@@ -14,6 +14,10 @@ html {
 .header {
   margin-top: 6rem;
   text-align: center; }
+.footer {
+  text-transform: lowercase;
+  margin-top: 6rem;
+  text-align: center; }
 .value-prop {
   margin-top: 1rem; }
 .value-props {
