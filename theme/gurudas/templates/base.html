@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include 'header.html' %}
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+      {% include 'navbar.html' %}
+
+    <section class="header">
+      <h2 class="title" style="margin-top: -20%">{{SITENAME}}</h2>
+    </section>
+
+    {% block content %}
+    {% endblock %}
+
+  </div>
+
+  <footer>
+
+    {% include 'footer.html' %}
+
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

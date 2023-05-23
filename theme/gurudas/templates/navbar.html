@@ -1,0 +1,12 @@
+<div class="navbar-spacer"></div>
+<div class="container-nav">
+  <nav class="navbar">
+    <div class="container-center">
+      <ul class="navbar-list">
+        {% for section in SECTIONS %}
+        <li class="navbar-item"><a class="navbar-link" href="#{{ section }}">{{ section.capitalize() }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </nav>
+</div>

@@ -29,3 +29,12 @@ ARCHIVES_SAVE_AS=''
 AUTHORS_SAVE_AS=''
 CATEGORIES_SAVE_AS=''
 TAGS_SAVE_AS=''
+PAGE_SAVE_AS=''
+
+DEFAULT_DATE_FORMAT = '%d %b %Y'
+PAGE_ORDER_BY = 'date'
+
+SECTIONS = ['about', 'work', 'education', 'projects', 'contact']
+
+# Delete output directory upon every run
+DELETE_OUTPUT_DIRECTORY = True
