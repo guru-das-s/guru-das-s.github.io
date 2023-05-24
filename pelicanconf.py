@@ -42,3 +42,12 @@ DELETE_OUTPUT_DIRECTORY = True
 SITEMAP = {
     "format": "xml",
 }
+
+STATIC_PATHS = [
+    'extras/robots.txt',
+    'images',
+]
+
+EXTRA_PATH_METADATA = {
+    'extras/robots.txt': {'path': 'robots.txt'},
+}
