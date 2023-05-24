@@ -38,3 +38,7 @@ SECTIONS = ['about', 'work', 'education', 'projects', 'contact']
 
 # Delete output directory upon every run
 DELETE_OUTPUT_DIRECTORY = True
+
+SITEMAP = {
+    "format": "xml",
+}
