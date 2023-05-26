@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="page-section">
 <h4><a href="{{ article.slug }}">{{ article.title }}</a></h4>
-<h6> {{ article.date }} </h6>
-{{ article.content }} 
+<h6 style="margin-top: -2%"> <b>{{ article.date.strftime(DEFAULT_DATE_FORMAT) }}</b> </h6>
+{{ article.content }}
+</div>
 {% endblock %}
