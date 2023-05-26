@@ -1,6 +1,7 @@
 Title: Projects
 Slug: projects
 Date: 26 May 2023
+Status: draft
 
 <h4>Projects</h4>
 <p>

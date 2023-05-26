@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% for article in articles %}
+<h4><a href="{{ SITEURL}}/{{ article.save_as }}">{{ article.title }}</a></h4>
+<h6> {{ article.date }} </h6>
+{{ article.content }} 
+{% endfor %}
+
+{% endblock %}

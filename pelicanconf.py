@@ -26,10 +26,19 @@ DISPLAY_PAGES_ON_MENU = True
 
 # Prevent generation of files we don't need.
 ARCHIVES_SAVE_AS=''
+AUTHOR_SAVE_AS=''
 AUTHORS_SAVE_AS=''
+CATEGORY_SAVE_AS=''
 CATEGORIES_SAVE_AS=''
 TAGS_SAVE_AS=''
-PAGE_SAVE_AS=''
+ARTICLE_PATHS = ['blog']
+ARTICLE_URL = '{date:%Y}/{date:%m}/{date:%d}/{slug}'
+ARTICLE_SAVE_AS = 'blog/{}.html'.format(ARTICLE_URL)
+PAGE_PATHS = ['pages']
+PAGE_URL = '{slug}/'
+PAGE_SAVE_AS = '{slug}/index.html'
+DRAFT_SAVE_AS=''
+DRAFT_PAGE_SAVE_AS=''
 
 DEFAULT_DATE_FORMAT = '%d %b %Y'
 PAGE_ORDER_BY = 'date'

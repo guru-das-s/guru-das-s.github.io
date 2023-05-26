@@ -2,7 +2,7 @@
 {% block content %}
 {% if pages %}
 
-{% for page in pages %}
+{% for page in draft_pages %}
 <div class="page-section" id="{{ page.slug }}">
 {{ page.content }}
 </div>

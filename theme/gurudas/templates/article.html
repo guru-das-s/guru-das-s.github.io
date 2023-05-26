@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h4><a href="{{ article.slug }}">{{ article.title }}</a></h4>
+<h6> {{ article.date }} </h6>
+{{ article.content }} 
+{% endblock %}
