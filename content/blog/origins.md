@@ -1,6 +1,6 @@
 Title: How I generate gurudas.dev
 Slug: how-i-generate-gurudas-dev
-Date: 25 May 2023
+Date: 07 Jun 2023
 
 ##### Beginnings
 
