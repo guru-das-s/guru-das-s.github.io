@@ -15,7 +15,7 @@ html {
   margin-top: 6rem;
   text-align: center; }
 .footer {
-  text-transform: lowercase;
+  text-transform: capitalize;
   margin-top: 6rem;
   text-align: center; }
 .value-prop {
