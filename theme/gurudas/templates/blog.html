@@ -5,7 +5,9 @@
 <div class="page-section">
 <h4><a href="{{ SITEURL}}/{{ article.save_as }}">{{ article.title }}</a></h4>
 <h6 style="margin-top: -2%"> <b>{{ article.date.strftime(DEFAULT_DATE_FORMAT) }}</b> </h6>
-{{ article.content }}
+<summary>
+{{ article.summary }}
+</summary>
 </div>
 {% endfor %}
 

@@ -3,11 +3,13 @@ docutils==0.19
 feedgenerator==2.0.0
 ghp-import==2.1.0
 Jinja2==3.1.2
+lxml==4.9.3
 Markdown==3.4.3
 markdown-it-py==2.2.0
 MarkupSafe==2.1.2
 mdurl==0.1.2
 pelican==4.8.0
+pelican-read-more==1.0.0
 pelican-sitemap==1.0.2
 Pygments==2.15.0
 python-dateutil==2.8.2

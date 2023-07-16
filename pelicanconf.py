@@ -49,6 +49,14 @@ SECTIONS = ['about', 'work', 'education', 'projects', 'contact']
 # Delete output directory upon every run
 DELETE_OUTPUT_DIRECTORY = True
 
+LOAD_CONTENT_CACHE = False
+
+PLUGINS = ['read_more']
+# "read more" plugin conf
+SUMMARY_MAX_LENGTH = 55
+SUMMARY_END_SUFFIX = "... →"
+READ_MORE_LINK = '<span>Continue reading</span>'
+
 SITEMAP = {
     "format": "xml",
 }
