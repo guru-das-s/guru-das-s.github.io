@@ -51,7 +51,11 @@ DELETE_OUTPUT_DIRECTORY = True
 
 LOAD_CONTENT_CACHE = False
 
-PLUGINS = ['read_more']
+PLUGINS = [
+        'read_more',
+        'sitemap',
+]
+
 # "read more" plugin conf
 SUMMARY_MAX_LENGTH = 55
 SUMMARY_END_SUFFIX = "... →"
