@@ -1,6 +1,6 @@
 AUTHOR = 'Guru Das Srinagesh'
 SITENAME = 'Guru Das Srinagesh'
-SITEURL = ''
+SITEURL = 'https://gurudas.dev/'
 
 PATH = 'content'
 
