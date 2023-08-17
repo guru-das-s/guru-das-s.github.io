@@ -1,4 +1,5 @@
 Title: Script to add maintainers to a Linux kernel patch
+Date: 16 Aug 2023
 
 ##### Introducing `add-maintainer.py`
 
