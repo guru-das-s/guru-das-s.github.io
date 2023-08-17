@@ -1,6 +1,6 @@
 AUTHOR = 'Guru Das Srinagesh'
 SITENAME = 'Guru Das Srinagesh'
-SITEURL = 'https://gurudas.dev/'
+SITEURL = 'https://gurudas.dev'
 
 PATH = 'content'
 
@@ -41,6 +41,7 @@ PAGE_SAVE_AS = '{slug}/index.html'
 DRAFT_SAVE_AS=''
 DRAFT_PAGE_SAVE_AS=''
 
+DEFAULT_DATE = 'fs' # Automatically get date from article's filesystem data
 DEFAULT_DATE_FORMAT = '%d %b %Y'
 PAGE_ORDER_BY = 'date'
 
@@ -60,6 +61,8 @@ PLUGINS = [
 SUMMARY_MAX_LENGTH = 55
 SUMMARY_END_SUFFIX = "... →"
 READ_MORE_LINK = '<span>Continue reading</span>'
+
+SLUGIFY_SOURCE = 'basename'
 
 SITEMAP = {
     "format": "xml",
