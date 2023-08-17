@@ -4,7 +4,7 @@ SITEURL = 'https://gurudas.dev'
 
 PATH = 'content'
 
-TIMEZONE = 'US/Pacific'
+TIMEZONE = 'America/Los_Angeles'
 
 DEFAULT_LANG = 'en'
 
