@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-{% if pages %}
 
 {% for page in draft_pages %}
 <div class="page-section" id="{{ page.slug }}">
 {{ page.content }}
 </div>
 {% endfor %}
-{% endif %}
 {% endblock %}

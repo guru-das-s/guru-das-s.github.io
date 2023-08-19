@@ -41,6 +41,8 @@ PAGE_SAVE_AS = '{slug}/index.html'
 DRAFT_SAVE_AS=''
 DRAFT_PAGE_SAVE_AS=''
 
+TEMPLATE_PAGES = {'blog.html': 'blog/index.html'}
+
 DEFAULT_DATE = 'fs' # Automatically get date from article's filesystem data
 DEFAULT_DATE_FORMAT = '%d %b %Y'
 PAGE_ORDER_BY = 'date'
