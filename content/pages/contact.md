@@ -6,3 +6,5 @@ Status: draft
 #### Contact Me
 
 I prefer to be contacted <a href="mailto:guru@gurudas.dev">via email</a>. <a href="https://www.linkedin.com/in/guru-das/">LinkedIn</a> requests are welcome as well.
+
+A PDF version of my resume is available for download here: [My Resume]({static}/downloads/guru_das_srinagesh_resume.pdf)
