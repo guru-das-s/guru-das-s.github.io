@@ -173,6 +173,11 @@ html {
     color: #222; }
   .navbar-link.active {
     color: #33C3F0; }
+  .title-link {
+    color: #222;
+    text-decoration: none; }
+  .title-link:hover {
+    color: #33C3F0; }
   .has-docked-nav .navbar {
     position: fixed;
     top: 0;
