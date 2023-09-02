@@ -58,6 +58,7 @@ LOAD_CONTENT_CACHE = False
 PLUGINS = [
         'read_more',
         'sitemap',
+        'simple_footnotes',
 ]
 
 # "read more" plugin conf
