@@ -53,3 +53,5 @@ focus- and productivity-destroying `Shift + ;` to enter Command-line mode from
 Normal mode.
 
 With these, I am a happy bunny using VS Code on my laptop!
+
+---
