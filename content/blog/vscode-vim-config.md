@@ -1,5 +1,5 @@
 Title: Configuring the Visual Studio Code vim extension
-Date: Fri Sep  1 06:36:49 PM PDT 2023
+Date: Fri Sep  1
 
 I just installed Visual Studio Code (VS Code) on my Arch Linux machine, and one
 of the first things I did was to install the `vim` extension.

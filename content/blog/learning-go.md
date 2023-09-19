@@ -1,5 +1,5 @@
 Title: Learning Go
-Date: Mon Sep 18
+Date: 2023-09-19T00:23:04-07:00
 
 I recently had to learn Go. I was on a tight timeline of just about 4 or 5
 days. I am familiar with learning Rust, and [Rust by
