@@ -3,9 +3,16 @@
   <nav class="navbar">
     <div class="container-center">
       <ul class="navbar-list">
-        {% for section in SECTIONS %}
-        <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/#{{ section }}">{{ section.capitalize() }}</a></li>
-        {% endfor %}
+        <li class="navbar-item">
+          <a class="navbar-link" href="#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              {% for section in SECTIONS %}
+              <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/#{{ section }}">{{ section.capitalize() }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </li>
         <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/blog/">Blog</a></li>
       </ul>
     </div>

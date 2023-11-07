@@ -180,8 +180,7 @@ html {
     color: #33C3F0; }
   .has-docked-nav .navbar {
     position: fixed;
-    top: 0;
-    left: 0; }
+    top: 0; }
   .has-docked-nav .navbar-spacer {
     display: block; }
   /* Re-overiding the width 100% declaration to match size of % based container */
