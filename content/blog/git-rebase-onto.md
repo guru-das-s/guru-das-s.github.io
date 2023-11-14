@@ -94,7 +94,10 @@ In my case, this was `<SHA>^` where `<SHA>` was that of the first patch - easily
 available by inspection on Gerrit. Let's say this was `43487e7b567cfb^`.
 
 `head` would be the `FETCH_HEAD` after running `git fetch` on the **last change** in
-my series, i.e. `git fetch <server/project> <refs/changes/12345/4>`
+my series, i.e.
+```
+git fetch <server/project> <refs/changes/12345/4>
+```
 
 Thus, the final command became:
 
