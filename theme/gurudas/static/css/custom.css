@@ -12,7 +12,7 @@ html {
   text-align: center;
   max-width: 800px; }
 .header {
-  margin-top: 6rem;
+  margin-top: 2rem;
   text-align: center; }
 .footer {
   text-transform: capitalize;
@@ -111,8 +111,6 @@ html {
 
 /* Larger than phone */
 @media (min-width: 550px) {
-  .header {
-    margin-top: 18rem; }
   .value-props {
     margin-top: 9rem;
     margin-bottom: 7rem; }
