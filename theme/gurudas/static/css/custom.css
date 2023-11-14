@@ -109,6 +109,10 @@ html {
 .alignright {
   float: right;}
 
+code {
+  overflow-x: auto;
+}
+
 /* Larger than phone */
 @media (min-width: 550px) {
   .value-props {
