@@ -1,8 +1,7 @@
 $(document).ready(function() {
 
   // Variables
-  var $codeSnippets = $('.code-example-body'),
-      $nav = $('.navbar'),
+  var $nav = $('.navbar'),
       $body = $('body'),
       $window = $(window),
       $popoverLink = $('[data-popover]'),
@@ -43,20 +42,6 @@ $(document).ready(function() {
         scrollTop: $("#elementtoScrollToID").offset().top
     }, 2000);
 });
-
-  function escapeHtml(string) {
-    return String(string).replace(/[&<>"'\/]/g, function (s) {
-      return entityMap[s];
-    });
-  }
-
-  function buildSnippets() {
-    $codeSnippets.each(function() {
-      var newContent = escapeHtml($(this).html())
-      $(this).html(newContent)
-    })
-  }
-
 
   init();
 
