@@ -1,5 +1,18 @@
 html {
   scroll-padding-top: 5rem;}
+
+dt {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+  margin-right: 1em;
+}
+
+dd {
+  display: inline-block;
+  margin-left: 10px;
+}
+
 .container {
   max-width: 800px; }
 .container-center {

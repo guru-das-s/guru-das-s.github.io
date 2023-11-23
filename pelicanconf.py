@@ -41,6 +41,11 @@ PAGE_SAVE_AS = '{slug}/index.html'
 DRAFT_SAVE_AS=''
 DRAFT_PAGE_SAVE_AS=''
 
+YEAR_ARCHIVE_URL = 'blog/{date:%Y}/'
+YEAR_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/index.html'
+MONTH_ARCHIVE_URL = 'blog/{date:%Y}/{date:%m}/'
+MONTH_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/{date:%m}/index.html'
+
 DIRECT_TEMPLATES = ['index', 'blog']
 BLOG_URL = 'blog/'
 BLOG_SAVE_AS = 'blog/index.html'
