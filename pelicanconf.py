@@ -38,7 +38,7 @@ ARTICLE_SAVE_AS = 'blog/{}.html'.format(ARTICLE_URL_END)
 PAGE_PATHS = ['pages']
 PAGE_URL = '{slug}/'
 PAGE_SAVE_AS = '{slug}/index.html'
-DRAFT_SAVE_AS=''
+DRAFT_SAVE_AS='blog/drafts/{slug}.html'
 DRAFT_PAGE_SAVE_AS=''
 
 YEAR_ARCHIVE_URL = 'blog/{date:%Y}/'
