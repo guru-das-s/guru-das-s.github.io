@@ -87,7 +87,7 @@ down in the page:
 The theme is very bare bones and is adapted from the source code of the
 [getskeleton.com](getskeleton.com) website.
 
-##### Setting up a Worflow via Github Actions
+##### Setting up a Workflow via Github Actions
 
 Choosing Github Pages for hosting was an easy choice was easy as this is offered
 for free. Plus, I was excited about setting up a CI/CD pipeline for generating
