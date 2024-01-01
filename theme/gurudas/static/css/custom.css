@@ -139,6 +139,11 @@ code {
   overflow-x: auto;
 }
 
+@media (max-width: 549px) {
+  .footer {
+    white-space: pre-wrap;
+  }
+}
 /* Larger than phone */
 @media (min-width: 550px) {
   .value-props {
@@ -267,6 +272,7 @@ code {
     text-decoration: none;
     text-transform: uppercase;
     font-size: 1.0rem;
+    font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 600;
     text-align: center;
     letter-spacing: .1rem; }
