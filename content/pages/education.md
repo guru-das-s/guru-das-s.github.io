@@ -1,7 +1,7 @@
 Title: Education
 Slug: education
 Date: 25 May 2023
-Status: draft
+Status: hidden
 
 <h4>Education</h4>
 <p>
