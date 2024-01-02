@@ -7,8 +7,8 @@
           <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#meNavPopover">Me</a>
           <div id="meNavPopover" class="popover">
             <ul class="popover-list">
-              {% for section in SECTIONS %}
-              <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/#{{ section }}">{{ section.capitalize() }}</a></li>
+              {% for page in draft_pages %}
+              <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/#{{ page.slug }}">{{ page.slug.capitalize() }}</a></li>
               {% endfor %}
             </ul>
           </div>

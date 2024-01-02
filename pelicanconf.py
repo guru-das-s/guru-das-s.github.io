@@ -53,8 +53,6 @@ BLOG_SAVE_AS = 'blog/index.html'
 DEFAULT_DATE_FORMAT = '%d %b %Y'
 PAGE_ORDER_BY = 'date'
 
-SECTIONS = ['about', 'work', 'education', 'projects', 'contact']
-
 # Delete output directory upon every run
 DELETE_OUTPUT_DIRECTORY = True
 
