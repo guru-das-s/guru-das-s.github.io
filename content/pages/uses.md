@@ -16,8 +16,7 @@ Personal:
 
 Work:
 
-> 1. Lenovo Thinkpad T14s Gen 1
-2. Microsoft Sculpt [ergonomic (split) keyboard](https://www.microsoft.com/en/accessories/products/keyboards/sculpt-ergonomic-desktop?activetab=pivot:overviewtab)
+> 1. Apple Macbook Pro (15 in)
 
 ##### Software I use
 
@@ -28,10 +27,7 @@ I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 3. Google Chrome
 4. `tmux`
 
-For work, I use Windows 11 with:
-
-> 1. [PuTTy](https://putty.org/)
-2. [VNC](https://www.realvnc.com/en/connect/download/vnc/)
+For work, I use Mac OS.
 
 ##### Google Chrome Extensions
 
