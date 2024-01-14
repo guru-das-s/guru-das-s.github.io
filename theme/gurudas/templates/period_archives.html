@@ -6,8 +6,10 @@
     <dl>
     {% for article in dates %}
         <div>
-        <dt>{{ article.locale_date }}</dt>
-        <dd><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></dd>
+          <div class="row">
+            <div class="two columns">{{ article.locale_date }}</div>
+            <div class="ten columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
+	  </div>
 	</div>
     {% endfor %}
     </dl>
