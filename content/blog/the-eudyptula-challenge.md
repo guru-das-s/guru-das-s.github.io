@@ -1,5 +1,6 @@
 Title: The Eudyptula Challenge
 Date: 2024-01-20T13:46:09-08:00
+Status: draft
 
 [The Eudyptula Challenge](http://eudyptula-challenge.org/) was how I first got
 started with Linux kernel development back in 2016. This article describes the
