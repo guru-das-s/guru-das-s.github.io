@@ -5,6 +5,15 @@ body {
   font-size: 1.85em;
 }
 
+ol, ul {
+  margin-left: 4rem;
+  list-style-position: outside;
+}
+
+ol li {
+  padding-left: 1rem;
+}
+
 dt {
   display: inline-block;
   width: 100px;
