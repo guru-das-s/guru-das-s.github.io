@@ -14,7 +14,15 @@
           </div>
         </li>
         <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/now/">Now</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/uses/">Uses</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/til/">TIL</a></li>
+            </ul>
+          </div>
+        </li>
         <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/blog/">Blog</a></li>
       </ul>
     </div>

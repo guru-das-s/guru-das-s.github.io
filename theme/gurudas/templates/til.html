@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block bigtitle %} Today I Learned - {{ SITENAME }} {% endblock %}
+{% block content %}
+
+<div class="page-section">
+    <h4>Today I Learned</h4>
+    <dl>
+        {% for article in dates %}
+        {% if article.category == "til" %}
+        <div>
+            <div class="row">
+                <div class="two columns">{{ article.locale_date }}</div>
+                <div class="ten columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </dl>
+</div>
+
+{% endblock %}

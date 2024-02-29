@@ -28,17 +28,18 @@ DISPLAY_PAGES_ON_MENU = True
 ARCHIVES_SAVE_AS=''
 AUTHOR_SAVE_AS=''
 AUTHORS_SAVE_AS=''
+USE_FOLDER_AS_CATEGORY = True
+DEFAULT_CATEGORY = 'blog'
 CATEGORY_SAVE_AS=''
 CATEGORIES_SAVE_AS=''
 TAGS_SAVE_AS=''
-ARTICLE_PATHS = ['blog']
-ARTICLE_URL_END = '{date:%Y}/{date:%m}/{date:%d}/{slug}'
-ARTICLE_URL = 'blog/{}.html'.format(ARTICLE_URL_END)
-ARTICLE_SAVE_AS = 'blog/{}.html'.format(ARTICLE_URL_END)
+ARTICLE_PATHS = ['blog', 'til']
+ARTICLE_URL = '{category}/{date:%Y}/{date:%m}/{date:%d}/{slug}'
+ARTICLE_SAVE_AS = '{category}/{date:%Y}/{date:%m}/{date:%d}/{slug}.html'
 PAGE_PATHS = ['pages']
 PAGE_URL = '{slug}/'
 PAGE_SAVE_AS = '{slug}/index.html'
-DRAFT_SAVE_AS='blog/drafts/{slug}.html'
+DRAFT_SAVE_AS='{category}/drafts/{slug}.html'
 DRAFT_PAGE_SAVE_AS=''
 
 YEAR_ARCHIVE_URL = 'blog/{date:%Y}/'
@@ -46,9 +47,11 @@ YEAR_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/index.html'
 MONTH_ARCHIVE_URL = 'blog/{date:%Y}/{date:%m}/'
 MONTH_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/{date:%m}/index.html'
 
-DIRECT_TEMPLATES = ['index', 'blog']
+DIRECT_TEMPLATES = ['index', 'blog', 'til']
 BLOG_URL = 'blog/'
 BLOG_SAVE_AS = 'blog/index.html'
+TIL_URL = 'til/'
+TIL_SAVE_AS = 'til/index.html'
 
 DEFAULT_DATE_FORMAT = '%d %b %Y'
 PAGE_ORDER_BY = 'date'
