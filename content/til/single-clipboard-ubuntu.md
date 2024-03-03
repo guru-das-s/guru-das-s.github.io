@@ -2,6 +2,7 @@ Title: TIL: How to unify all three of Ubuntu's clipboards
 Date: 2024-03-02T18:24:00-08:00
 url: til/single-clipboard-ubuntu
 save_as: til/single-clipboard-ubuntu.html
+tldr: Make Ubuntu share one single clipboard for easy copy-pasting
 
 Yes, you read that right - Ubuntu (which uses the X server) has a grand total of
 *three* clipboards: As the Inter-Client Communication Conventions Manual (ICCCM)

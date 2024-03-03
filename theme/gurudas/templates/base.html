@@ -11,6 +11,11 @@
 <!-- Add canonical link to solve Page Indexing issues
 ––––––––––––––––––––––––––––––––––––––––––––––––- -->
 <link rel="canonical" href="{{ SITEURL }}/{{ article.url }}" />
+<meta property="og:url" content="{{ SITEURL }}/{{ article.url }}" />
+<meta property="og:type" content="article" />
+<meta property="og:image" content="{{ SITEURL }}/theme/images/favicon.png">
+<meta name="description" content="{{ article.tldr }}">
+<meta property="og:description" content="{{ article.tldr }}">
   {% endif%}
 </head>
 <body>
