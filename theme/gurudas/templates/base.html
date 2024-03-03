@@ -3,7 +3,8 @@
 <head>
 <!-- Basic Page Needs
 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-<title>{% block bigtitle %} {% endblock %}</title>
+{% set title_s %}{% block bigtitle %} {% endblock %}{% endset %}
+<title>{{ title_s }}</title>
   {% include 'header.html' %}
 
   {% if article %}

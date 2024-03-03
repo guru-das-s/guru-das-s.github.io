@@ -1,13 +1,14 @@
 <meta charset="utf-8">
 {% if page %}
 <meta name="description" content="{{ page.tldr }}">
-<meta property="og:description" content="{{ page.tldr }}">
+<meta property="og:description" content="{{ page.tldr }}" />
 {% elif not article %}
 <meta name="description" content="Guru Das Srinagesh's personal website">
-<meta property="og:description" content="Guru Das Srinagesh's personal website">
+<meta property="og:description" content="Guru Das Srinagesh's personal website" />
 {% endif %}
 <meta name="author" content="{{AUTHOR}}">
-<meta property="og:image" content="{{ SITEURL }}/theme/images/favicon-og.png">
+<meta property="og:image" content="{{ SITEURL }}/theme/images/favicon-og.png" />
+<meta property="og:title" content="{{ title_s }}" />
 
 <!-- Mobile Specific Metas
 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
