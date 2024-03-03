@@ -2,6 +2,7 @@ Title: Education
 Slug: education
 Date: 25 May 2023
 Status: hidden
+tldr: Guru Das Srinagesh's educational qualifications
 
 <h4>Education</h4>
 <p>

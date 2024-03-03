@@ -2,6 +2,7 @@ Title: Contact Me
 Slug: contact
 Date: 27 May 2023
 Status: draft
+tldr: Contact information for Guru Das Srinagesh
 
 #### Contact Me
 

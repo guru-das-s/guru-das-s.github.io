@@ -1,5 +1,6 @@
 Title: Script to add maintainers to a Linux kernel patch
 Date: 16 Aug 2023
+tldr: A Python script to improve kernel patch submission workflow
 
 ##### Introducing `add-maintainer.py`
 

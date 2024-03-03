@@ -1,6 +1,7 @@
 Title: Uses
 Slug: uses
 Date: 2023-11-08T15:53:52-08:00
+tldr: Tools Guru Das Srinagesh uses on a daily basis to get work done
 
 #### Uses
 

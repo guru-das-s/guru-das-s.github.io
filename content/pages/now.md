@@ -1,6 +1,7 @@
 Title: Now
 Slug: now
 Date: 2024-01-04T00:14:50-08:00
+tldr: What Guru Das Srinagesh is up to now
 
 #### Now
 

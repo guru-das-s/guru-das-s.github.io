@@ -2,6 +2,7 @@ Title: About Me
 Slug: about
 Date: 23 May 2023
 Status: draft
+tldr: About Guru Das Srinagesh
 
 #### About Me
 

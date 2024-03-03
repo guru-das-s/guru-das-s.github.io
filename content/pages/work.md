@@ -2,6 +2,7 @@ Title: Work History
 Slug: work
 Date: 24 May 2023
 Status: hidden
+tldr: Guru Das Srinagesh's work history
 
 #### Work
 <p>

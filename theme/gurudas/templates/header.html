@@ -1,6 +1,10 @@
 <meta charset="utf-8">
-{% if not article %}
+{% if page %}
+<meta name="description" content="{{ page.tldr }}">
+<meta property="og:description" content="{{ page.tldr }}">
+{% elif not article %}
 <meta name="description" content="Guru Das Srinagesh's personal website">
+<meta property="og:description" content="Guru Das Srinagesh's personal website">
 {% endif %}
 <meta name="author" content="{{AUTHOR}}">
 

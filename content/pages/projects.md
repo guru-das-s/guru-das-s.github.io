@@ -2,6 +2,7 @@ Title: Projects
 Slug: projects
 Date: 26 May 2023
 Status: draft
+tldr: Guru Das Srinagesh's project portfolio
 
 <h4>Projects</h4>
 <p>

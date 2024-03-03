@@ -1,6 +1,7 @@
 Title: How I generate gurudas.dev
 Slug: how-i-generate-gurudas-dev
 Date: 07 Jun 2023
+tldr: The tools and technologies used to generate this website
 
 ##### Beginnings
 
