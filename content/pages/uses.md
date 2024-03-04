@@ -28,7 +28,10 @@ I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 3. Google Chrome
 4. `tmux`
 
-For work, I use Mac OS.
+For work, I use mostly the above tools on Ubuntu, along with this fantastic new
+todo-list manager I discovered:
+
+> 1. [todotxt](http://todotxt.org/) and its [todotxt-cli client](https://github.com/todotxt/todo.txt-cli) in particular
 
 ##### Google Chrome Extensions
 
