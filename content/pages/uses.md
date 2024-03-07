@@ -24,7 +24,7 @@ Work:
 I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 
 1. `vim`
-2. `ag`, [the silver searcher](https://github.com/ggreer/the_silver_searcher) and its vim [integration script](https://github.com/rking/ag.vim)
+2. `ag`, [the silver searcher](https://github.com/ggreer/the_silver_searcher) and [my fork](https://github.com/guru-das-s/ag.vim) of its vim [integration script](https://github.com/rking/ag.vim)
 3. Google Chrome
 4. `tmux`
 
