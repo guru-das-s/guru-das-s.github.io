@@ -28,10 +28,14 @@ I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 3. Google Chrome
 4. `tmux`
 
-For work, I use mostly the above tools on Ubuntu, along with this fantastic new
-todo-list manager I discovered:
+For work, I use mostly the above tools on Ubuntu, along with these nifty tools that
+make my life easier:
 
 > 1. [todotxt](http://todotxt.org/) and its [todotxt-cli client](https://github.com/todotxt/todo.txt-cli) in particular
+    - Fantastic, minimalist todo list manager
+2. [Preservim's vim-markdown plugin](https://github.com/preservim/vim-markdown)
+    - The `conceallevel`, `InsertToc` and syntax highlighting are all top-notch
+      features. `InsertToc` requires `Tabular` to work and it does a superb job.
 
 ##### Google Chrome Extensions
 
