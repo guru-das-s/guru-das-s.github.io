@@ -1,6 +1,6 @@
 Title: TIL: How to unify all three of Ubuntu's clipboards
 Date: 2024-03-02T18:24:00-08:00
-url: til/single-clipboard-ubuntu
+url: til/single-clipboard-ubuntu.html
 save_as: til/single-clipboard-ubuntu.html
 tldr: Make Ubuntu share one single clipboard for easy copy-pasting using both mouse as well as standard keyboard shortcuts.
 
