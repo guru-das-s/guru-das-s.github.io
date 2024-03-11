@@ -1,6 +1,6 @@
 Title: Now
 Slug: now
-Date: 2024-01-04T00:14:50-08:00
+Date: 2024-03-10T21:39:39-07:00
 tldr: What Guru Das Srinagesh is up to now
 
 #### Now
@@ -11,33 +11,42 @@ This is what a portion of my About Me page _used to_ say about what I'm up to no
 
 > I'm currently working on improving my scripting skills in Python and Bash. I'm also learning Go and Rust.
 
-Last Updated: `Thu Jan 4 12:15:11 AM PST 2024`
+Last Updated: `2024-03-10T21:39:39-07:00`
 
-🏎️ I've joined Tesla as a Linux kernel engineer in the Autopilot AI team! Excited to
-work on system software for Tesla vehicles and embark upon a new journey in my
-career.
+⚒️  I'm working on solving the projects from the first part of the wonderful
+[NAND2Tetris course](https://www.nand2tetris.org/). So far I've solved the tasks in
+Projects 1 and 2 up until the building the ALU.
 
-🏠 I've finally moved in with my wife in San Jose, putting an end to all the
-long-distancing over the years. Excited to take my learnings from having lived in San
-Diego for many years and apply them to loving another city and getting to build my
-own memories there with my wife.
+⚒️  Even though I started working on last year's (2023) [Advent of
+Code (AoC)](https://adventofcode.com/2023), I couldn't find the motivation to continue
+working on it beyond Problem-Day 6 in Jan 2024. I'm hoping that one of the capstone
+projects in NAND2Tetris (to write an assembler) inspires me to restart AoC - I intend
+to use Rust to create my assembler.
+
+📖 I have begun reading Frank Herbert's Dune series on my wife's Kindle. I watched
+Denis Villeneuve's movie adaptation (both parts as of Mar 2024) and loved the
+world-building and the shadowy, powerful figures depicted in the lore. It's been a
+long time since I felt like reading anything, so I'm really excited to rekindle a
+hobby that shaped me greatly during my childhood years.
 
 ⚡ I'm experiencing an awakening of sorts and realizing I've been on autopilot for
 many years - both at work as well as in life. I am working on making some changes to
 align myself more with my true feelings and stop living in fear so much.
 
-🤖 I'm very proud of this website and am delighted to continue working on it and
-adding new features to it. Most of all, I'm excited about writing more blog posts.
+🤖 Website stuff: Added a `/til` page and published my first TIL.  Added [Facebook
+OpenGraph tags](https://developers.facebook.com/docs/sharing/webmasters/) to all my
+blog posts and pages and they look so good now! Currently working on a post on the
+Eudyptula Challenge.
 
-💻 I started working on this year's (2023) [Advent of
-Code](https://adventofcode.com/2023) and used Rust to solve the first five days of
-problems. I learnt a lot and intend to complete at least one more problem-day before
-the end of the month. I'm very proud of myself for doing this, and for setting up a
-Discord server along with a few friends to keep myself motivated (thanks Nandu for
-the wonderful suggestion!).
+🫂 I'm being more intentional about staying in touch with friends, mostly old ones.
+It really helps that [one of them](https://web.stanford.edu/~mishel/) works right
+across the road from me - meeting him for lunch randomly really warms my heart.
 
-🏋🏾 Hoping to develop a daily routine involving daily Duolingo lessons (Latin), some
-physical exercise, meals at the "proper" times, and adequate sleep at the end of the
-day.
+🦉 [The green bird](https://www.duolingo.com/) nags me into completing a lesson
+daily. Progress is slow, and the lessons could be better structured, but I have
+been learning Latin for (_checks app_) 64 days now.
+
+🏋🏾 Still working on developing a daily routine involving some physical exercise,
+meals at the "proper" times, and adequate sleep at the end of the day.
 
 ---
