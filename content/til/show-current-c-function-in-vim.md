@@ -1,7 +1,7 @@
 Title: TIL: Show current C function in vim status line sans plugins
 Date: 2024-03-13T00:10:11-07:00
-url: til/vim-show-current-c-function.html
-save_as: til/vim-show-current-c-function.html
+url: til/vim-show-current-c-function/
+save_as: til/vim-show-current-c-function/index.html
 tldr: A very useful plain vanilla vimscript function to display the function the cursor is currently at, in the vim statusline.
 
 I primarily work on the Linux kernel (which is written almost entirely in C) and I
