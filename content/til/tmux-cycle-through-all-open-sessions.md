@@ -52,10 +52,14 @@ unbind )
 bind-key = switch-client -n
 ```
 
-Now I can easily cycle through all my open sessions using `<prefix> + 0` or `<prefix>
-+ =`. And, since I have this ability, I can happily create as many new sessions as I
-need - one per project - without having to painfully type in `switch-client -n` each
-time I want to switch to another session I created.
+Turns out that `<prefix> + (` or `)` enables switching to the previous or next open
+session. I find this cumbersome because of the need to use the `Shift` key and so I
+remapped them to single keys. Now I can easily cycle through all my open sessions
+using `<prefix> + 0` or `<prefix> + =`.
+
+And, since I have this ability, I can happily create as many new sessions as I
+need - one per project - without having to fear using the `Shift` key to type in the
+paranthesis characters each time I want to switch to another session I created.
 
 You may well wonder how I could access the `0`-th pane if `<prefix> + 0` has been
 re-bound as above. I don't, because I don't have a `0`-th pane at all. I number my
@@ -75,6 +79,9 @@ And for good measure and clean pane number management:
 #      1 2 3       .... and not 1 2 4, which would call for a :movew -r
 set -g renumber-windows on
 ```
+
+And I chose `=` to switch to the next session because of its proximity to the
+`Backspace` key (easier to reach).
 
 Bottom line: my workflow is now the following.
 
