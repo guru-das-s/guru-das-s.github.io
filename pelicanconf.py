@@ -79,11 +79,12 @@ SITEMAP = {
 }
 
 STATIC_PATHS = [
-    'extras/robots.txt',
+    'extras/',
     'images',
     'downloads/guru_das_srinagesh_resume.pdf',
 ]
 
 EXTRA_PATH_METADATA = {
     'extras/robots.txt': {'path': 'robots.txt'},
+    'extras/404.html': {'path': '404.html'},
 }
