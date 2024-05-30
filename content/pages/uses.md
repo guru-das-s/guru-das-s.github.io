@@ -19,6 +19,9 @@ Work:
 
 1. Apple Macbook Pro (15 in)
 2. [EPOS EOS 560 headphones](https://www.eposaudio.com/en/us/products/adapt-500)
+3. Microsoft Sculpt Ergonomic Keyboard
+    - Microsoft has apparently discontinued production of this keyboard now
+    - Highly recommend!
 
 ##### Software I use
 
