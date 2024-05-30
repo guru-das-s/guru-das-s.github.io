@@ -18,6 +18,7 @@ Personal:
 Work:
 
 1. Apple Macbook Pro (15 in)
+2. [EPOS EOS 560 headphones](https://www.eposaudio.com/en/us/products/adapt-500)
 
 ##### Software I use
 
@@ -58,7 +59,7 @@ make my life easier:
 
 ##### Everyday Carry (EDC)
 1. Benchmade Mini Bugout knife
-2. Seiko SKX013
+2. Seiko SKX013/Sinn 104
 3. Bespoke Post's Line of Trade [Slim Wallet](https://www.bespokepost.com/store/line-of-trade-slim-wallet)
 4. Gerber Shard tool
 
