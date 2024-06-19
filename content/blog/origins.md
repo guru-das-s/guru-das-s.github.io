@@ -86,7 +86,7 @@ down in the page:
 > missing, it will be replaced by the matching template from the simple theme.
 
 The theme is very bare bones and is adapted from the source code of the
-[getskeleton.com](getskeleton.com) website.
+[getskeleton.com](http://getskeleton.com/) website.
 
 ##### Setting up a Workflow via Github Actions
 
