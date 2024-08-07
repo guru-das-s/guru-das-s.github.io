@@ -22,6 +22,13 @@ projects.
 friends old and new, family members, and visited places of historical and cultural
 interest.
 
+🎮 My wife recently gifted me a Sony Playstation 5. A close friend of mine (a
+long-time gamer) recommended that I start with [Uncharted
+4](https://en.wikipedia.org/wiki/Uncharted_4:_A_Thief%27s_End) as a newbie to console
+gaming. I took his suggestion and have been playing almost every day. I am almost
+near the end of the story and both the gameplay and the visuals have been
+breathtaking so far.
+
 📖 I have been reading Frank Herbert's Dune series on my wife's Kindle ever since I
 watched Denis Villeneuve's movie adaptation (both parts). It's been slow going but
 it's an essential part of my lunchtime routine at work when I don't have company. My
