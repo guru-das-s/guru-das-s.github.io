@@ -326,6 +326,17 @@ th:last-child,
 td:last-child {
   padding-right: 0; }
 
+@media (max-width: 399px) {
+  table {
+    padding: 0px;
+    width: 100%;
+    font-size: 80%;
+  }
+  th, td {
+    width: auto;
+    padding: 10px 3px;
+  }
+}
 
 /* Spacing
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
