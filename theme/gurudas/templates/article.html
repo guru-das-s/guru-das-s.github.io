@@ -6,4 +6,32 @@
 <h6 style="margin-top: -2%"> <b>{{ article.date.strftime(DEFAULT_DATE_FORMAT) }}</b> </h6>
 {{ article.content }}
 </div>
+<hr>
+<div class="row">
+	<div class="six columns">
+		{% if article.prev_article_in_category %}
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="{{ SITEURL }}/{{ article.prev_article_in_category.url}}">
+			{{ article.prev_article_in_category.title }}
+		</a>
+		</div>
+		{% else %}
+		<p> </p>
+		{% endif %}
+	</div>
+	<div class="six columns">
+		{% if article.next_article_in_category %}
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="{{ SITEURL }}/{{ article.next_article_in_category.url}}">
+			{{ article.next_article_in_category.title }}
+		</a>
+		</div>
+		{% else %}
+		<p> </p>
+		{% endif %}
+	</div>
+</div>
+
 {% endblock %}

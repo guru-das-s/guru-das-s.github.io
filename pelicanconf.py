@@ -65,6 +65,7 @@ PLUGINS = [
         'read_more',
         'sitemap',
         'simple_footnotes',
+        'neighbors',
 ]
 
 # "read more" plugin conf

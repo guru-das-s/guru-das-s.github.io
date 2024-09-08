@@ -10,6 +10,7 @@ markdown-it-py==2.2.0
 MarkupSafe==2.1.2
 mdurl==0.1.2
 pelican==4.8.0
+pelican-neighbors==1.2.0
 pelican-read-more==1.0.0
 pelican-simple-footnotes==1.0.2
 pelican-sitemap==1.0.2
