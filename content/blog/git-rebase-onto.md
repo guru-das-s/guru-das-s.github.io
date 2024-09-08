@@ -26,9 +26,10 @@ some of which were also large merge commits.
 My erstwhile strategy for cherrypicking the whole series onto the moving tip of the
 `master` branch was as follows:
 
-    :::bash
-    git config pull.rebase true
-    git pull <server/project> <refs/changes/12345/4>
+```bash
+git config pull.rebase true
+git pull <server/project> <refs/changes/12345/4>
+```
 
 (where `12345` was the last change in the series)
 

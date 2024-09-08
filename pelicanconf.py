@@ -74,6 +74,17 @@ READ_MORE_LINK = '<span>→ Continue reading</span>'
 
 SLUGIFY_SOURCE = 'basename'
 
+MARKDOWN = {
+    'extension_configs': {
+        'markdown.extensions.codehilite': {
+            'guess_lang': 'false',
+            'css_class': 'highlight',
+        },
+        'markdown.extensions.extra': {},
+        'markdown.extensions.meta': {},
+    },
+}
+
 SITEMAP = {
     "format": "xml",
 }

@@ -44,7 +44,7 @@ tmux exits._
 lines](https://github.com/guru-das-s/dotfiles/commit/8fd159707076a5b8a594bf4f6cb1a716042829da)
 to my `.tmux.conf` solved my issue:
 
-```
+```bash
 # Easily cycle between open tmux sessions
 unbind (
 bind-key 0 switch-client -p
@@ -65,7 +65,7 @@ You may well wonder how I could access the `0`-th pane if `<prefix> + 0` has bee
 re-bound as above. I don't, because I don't have a `0`-th pane at all. I number my
 panes starting from `1` and not `0` via these lines:
 
-```
+```bash
 # Start windows and panes at 1, not 0
 set -g base-index 1
 setw -g pane-base-index 1
@@ -73,7 +73,7 @@ setw -g pane-base-index 1
 
 And for good measure and clean pane number management:
 
-```
+```bash
 # Automatically renumber all windows/panes when one is killed
 # e.g. 1 2 [3] 4   .... 3 is killed, results in:
 #      1 2 3       .... and not 1 2 4, which would call for a :movew -r

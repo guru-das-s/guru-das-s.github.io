@@ -19,7 +19,7 @@ workstation or logging into a remote server somewhere.
 
 Here's the function in all its inscrutable beauty:
 
-```
+```vim
 " Show function name on demand, mapped to key ','
 fun! ShowFuncName()
 	echohl ModeMsg
@@ -67,7 +67,7 @@ line](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/dr
 in `drivers/mfd/qcom-pm8008.c` (which is a driver I authored) and pressed `,`
 to trigger the above command, you would see this in the vim statusline:
 
-```
+```c
 static int pm8008_probe(struct i2c_client *client)
 ```
 

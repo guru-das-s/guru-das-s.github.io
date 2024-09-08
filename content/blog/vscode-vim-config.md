@@ -15,7 +15,7 @@ add config options as you please.
 
 My `settings.json` (shortcut: `Ctrl + ,` ) looks like this:
 
-```
+```json
 {
     "keyboard.dispatch": "keyCode",
     "vim.normalModeKeyBindings": [
@@ -29,7 +29,7 @@ My `settings.json` (shortcut: `Ctrl + ,` ) looks like this:
 
 Explanations:
 
-```
+```json
     "keyboard.dispatch": "keyCode",
 ```
 
@@ -40,7 +40,7 @@ reaching allll the way to the top left corner of the keyboard multiple times
 per five seconds. Anyway, the above line enables VS Code to respect this
 system-wide keymapping of mine. [ref] Source: [FAQ on VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=vscodevim.vim#-faq:~:text=I%27ve%20swapped%20Escape%20and%20Caps%20Lock)[/ref]
 
-```
+```json
     "vim.normalModeKeyBindings": [
         {
             "before": [";"],
