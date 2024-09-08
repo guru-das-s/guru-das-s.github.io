@@ -35,6 +35,12 @@ code {
   font-family: 'Source Code Pro', monospace;
 }
 
+blockquote {
+  border-left: 5px solid grey;
+  padding-left: 20px;
+  margin-left: 0px;
+}
+
 .container {
   max-width: 800px; }
 .container-center {
