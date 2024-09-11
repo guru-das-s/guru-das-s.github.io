@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block bigtitle %}All tags - {{ SITENAME }}{% endblock %}
+{% block content %}
+
+<div class="page-section">
+<h4>All Tags</h4>
+    <dl>
+        <div>
+            <div class="row">
+                <div class="six columns" style="text-align: right">
+			Tag
+		</div>
+                <div class="six columns">
+			Number of articles
+		</div>
+            </div>
+	    {% for tag, articles in tags|sort(reverse = true) %}
+            <div class="row">
+                <div class="six columns" style="text-align: right">
+			<tt><a href="{{ SITEURL }}/{{ tag.url }}" class="tag">{{ tag.slug }}</a></tt>
+		</div>
+                <div class="six columns">
+			{{ articles|length }}
+		</div>
+            </div>
+	    {% endfor %}
+        </div>
+    </dl>
+</div>
+
+{% endblock %}

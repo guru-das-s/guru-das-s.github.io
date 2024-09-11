@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block bigtitle %} Articles tagged "{{ tag }}" - {{ SITENAME }}{% endblock %}
+{% block content %}
+
+<div class="page-section">
+<h4><tt class="tag">{{ tag }}</a></tt> </h4>
+    <dl>
+        {% for article in articles %}
+        <div>
+            <div class="row">
+                <div class="three columns">{{ article.locale_date }}</div>
+                <div class="nine columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
+            </div>
+        </div>
+        {% endfor %}
+    </dl>
+</div>
+
+{% endblock %}

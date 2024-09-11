@@ -41,6 +41,26 @@ blockquote {
   margin-left: 0px;
 }
 
+.tag {
+  border: 1px solid #1EAEDB;
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 4px 8px;
+  font-size: 80%;
+  font-family: 'Source Code Pro', monospace;
+}
+
+.tag:hover {
+  border: 1px solid #0FA0CE;
+  background-color: #0FA0CE;
+  color: white !important;
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 4px 8px;
+  font-size: 80%;
+  font-family: 'Source Code Pro', monospace;
+}
+
 .container {
   max-width: 800px; }
 .container-center {

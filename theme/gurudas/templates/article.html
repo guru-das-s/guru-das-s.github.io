@@ -6,6 +6,11 @@
 <h6 style="margin-top: -2%"> <b>{{ article.date.strftime(DEFAULT_DATE_FORMAT) }}</b> </h6>
 {{ article.content }}
 </div>
+<p>
+	{% for tag in article.tags %}
+		<tt><a href="{{ SITEURL}}/{{ tag.url }}" class="tag">{{ tag }}</a></tt>
+	{% endfor %}
+</p>
 <hr>
 <div class="row">
 	<div class="six columns">
