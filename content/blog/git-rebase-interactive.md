@@ -1,6 +1,7 @@
 Title: Fun with git rebase --interactive
 Date: 2023-12-02T23:41:29-08:00
 tldr: The amazing exec and autosquash features of git rebase interactive
+Tags: git
 
 _This is the second in a series of blog posts related to some powerful features of
 `git` I've used over the years. Previously, I wrote about `git rebase --onto` which

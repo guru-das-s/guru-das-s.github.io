@@ -1,6 +1,7 @@
 Title: Nand2Tetris - Projects 1 to 3
 Date: 2024-04-13T11:53:34-07:00
 tldr: My account of taking the NAND2Tetris course in 2024, up until Project 3: Sequential logic and memory
+Tags: nand2tetris, opensource
 
 [Nand2Tetris](https://www.nand2tetris.org/) is a very interesting "learning by doing"
 free and open-source course that enables one to learn how a computer is designed from the

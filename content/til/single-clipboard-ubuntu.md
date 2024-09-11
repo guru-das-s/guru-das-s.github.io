@@ -3,6 +3,7 @@ Date: 2024-03-02T18:24:00-08:00
 url: til/single-clipboard-ubuntu/
 save_as: til/single-clipboard-ubuntu/index.html
 tldr: Make Ubuntu share one single clipboard for easy copy-pasting using both mouse as well as standard keyboard shortcuts.
+Tags: terminal
 
 Yes, you read that right - Ubuntu (which uses the X server) has a grand total of
 *three* clipboards: As the Inter-Client Communication Conventions Manual (ICCCM)

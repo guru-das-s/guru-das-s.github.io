@@ -1,6 +1,7 @@
 Title: How I used git rebase --onto
 Date: 2023-11-09T23:25:28-08:00
 tldr: Git rebase onto, an underrated but powerful command
+Tags: git
 
 On one of my daily trawlings of Hacker News, I came across Julia Evans' blogpost on
 [confusing git

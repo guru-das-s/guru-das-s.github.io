@@ -1,6 +1,7 @@
 Title: Nand2Tetris - Projects 4 to 5
 Date: Wed Aug 28 12:03:11 AM PDT 2024
 tldr: How I built my own Nand2Tetris Hack computer by creating a CPU, Memory unit and ROM and wiring them all together
+Tags: nand2tetris, opensource
 
 Continuing from [where I left off]({filename}nand-to-tetris-2024-project-3.md) in my
 [Nand2Tetris](https://www.nand2tetris.org/course) journey, I went ahead and completed

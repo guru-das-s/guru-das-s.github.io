@@ -1,6 +1,7 @@
 Title: Build your own shell - Codecrafters style
 Date: 2024-07-28T23:26:59-07:00
 tldr: I created a shell using the Codecrafters Make your own shell challenge. My experience taking the challenge and things I learnt.
+Tags: rust
 
 I created my own shell in Rust using the Codecrafters [Build your own
 shell](https://app.codecrafters.io/courses/shell/overview) challenge.

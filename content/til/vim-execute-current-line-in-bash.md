@@ -3,6 +3,7 @@ Date: 2024-07-29T22:52:04-07:00
 url: til/vim-execute-current-line-in-bash/
 save_as: til/vim-execute-current-line-in-bash/index.html
 tldr: How to easily execute the currently highlighted line in vim
+Tags: vim
 
 I write a lot of notes in Markdown on a daily basis as a sort of personal wiki.
 Almost all of them contain code snippets - shell commands, mostly. Today I learnt

@@ -3,6 +3,7 @@ Date: 2024-03-30T08:32:00-07:00
 url: til/tmux-cycle-through-all-open-sessions/
 save_as: til/tmux-cycle-through-all-open-sessions/index.html
 tldr: tmux configuration options and keybindings to easily cycle through all open sessions with very few keystrokes
+Tags: tmux
 
 My `tmux` workflow thus far has been strictly windows- and panes-based, meaning I
 usually launch only one tmux session and then create named windows and panes
