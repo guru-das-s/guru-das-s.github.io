@@ -9,10 +9,10 @@ This is a [/now page](https://nownownow.com/about).
 
 Last Updated: September 2024.
 
-⚒️  I [finished]({filename}nand-to-tetris-2024-project-5.md) Project 5 of the [NAND2Tetris
-course](https://www.nand2tetris.org/)! I've "built" my very own Hack computer from
-NAND gates. Working on Project 6 next: building an assembler for the Hack ISA using
-Rust.
+⚒️  I've [finished]({filename}nand-to-tetris-2024-project-5.md) Project 5 of the
+[NAND2Tetris course](https://www.nand2tetris.org/)! I've "built" my very own Hack
+computer from NAND gates. Working on Project 6 next: building an assembler for the
+Hack ISA using Rust.
 
 🎮 My wife recently gifted me a Sony Playstation 5. A close friend of mine (a
 long-time gamer) recommended that I start with [Uncharted
@@ -22,8 +22,8 @@ out [Red Dead Redemption II](https://en.wikipedia.org/wiki/Red_Dead_Redemption_2
 have been _hooked_ to that game ever since I started playing and have already spent
 far too many hours on it. Feels good, man.
 
-📖 I finished reading Frank Herbert's Dune (the first book) on my wife's Kindle and
-am looking for something new to read.
+📖 I've finished reading Frank Herbert's Dune (the first book) on my wife's Kindle
+and am looking for something new to read.
 
 🍳 Re-seasoning my cast iron skillet with grapeseed oil. I'd been using avocado oil all
 this while, and the seasoning has not been built up because avocado oil has a high
