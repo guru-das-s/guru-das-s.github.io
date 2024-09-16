@@ -14,6 +14,9 @@ Last Updated: September 2024.
 computer from NAND gates. Working on Project 6 next: building an assembler for the
 Hack ISA using Rust.
 
+💻 I've added tags to my blog posts and syntax highlighting to all the code snippets
+in them.
+
 🎮 My wife recently gifted me a Sony Playstation 5. A close friend of mine (a
 long-time gamer) recommended that I start with [Uncharted
 4](https://en.wikipedia.org/wiki/Uncharted_4:_A_Thief%27s_End) as a newbie to console
