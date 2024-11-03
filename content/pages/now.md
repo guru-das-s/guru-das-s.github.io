@@ -9,7 +9,7 @@ This is a [/now page](https://nownownow.com/about).
 
 Last Updated: September 2024.
 
-⚒️  I've [finished]({filename}nand-to-tetris-2024-project-5.md) Project 5 of the
+⚒️  I've [finished]({filename}/blog/nand-to-tetris-2024-project-5.md) Project 5 of the
 [NAND2Tetris course](https://www.nand2tetris.org/)! I've "built" my very own Hack
 computer from NAND gates. Working on Project 6 next: building an assembler for the
 Hack ISA using Rust.
