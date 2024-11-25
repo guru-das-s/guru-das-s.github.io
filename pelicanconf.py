@@ -45,6 +45,9 @@ PAGE_SAVE_AS = '{slug}/index.html'
 DRAFT_SAVE_AS='{category}/drafts/{slug}.html'
 DRAFT_PAGE_SAVE_AS=''
 
+FEED_MAX_ITEMS = 15
+FEED_ATOM = "feed.atom"
+
 YEAR_ARCHIVE_URL = 'blog/{date:%Y}/'
 YEAR_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/index.html'
 MONTH_ARCHIVE_URL = 'blog/{date:%Y}/{date:%m}/'
