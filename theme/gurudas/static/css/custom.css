@@ -175,9 +175,6 @@ code {
 }
 
 @media (max-width: 549px) {
-  .footer {
-    white-space: pre-wrap;
-  }
 }
 /* Larger than phone */
 @media (min-width: 550px) {
