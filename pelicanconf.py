@@ -8,13 +8,13 @@ TIMEZONE = 'America/Los_Angeles'
 
 DEFAULT_LANG = 'en'
 
-# Feed generation is usually not desired when developing
+FEED_MAX_ITEMS = 15
+FEED_ATOM = "feed.atom.xml"
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
-
 
 DEFAULT_PAGINATION = False
 
@@ -44,9 +44,6 @@ PAGE_URL = '{slug}/'
 PAGE_SAVE_AS = '{slug}/index.html'
 DRAFT_SAVE_AS='{category}/drafts/{slug}.html'
 DRAFT_PAGE_SAVE_AS=''
-
-FEED_MAX_ITEMS = 15
-FEED_ATOM = "feed.atom"
 
 YEAR_ARCHIVE_URL = 'blog/{date:%Y}/'
 YEAR_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/index.html'
