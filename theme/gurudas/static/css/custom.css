@@ -41,6 +41,24 @@ blockquote {
   margin-left: 0px;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+}
+
 .tag {
   border: 1px solid #1EAEDB;
   border-radius: 5px;
