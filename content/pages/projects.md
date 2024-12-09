@@ -1,7 +1,7 @@
 Title: Projects
 Slug: projects
 Date: 26 May 2023
-Status: draft
+Status: hidden
 tldr: Guru Das Srinagesh's project portfolio
 
 <h4>Projects</h4>
