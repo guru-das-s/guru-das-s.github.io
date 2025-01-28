@@ -30,7 +30,15 @@ the Modern Hindu Identity][manu] to be made available in the US on Kindle.
 do a few pull-ups by the end of the year. Started with dead hangs and scapular
 pull-ups.
 
+🎵 Been listening to Pandit Venkatesh Kumar's [Sirsi concert][sirsi] on loop.
+
+📡 A co-worker rekindled my interest in acquiring a [ham
+radio](https://www.arrl.org/) Technician licence and in learning Morse code. Did you
+know there is a Google keyboard that allows you to [type in Morse code][morse]?
+
 [perpl]: https://github.com/guru-das-s/guru-das-s.github.io/commit/6f382b22db18f4cfbd3b5cc1b3a54556a4a13497
 [manu]: https://www.amazon.com/Gods-Guns-Missionaries-Making-Identity/dp/0670093653
+[sirsi]: https://www.youtube.com/watch?v=noYYbAZtWUk
+[morse]: https://support.google.com/gboard/answer/9011881?hl=en&co=GENIE.Platform%3DAndroid
 
 ---
