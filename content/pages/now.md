@@ -1,44 +1,30 @@
 Title: Now
 Slug: now
-Date: Wed Jan  8 10:16:44 PM PST 2025
+Date: Sat Apr 12 12:53:44 AM PDT 2025
 tldr: What Guru Das Srinagesh is up to now
 
 #### Now
 
 This is a [/now page](https://nownownow.com/about).
 
-Last Updated: January 2025.
+Last Updated: April 2025.
 
-⚒️  I've [finished]({filename}/blog/nand-to-tetris-2024-project-7.md) Project 7 of the
-[NAND2Tetris course](https://www.nand2tetris.org/). I've built half of the VM
-Translator in Rust. This is a really great step forward for me, and I'm quite proud
-of myself for reaching thus far.
+🎵 Been listening to Pandit Kumar Gandharva's [concert][c] on loop. I did not like
+his voice initially, but I found myself returning to this concert again and again,
+and also discovered Raga Nat Kamod as a happy side-effect.
 
-💻 I finally got the footer of this website to stay at the bottom even when there is
-not enough content to fill a screenful. I uploaded the CSS files I use to Perplexity
-AI (three files max in the free tier) and asked it to fix my long-standing problem.
-It promptly [gave me the code][perpl] and put a great big smile of satisfaction on my
-face.
+A particularly trying period has passed and I'm optimistic about the coming days. A
+technique that I've found useful to calm down is to:
 
-🎮 Still playing and enjoying [Red Dead Redemption
-II](https://en.wikipedia.org/wiki/Red_Dead_Redemption_2).
+1. Say the words out loud: "I choose peace".
+    - This I find effective as a bookend to my day: either said out loud first thing
+        in the morning, and/or while settling into bed at night.
+2. Ask myself in the midst of a tumultuous moment, "what is one thing I can drop
+   right now to feel better about instantly?"
+    - By "drop" I mean "stop worrying/spiralling about"
+    - This is a very newly-discovered technique, not battle-hardened like the first
+        one.
 
-📖 Waiting for Manu S. Pillai's new book, [Gods, Guns and Missionaries: The Making of
-the Modern Hindu Identity][manu] to be made available in the US on Kindle.
-
-🏋🏾 Been semi-regular with physical exercise. Working my way towards being able to
-do a few pull-ups by the end of the year. Started with dead hangs and scapular
-pull-ups.
-
-🎵 Been listening to Pandit Venkatesh Kumar's [Sirsi concert][sirsi] on loop.
-
-📡 A co-worker rekindled my interest in acquiring a [ham
-radio](https://www.arrl.org/) Technician licence and in learning Morse code. Did you
-know there is a Google keyboard that allows you to [type in Morse code][morse]?
-
-[perpl]: https://github.com/guru-das-s/guru-das-s.github.io/commit/6f382b22db18f4cfbd3b5cc1b3a54556a4a13497
-[manu]: https://www.amazon.com/Gods-Guns-Missionaries-Making-Identity/dp/0670093653
-[sirsi]: https://www.youtube.com/watch?v=noYYbAZtWUk
-[morse]: https://support.google.com/gboard/answer/9011881?hl=en&co=GENIE.Platform%3DAndroid
+[c]: https://www.youtube.com/watch?v=dznoATZrayw
 
 ---
