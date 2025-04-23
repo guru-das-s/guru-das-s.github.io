@@ -11,19 +11,13 @@ Last Updated: April 2025.
 
 🎵 Been listening to Pandit Kumar Gandharva's [concert][c] on loop. I did not like
 his voice initially, but I found myself returning to this concert again and again,
-and also discovered Raga Nat Kamod as a happy side-effect.
+and also discovered Raga Nat Kamod as a happy side-effect. There are multiple parts
+to this concert and I am enthralled.
 
-A particularly trying period has passed and I'm optimistic about the coming days. A
-technique that I've found useful to calm down is to:
-
-1. Say the words out loud: "I choose peace".
-    - This I find effective as a bookend to my day: either said out loud first thing
-        in the morning, and/or while settling into bed at night.
-2. Ask myself in the midst of a tumultuous moment, "what is one thing I can drop
-   right now to feel better about instantly?"
-    - By "drop" I mean "stop worrying/spiralling about"
-    - This is a very newly-discovered technique, not battle-hardened like the first
-        one.
+Currently seated at the airport waiting to board a flight to the motherland. Been
+trying to read Pema Chödrön's [Start where you
+are](https://pemachodronfoundation.org/product/start-where-you-are-book/) and think
+about the teachings therein.
 
 [c]: https://www.youtube.com/watch?v=dznoATZrayw
 
