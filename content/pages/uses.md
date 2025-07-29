@@ -65,5 +65,6 @@ make my life easier:
 2. Seiko SKX013/Sinn 104
 3. Bespoke Post's Line of Trade [Slim Wallet](https://www.bespokepost.com/store/line-of-trade-slim-wallet)
 4. Gerber Shard tool
+5. [P-7 Suspension Clip](https://www.amazon.com/dp/B00L75GRX6?ref=ppx_yo2ov_dt_b_fed_asin_title&th=1)
 
 ---
