@@ -74,7 +74,7 @@ PLUGINS = [
 # "read more" plugin conf
 SUMMARY_MAX_LENGTH = 60
 SUMMARY_END_SUFFIX = "... "
-READ_MORE_LINK = '<span>→ Continue reading</span>'
+READ_MORE_LINK = 'Continue reading >>'
 
 SLUGIFY_SOURCE = 'basename'
 
