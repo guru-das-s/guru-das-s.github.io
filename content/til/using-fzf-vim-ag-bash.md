@@ -16,7 +16,7 @@ workflow tremendously.
 Here are some of the actions and workflows I use `fzf` for, multiple times on a daily
 basis.
 
-##### Opening files in vim within current directory
+# Opening files in vim within current directory
 
 From the shell, it is easy to search for a file within the current directory
 (recursively) and open it in `vim`. I have this Bash alias that does that for me with
@@ -43,7 +43,7 @@ plugin's documentation, one can remap that key combination to just `:Files` as w
 for directories that are not git repositories. I can then search for the file I want
 and then open it in a horizontal or vertical split with `Ctrl + L` or `Ctrl + H`.
 
-##### ag integration from within vim
+# ag integration from within vim
 
 I use `ag` (the "silver searcher") instead of `grep`, and the `fzf.vim` plugin
 supports this natively. I just had to make [a couple of
@@ -62,7 +62,7 @@ convenience:
    I can just place my cursor on a word and then say `:A` to search for that word,
    which is highly effective.
 
-##### Bash alias to add filename in REPL prompt
+# Bash alias to add filename in REPL prompt
 
 Adding this line to `~/.bashrc` adds the default fzf bindings for bash:
 
@@ -76,7 +76,7 @@ Now, `Ctrl + T` brings the power of `fzf` to locating deeply-nested build artifa
 files and using them in a command you're building on the fly at the REPL shell
 prompt.
 
-##### Bash alias for git log
+# Bash alias for git log
 
 The single most frequent use case is browsing git log output with `fzf`. This is how
 I've hooked things up - and a warning: it's not that pretty to look at, but gets the

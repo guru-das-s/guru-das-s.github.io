@@ -36,7 +36,7 @@ Of these, only `PRIMARY` and `CLIPBOARD` are commonly used by applications. As
 > No one ever does anything interesting with SECONDARY as far as I can
 > tell.
 
-##### What led me to this discovery? <a name="copyways"></a>
+# What led me to this discovery? <a name="copyways"></a>
 
 There are two main ways to copy and paste stuff from one application to another on
 Ubuntu:
@@ -49,7 +49,7 @@ unsupported hybrid scheme to work that I grew frustrated and decided to investig
 why the scheme that occurred to me naturally did not, in fact, work. Allow me to
 explain using a couple of scenarios.
 
-##### Terminal &rarr; Terminal
+# Terminal &rarr; Terminal
 
 As a heavy terminal and `tmux` user, my workflow involves frequently copying stuff I
 use `tmux`, so I need to copy stuff from one tmux pane to another. To achieve this, I
@@ -60,14 +60,14 @@ what the mouse selects, it copies, too. The first method also works, albeit with
 need to use `Ctrl-Shift-C` and `Ctrl-Shift-V`. So this is technically a _third_ way
 of copying and pasting on Ubuntu.
 
-##### Non-terminal application &rarr; non-terminal application
+# Non-terminal application &rarr; non-terminal application
 
 Example: copying from one Google Chrome tab to another.
 
 Here, the first method is intuitive to me because it is what has been ingrained in me
 from a young age thanks to Windows.
 
-##### Non-terminal application &rarr; Terminal
+# Non-terminal application &rarr; Terminal
 
 Example: copying from Google Chrome to the terminal.
 
@@ -75,7 +75,7 @@ Here, too, the first method is intuitive to me, albeit with a twist. The twist i
 that you need to paste using `Ctrl-Shift-V` in the terminal. So this is technically a
 _fourth_ way of copying and pasting on Ubuntu.
 
-##### Terminal &rarr; non-terminal application
+# Terminal &rarr; non-terminal application
 
 Example: copying from the terminal to Google Chrome.
 
@@ -89,7 +89,7 @@ look up a compilation error message, or copy some logs to a chat client. I would
 select to copy using the mouse, paste using `Ctrl-V`, fail, then middle-click. I did
 this so many times that I found it disruptive to my workflow and had to fix this.
 
-##### The fix: unify both clipboards
+# The fix: unify both clipboards
 
 Install [autocutsel](https://www.nongnu.org/autocutsel/) and add this to your
 `.bashrc`:

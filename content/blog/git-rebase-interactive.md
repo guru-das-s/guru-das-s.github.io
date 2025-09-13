@@ -25,7 +25,7 @@ this really shines is how it allows, via an optional flag, for executing any
 arbitrary shell command for one or even all of the commits in the list. I'm talking
 about `git rebase --interactive --exec`.
 
-##### Usecase: Pick a bunch of `linux-next` commits
+# Usecase: Pick a bunch of `linux-next` commits
 
 Frequently we run into the situation where we need some patches that are accepted by
 maintainers into their own trees but are not merged by Linus into his main
@@ -86,7 +86,7 @@ Finally, add one's own Signed-off-by to all the cherry picked commits:
 git rebase -i --exec 'git commit --amend --no-edit -s' $base_sha
 ```
 
-##### git fixup and `git rebase --interactive --autosquash`
+# git fixup and `git rebase --interactive --autosquash`
 
 This blog post: [Auto-squashing Git
 Commits](https://thoughtbot.com/blog/autosquashing-git-commits) goes into great

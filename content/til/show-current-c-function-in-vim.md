@@ -16,7 +16,7 @@ dependent on them. I am more partial towards things I can use that are just plai
 vanilla vimscript because I can just stick them in my `.vimrc` when setting up a new
 workstation or logging into a remote server somewhere.
 
-##### The function
+# The function
 
 Here's the function in all its inscrutable beauty:
 
@@ -35,7 +35,7 @@ I couldn't locate the StackOverflow answer I had sourced this from (even though 
 post says TIL, I did not learn this *literally* today) so I used [Gemini
 AI](https://gemini.google.com/app) to break this down for me.
 
-##### The breakdown
+# The breakdown
 
 `echohl ModeMsg`: Sets the highlighting for the echo output to the mode message
 style. This ensures the function name visually stands out.
@@ -61,7 +61,7 @@ two non-whitespace, non-tab, non-comment characters, followed by any characters
 
 `echohl None`: Resets the highlighting back to the default.
 
-##### The demo
+# The demo
 
 If you were at [this
 line](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mfd/qcom-pm8008.c?h=v6.8#n178)

@@ -4,7 +4,7 @@ Date: 07 Jun 2023
 tldr: The tools and technologies used to generate this website
 Tags: meta
 
-##### Beginnings
+# Beginnings
 
 I've always wanted my own website. Like, forever. Not Wordpress-like, but my
 own, written from scratch. I figured out that this meant that I would have to
@@ -21,12 +21,12 @@ Blogger.com and Wordpress) I eventually figured out the basics of what I needed
 to know in order to get started - a path which eventually led me to use
 Skeleton.
 
-##### The Github repo
+# The Github repo
 
 The code for my website is [here on
 Github](https://github.com/guru-das-s/guru-das-s.github.io).
 
-##### Choosing a domain and a provider
+# Choosing a domain and a provider
 
 Naming things is hard - it took me a while before I settled on this current
 domain name. Google Domains has a pretty good deal for `.dev` domains (currently
@@ -36,7 +36,7 @@ domain too via their Workspace Business Starter option.
 I had to set up these DNS records: `A`, `CNAME`, and `TXT` (for Github Pages,
 see below).
 
-##### Using Pelican as my static site generator
+# Using Pelican as my static site generator
 
 I [asked Hacker News](https://news.ycombinator.com/item?id=35019343) which
 static site generator to use, and based on the responses, I went with my gut
@@ -54,7 +54,7 @@ fulfilling experience. I don't know a lot of HTML or CSS beyond the very basics,
 so I'm getting to learn a considerable amount of how they work together, and the
 various tags and options available.
 
-###### Creating a custom theme based on Skeleton
+## Creating a custom theme based on Skeleton
 
 Now, since I wanted a custom website theme, I found Pelican to be quite
 forbidding as a newbie since the documentation says that in order to create a
@@ -89,7 +89,7 @@ down in the page:
 The theme is very bare bones and is adapted from the source code of the
 [getskeleton.com](http://getskeleton.com/) website.
 
-##### Setting up a Workflow via Github Actions
+# Setting up a Workflow via Github Actions
 
 Choosing Github Pages for hosting was an easy choice was easy as this is offered
 for free. Plus, I was excited about setting up a CI/CD pipeline for generating
@@ -97,7 +97,7 @@ my website through Github Actions and Workflows. I looked at existing examples
 and got that up and running too! Check it out:
 [deploy.yml](https://github.com/guru-das-s/guru-das-s.github.io/blob/master/.github/workflows/deploy.yml)
 
-##### Credits:
+# Credits:
 
 - [pyladies-brazil](https://github.com/pyladies-brazil/br-pyladies-pelican): I
   referred to this repository and their corresponding

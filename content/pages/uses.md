@@ -7,7 +7,7 @@ tldr: Tools Guru Das Srinagesh uses on a daily basis to get work done
 
 This is a [`/uses page`](https://uses.tech/) and, as such, talks about the tools I use on a daily basis to get work done.
 
-##### Hardware
+# Hardware
 
 Personal:
 
@@ -23,7 +23,7 @@ Work:
     - Microsoft has apparently discontinued production of this keyboard now
     - Highly recommend!
 
-##### Software I use
+# Software I use
 
 I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 
@@ -41,7 +41,7 @@ make my life easier:
     - The `conceallevel`, `InsertToc` and syntax highlighting are all top-notch
       features. `InsertToc` requires `Tabular` to work and it does a superb job.
 
-##### Google Chrome Extensions
+# Google Chrome Extensions
 
 1. [uBlock Origin](https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm?pli=1)
 2. [GoFullPage - Full Page Screen Capture](https://chromewebstore.google.com/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl)
@@ -49,7 +49,7 @@ make my life easier:
 4. [Vimium](https://chromewebstore.google.com/detail/vimium/dbepggeogbaibhgnhhndojpepiihcmeb) - use Vim keybindings in the browser!
 5. [Google Input Tools](https://chrome.google.com/webstore/detail/google-input-tools/mclkkofklkfljcocdinagocijmpgbhab) to type in Indic languages
 
-##### Camera equipment and software
+# Camera equipment and software
 1. I use a Fujifilm X-T10 that has been my faithful companion since 2017.
 2. Lenses:
     - Stock Fuji 18-55 mm: I hardly use this.
@@ -60,7 +60,7 @@ make my life easier:
 4. My Dell XPS 13 9343 has an SD card reader built-in, which is _extremely_ convenient.
 4. [darktable](https://www.darktable.org/) to process RAW photos.
 
-##### Everyday Carry (EDC)
+# Everyday Carry (EDC)
 1. Benchmade Mini Bugout knife
 2. Seiko SKX013/Sinn 104
 3. Bespoke Post's Line of Trade [Slim Wallet](https://www.bespokepost.com/store/line-of-trade-slim-wallet)

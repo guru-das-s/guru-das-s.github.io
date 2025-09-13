@@ -32,7 +32,7 @@ concepts. Most of all, I *love* the 100% hands-on approach because I learn bette
 Here are some thoughts and observations on each of the projects I've completed so
 far:
 
-##### Project 1: Boolean logic
+# Project 1: Boolean logic
 
 1. This project is about creating gates such as OR, NOT, and MUX along with their
    16-bit versions using basic Boolean logic. The NAND gate is provided as a
@@ -49,7 +49,7 @@ far:
    suite.
 5. Overall, this project was very satisfying and straightforward.
 
-##### Project 2: Boolean arithmetic and building an ALU
+# Project 2: Boolean arithmetic and building an ALU
 
 1. The concept of two's complement was explained clearly with motivation for its
    existence, and illustrated with examples of subtraction and addition with
@@ -65,7 +65,7 @@ far:
    [forum](http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/) for
    guidance.
 
-##### Project 3: Building RAM chips
+# Project 3: Building RAM chips
 
 1. This project introduces sequential logic and building a 16K Random Access Memory
    (RAM) chip using banks of registers, which are built from individual registers
@@ -78,7 +78,7 @@ far:
 4. Creating the Program Counter (PC) was also very interesting because of the clever
    ways in which internal pins need to be used.
 
-##### Looking ahead
+# Looking ahead
 
 Things start to get even more interesting from Project 4 onward. It is about learning
 the assembly language of the particular computer that is being built and writing

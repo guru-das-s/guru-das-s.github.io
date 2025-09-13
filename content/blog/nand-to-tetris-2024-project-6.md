@@ -17,7 +17,7 @@ with it and learn more of its features in the process.
 Follow my progress on Github here:
 [guru-das-s/nand2tetris](https://github.com/guru-das-s/nand2tetris/commits/master/).
 
-##### Introducing: The `has` assembler
+# Introducing: The `has` assembler
 
 My Hack assembler is named `has` - a simple portmanteau of the two words. It has the
 following calling card:
@@ -59,7 +59,7 @@ name = "has"
 path = "projects/6/has/src/main.rs"
 ```
 
-##### Code walkthrough
+# Code walkthrough
 
 I followed the same sequence of developing the Hack assembler as suggested in the
 project docs - first, developing the ability to assemble symbol-less asm files and
@@ -77,7 +77,7 @@ projects/6/has/src/
 └── to_binary.rs
 ```
 
-###### Main data structures used
+## Main data structures used
 
 The fact that there is a finite number of valid values for each of the fields in a
 C-instruction and a max value for the number contained in an A-instruction led me to
@@ -193,7 +193,7 @@ pub struct SymbolTable {
 }
 ```
 
-###### Code flow
+## Code flow
 
 Starting from the `main.rs` entry point: 
 
@@ -249,7 +249,7 @@ fn binary_of_variable(variable: String, symbol_table: &mut SymbolTable) -> Strin
 }
 ```
 
-##### Does `has` output match the stock assembler's?
+# Does `has` output match the stock assembler's?
 
 With the assembler in place, I also wrote a shell script to verify that it matches
 the output of the stock assembler that is provided by the Nand2Tetris team in the
@@ -298,7 +298,7 @@ This causes `<command>` to run at the end of the Bash script's execution - eithe
 graceful or erroneous. In this case, I clean up all the generated `.hack` files in a
 `cleanup()` routine upon `EXIT`.
 
-##### Post-completion thoughts
+# Post-completion thoughts
 
 Writing this assembler was really rewarding not just in terms of learning how a basic
 two-pass assembler works but also because it afforded me the means and opportunity to

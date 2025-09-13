@@ -11,7 +11,7 @@ Projects 4 (Machine Language) and Project 5 (Computer Architecture) and I now ha
 Follow my progress on Github here:
 [guru-das-s/nand2tetris](https://github.com/guru-das-s/nand2tetris/commits/master/).
 
-##### Project 4: Machine Language
+# Project 4: Machine Language
 
 This project introduces the Hack instruction set architecture (ISA) and assembly
 language corresponding to the Hack computer we're building, and tasks the student
@@ -27,7 +27,7 @@ I haven't written a lot of assembly code, so it was very gratifying to reason ab
 problem in terms of assembly and write code while conforming to the constraints of
 the ISA.
 
-##### Project 5: Computer Architecture
+# Project 5: Computer Architecture
 
 This is the first big project in the course according to me, and the most climactic
 so far, as we progressively build:
@@ -81,7 +81,7 @@ After the rigours of the CPU design part of the project, this turned out to be
 relatively straightforward. Just three lines of code wiring the ROM, RAM and CPU
 together.
 
-##### Looking ahead
+# Looking ahead
 
 The next project, Project 6, is to build an assembler that converts Hack assembly
 code into binary. I've not attempted something of this nature before, and am really

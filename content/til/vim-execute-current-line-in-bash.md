@@ -12,7 +12,7 @@ in a single line in `vim`.
 
 Two ways, in fact.
 
-##### The first
+# The first
 
 ```bash
 .w !bash
@@ -54,7 +54,7 @@ comment (starting with '"') after the `:!` command.
                     program {filter}.
 
 ```
-##### The second
+# The second
 
 The second method is also documented a few lines from above:
 ```
@@ -67,6 +67,6 @@ Just need to say `!!bash` (note: no preceding `:`).
 But this will overwrite the contents of the current line with the output of the
 command in that line.
 
-##### Addendum
+# Addendum
 
 This same trick can be used to insert a date in a Markdown file: `!!date`

@@ -86,6 +86,7 @@ MARKDOWN = {
         },
         'markdown.extensions.extra': {},
         'markdown.extensions.meta': {},
+        'plugins.heading_shift_extension': {},  # A single # in *.md maps to <h5>
     },
 }
 

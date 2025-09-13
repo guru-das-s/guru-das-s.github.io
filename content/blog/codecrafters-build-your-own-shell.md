@@ -12,7 +12,7 @@ LinkedIn and resolved to try it out using Rust, another goal of mine. Here's my
 experience of completing the challenge, and also my thoughts on the Codecrafters platform
 as a whole.
 
-##### Capabilities of the shell
+# Capabilities of the shell
 
 But first, what can the shell do?
 
@@ -34,7 +34,7 @@ run`.
 There are more "extensions" in the pipeline: piping, history, autocompletion of
 commands, et c. Really excited to do those when they're available!
 
-##### The Codecrafters platform
+# The Codecrafters platform
 
 I am thoroughly impressed by the Codecrafters platform.
 
@@ -48,7 +48,7 @@ I am thoroughly impressed by the Codecrafters platform.
 - `git push`-ing to their server (`origin` already configured in the clone step)
     advances to the next stage
 
-##### Working on the challenge
+# Working on the challenge
 
 Making time to work on the challenge was challenging in itself with a full time job
 and other quotidian demands on my time. It was only during my vacation in India that
@@ -88,7 +88,7 @@ filepaths for the `cd` builtin - the code for the absolute filepaths was suffici
 The difficulty level for that stage is marked as _Hard_ but I literally had to write
 zero new code to pass that!
 
-##### Closing thoughts
+# Closing thoughts
 
 I feel quite proud of the fact that I got to build something tangible in Rust.
 
