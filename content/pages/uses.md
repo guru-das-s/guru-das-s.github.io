@@ -3,7 +3,7 @@ Slug: uses
 Date: 2024-05-29T23:54:38-07:00
 tldr: Tools Guru Das Srinagesh uses on a daily basis to get work done
 
-#### Uses
+<h4> Uses </h4>
 
 This is a [`/uses page`](https://uses.tech/) and, as such, talks about the tools I use on a daily basis to get work done.
 

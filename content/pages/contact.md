@@ -4,7 +4,7 @@ Date: 27 May 2023
 Status: draft
 tldr: Contact information for Guru Das Srinagesh
 
-#### Contact Me
+<h4> Contact </h4>
 
 [![Email]({static}/images/email_icon.png)](mailto:guru@gurudas.dev)
 [![Linkedin]({static}/images/linkedin_icon.png)](https://www.linkedin.com/in/guru-das/)

@@ -3,7 +3,7 @@ Slug: now
 Date: Sat Apr 12 12:53:44 AM PDT 2025
 tldr: What Guru Das Srinagesh is up to now
 
-#### Now
+<h4> Now </h4>
 
 This is a [/now page](https://nownownow.com/about).
 
