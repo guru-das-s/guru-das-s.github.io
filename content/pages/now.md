@@ -1,26 +1,34 @@
 Title: Now
 Slug: now
-Date: Sat Apr 12 12:53:44 AM PDT 2025
+Date: Sun Sep 14 10:26:30 PM PDT 2025
 tldr: What Guru Das Srinagesh is up to now
 
 <h4> Now </h4>
 
 This is a [/now page](https://nownownow.com/about).
 
-Last Updated: July 2025.
+Last Updated: September 2025.
 
-🎵 Discovered a new kid on the block, Aniruddh Aithal, who sings brilliantly. Been
-listening to his chamber performance of the [Gaud Malhar][c] bandish, _Manan kariye
-gori_, on loop.
+🎵 Youtube does a fantastic job of recommending more Kumar Gandharva to me. I have
+been hooked on to his [Surdas bhajans][surdas] (with probably his wife for vocal
+support). The guilelessness and honesty to the compositions, the ragas chosen for the
+bhajans, his voice, and open throated singing elevate this recording to one of my
+all-time favourites. The language is Braj Bhasha, which is new to me.
 
-📚 Reading Pema Chödrön's [Start where you
-are](https://pemachodronfoundation.org/product/start-where-you-are-book/). Really
-grateful this book exists.
+📚 Started reading a bit of Atul Gawande's _Being Mortal_ and very impressed by the
+quality of the writing. Reminds me of the prescribed rules of good writing and the
+various admonitions in [the Strunk book][strunk].
 
-🌤️ It's been a really rough couple of months, so more than the usual amount of
-introspection has been taking place. Trying hard to see things with unclouded eyes.
-Baseline health has improved, so using that as a solid foundation to return to.
+🧵🪡🧶✂️  Started learning to crochet using a [Woobles beginner kit][woobles]. Let's
+see where this goes.
 
-[c]: https://www.youtube.com/watch?v=0IA5hwhsa6o
+🚐 My wife and I went on our first RV trip together this Labor Day weekend! We drove
+down Highway 395 in a modified RAM Promaster camper van and had a lot of fun.
+Sometimes the least prepared-for trips turn out to be unexpectedly thrilling and
+memorable - and this was definitely one.
+
+[surdas]: https://www.youtube.com/watch?v=TfDEpJrJv4k
+[strunk]: https://en.wikipedia.org/wiki/The_Elements_of_Style
+[woobles]: https://thewoobles.com/collections/beginner-crochet-kits/products/bunny-crochet-kit
 
 ---
