@@ -19,6 +19,12 @@ this blogpost describes in detail my solution to Project 7 in Rust.
 The source code is here:
 [guru-das-s/nand2tetris](https://github.com/guru-das-s/nand2tetris/tree/master/projects/7)
 
+---
+
+[TOC]
+
+---
+
 # Problem description
 
 What does a VM file even look like? Here's `SimpleAdd.vm`:

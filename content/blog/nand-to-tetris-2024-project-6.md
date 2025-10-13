@@ -17,6 +17,12 @@ with it and learn more of its features in the process.
 Follow my progress on Github here:
 [guru-das-s/nand2tetris](https://github.com/guru-das-s/nand2tetris/commits/master/).
 
+---
+
+[TOC]
+
+---
+
 # Introducing: The `has` assembler
 
 My Hack assembler is named `has` - a simple portmanteau of the two words. It has the
