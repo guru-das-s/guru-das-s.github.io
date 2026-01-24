@@ -1,34 +1,78 @@
 Title: Now
 Slug: now
-Date: Sun Sep 14 10:26:30 PM PDT 2025
+Date: Sat Jan 24 09:23:47 AM PST 2026
 tldr: What Guru Das Srinagesh is up to now
 
 <h4> Now </h4>
 
 This is a [/now page](https://nownownow.com/about).
 
-Last Updated: September 2025.
+Last Updated: January 2026.
 
-🎵 Youtube does a fantastic job of recommending more Kumar Gandharva to me. I have
-been hooked on to his [Surdas bhajans][surdas] (with probably his wife for vocal
-support). The guilelessness and honesty to the compositions, the ragas chosen for the
-bhajans, his voice, and open throated singing elevate this recording to one of my
-all-time favourites. The language is Braj Bhasha, which is new to me.
+🌐 Moved domain and MX providers:
 
-📚 Started reading a bit of Atul Gawande's _Being Mortal_ and very impressed by the
-quality of the writing. Reminds me of the prescribed rules of good writing and the
-various admonitions in [the Strunk book][strunk].
+- Initially bought this domain from Google Domains
+- That got shut down and all domains got transferred to Squarespace
+- Wanted custom email address at the time, so signed up for Google Workspace
+- Google Workspace is *expensive* if all one wants is a custom email address and
+    not the other bells and whistles such as domain-private Meet, Drive, Docs, et
+    c.
+- Searched for other options, settled on Spacemail.
+- Thought it would be easier to consolidate domain management with the provider
+    of mail services too, so moved to Spaceship.
+- Spacemail is cheap and offers more mailboxes (custom email addresses on same
+    domain) but its Android app does not have instant email notifications like
+    GMail does
+- "Instant email notifications" needs Firebase. Spacemail only has IMAP IDLE,
+    which is a kind of polling mechanism
+- Installed betterbird on my Arch laptop and Thunderbird on my
+    Android phone to handle mail.
+- Setting IMAP Idle and mail frequency to fast values is working for me.
 
-🧵🪡🧶✂️  Started learning to crochet using a [Woobles beginner kit][woobles]. Let's
-see where this goes.
+🦬 Started using emacs Org Mode at work to track my To-Do lists
 
-🚐 My wife and I went on our first RV trip together this Labor Day weekend! We drove
-down Highway 395 in a modified RAM Promaster camper van and had a lot of fun.
-Sometimes the least prepared-for trips turn out to be unexpectedly thrilling and
-memorable - and this was definitely one.
+- Second time giving Org Mode a go and it has been amazing to make sense of the
+    chaos
+- Love the status-change, auto-sort, hiding, tagging features that work out of
+    the box, and the keybindings too
+- Helpful to log work done weekly at the end of the week.
+- Haven't started using the other features of emacs though.
+- Also I use evil mode, so that's not really the *true* emacs experience, but
+    this works well for me.
 
-[surdas]: https://www.youtube.com/watch?v=TfDEpJrJv4k
-[strunk]: https://en.wikipedia.org/wiki/The_Elements_of_Style
-[woobles]: https://thewoobles.com/collections/beginner-crochet-kits/products/bunny-crochet-kit
+🐧 Looking to get back into Linux kernel upstream work
+
+- I miss the thrill of posting patches upstream and receiving feedback from
+    maintainers and getting patches accepted
+- Feel like an outsider now that it's been a couple of years since I posted last
+- Want to start looking at avenues I can contribute given that I have experience
+    with many new subsystems thanks to work
+
+🏠 Bought a house, yay!
+
+- Doesn't feel very different yet, it takes a while to sink in I guess
+
+⌨️  Touch typing is a neat hack to actually improve productivity and the feeling of
+being productive:
+
+- Using the little finger to hit `:` is a game changer (used ring finger until now)
+- Want to learn it properly now - I still don't use it to hit `P`
+
+🤖 Started a Perplexity Pro subscription
+
+- Their alternative to Google Assistant is great.
+- Tried Comet browser too but it does not have password import yet
+- Their reduced-features-browser that opens links without opening a new browser
+    instance needs improvement - does not open links within the opened link. Maybe
+    I'm holding it wrong.
+
+🚀 Claude Code is awesome.
+
+- A new era dawns. Getting the distinct feeling that a paradigm shift has taken place
+    in software development.
+- I feel that hand-coding by reading docs, manuals and figuring stuff out sans AI will eventually
+    become a superpower of the past, much like how programming in assembly has become
+    a yesteryear superpower.
+- The image of Paul Atreides seeking to ride the sandworm comes to mind.
 
 ---
