@@ -75,4 +75,14 @@ being productive:
     a yesteryear superpower.
 - The image of Paul Atreides seeking to ride the sandworm comes to mind.
 
+💪🏽 The OODA loop
+
+- Observe
+- Orient
+- Decide
+- Act
+- I tend to get stuck in analysis-paralysis loops and this decision-making tool is helpful.
+- Setting a tight loop forces me to take a best-efforts decision and move on to the
+    next task.
+
 ---
