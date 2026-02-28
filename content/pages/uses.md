@@ -34,6 +34,7 @@ I run Arch Linux with Gnome as my desktop environment on my XPS 13.
 6. `b4`
 7. [Betterbird](https://www.betterbird.eu/)
 8. Thunderbird Android app
+9. Firefox [Ctrl+Number to switch tabs extension](https://addons.mozilla.org/en-US/firefox/addon/ctrl-number-to-switch-tabs/)
 
 For work, I use mostly the above tools on Ubuntu, along with these nifty tools that
 make my life easier:
