@@ -8,15 +8,38 @@
   {% include 'header.html' %}
 
   {% if article %}
+    {% set canonical_path = article.url %}
+  {% elif page %}
+    {% set canonical_path = page.url %}
+  {% elif tag and tag.url %}
+    {% set canonical_path = tag.url %}
+  {% elif output_file %}
+    {% if output_file == "index.html" %}
+      {% set canonical_path = "" %}
+    {% elif output_file.endswith("/index.html") %}
+      {% set canonical_path = output_file[:-10] %}
+    {% else %}
+      {% set canonical_path = output_file %}
+    {% endif %}
+  {% else %}
+    {% set canonical_path = "" %}
+  {% endif %}
+
+  {% if canonical_path %}
+    {% set canonical_url = SITEURL ~ "/" ~ canonical_path %}
+  {% else %}
+    {% set canonical_url = SITEURL ~ "/" %}
+  {% endif %}
 
 <!-- Add canonical link to solve Page Indexing issues
 ––––––––––––––––––––––––––––––––––––––––––––––––- -->
-<link rel="canonical" href="{{ SITEURL }}/{{ article.url }}" />
-<meta property="og:url" content="{{ SITEURL }}/{{ article.url }}" />
-<meta property="og:type" content="article" />
-<meta name="description" content="{{ article.tldr }}">
-<meta property="og:description" content="{{ article.tldr }}">
-  {% endif%}
+  <link rel="canonical" href="{{ canonical_url }}" />
+  <meta property="og:url" content="{{ canonical_url }}" />
+  {% if article %}
+  <meta property="og:type" content="article" />
+  <meta name="description" content="{{ article.tldr }}">
+  <meta property="og:description" content="{{ article.tldr }}">
+  {% endif %}
 </head>
 <body>
 
