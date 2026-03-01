@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>TIL: The fzf fuzzy finder is amazing - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="TIL: The fzf fuzzy finder is amazing - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/til/using-fzf-vim-ag-bash/" />
+  <meta property="og:url" content="https://gurudas.dev/til/using-fzf-vim-ag-bash/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="How I use the fzf fuzzy finder tool in conjunction with bash, vim and the silver searcher ag">
+  <meta property="og:description" content="How I use the fzf fuzzy finder tool in conjunction with bash, vim and the silver searcher ag">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/til/using-fzf-vim-ag-bash/">TIL: The fzf fuzzy finder is amazing</a></h4>
+<h6 style="margin-top: -2%"> <b>14 Dec 2024</b> </h6>
+<p><a href="https://github.com/junegunn/fzf"><code>fzf</code></a> is a general-purpose fuzzy text matching
+tool at its core that takes in a list of newline-separated text and allows the user
+to search for something within those lines and select one or more of the lines by
+typing just a few character sequences into a search field. It is highly customizable
+and the maintainer seems to have a good head on his shoulders. I recently started
+using it after a colleague introduced me to it and it has improved my developer
+workflow tremendously.</p>
+<p>Here are some of the actions and workflows I use <code>fzf</code> for, multiple times on a daily
+basis.</p>
+<h5 id="opening-files-in-vim-within-current-directory">Opening files in vim within current directory</h5>
+<p>From the shell, it is easy to search for a file within the current directory
+(recursively) and open it in <code>vim</code>. I have this Bash alias that does that for me with
+just one keystroke:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">alias</span><span class="w"> </span><span class="nv">f</span><span class="o">=</span><span class="s1">&#39;vim $(fzf)&#39;</span>
+</code></pre></div>
+
+<p>It is easy to do this from within an open <code>vim</code> session as well. For this, I use the
+<a href="https://github.com/junegunn/fzf.vim"><code>fzf.vim</code> plugin</a> with these lines in my
+<code>.vimrc</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">nnoremap</span> <span class="p">&lt;</span>C<span class="p">-</span><span class="k">f</span><span class="p">&gt;</span> :GFiles<span class="p">&lt;</span>CR<span class="p">&gt;</span>
+<span class="k">let</span> <span class="k">g</span>:fzf_action <span class="p">=</span> {
+        \ <span class="s1">&#39;ctrl-l&#39;</span>: <span class="s1">&#39;split&#39;</span><span class="p">,</span>
+        \ <span class="s1">&#39;ctrl-h&#39;</span>: <span class="s1">&#39;vsplit&#39;</span> }
+</code></pre></div>
+
+<p>The above config allows me to use <code>Ctrl + F</code> from within vim to bring up a list of
+all the files known to Git in that directory (<code>GFiles</code> = Git Files). From the
+plugin's documentation, one can remap that key combination to just <code>:Files</code> as well
+for directories that are not git repositories. I can then search for the file I want
+and then open it in a horizontal or vertical split with <code>Ctrl + L</code> or <code>Ctrl + H</code>.</p>
+<h5 id="ag-integration-from-within-vim">ag integration from within vim</h5>
+<p>I use <code>ag</code> (the "silver searcher") instead of <code>grep</code>, and the <code>fzf.vim</code> plugin
+supports this natively. I just had to make <a href="https://github.com/guru-das-s/fzf.vim/commits/master/">a couple of
+customizations</a> for my
+convenience:</p>
+<ol>
+<li>I <a href="https://github.com/guru-das-s/fzf.vim/commit/07792d18f86aed8853c5bbfa62eb6db871d81551">renamed</a> the invocation command from <code>:Ag</code> to <code>:A</code>, thereby saving
+   one precious keystroke.</li>
+<li>The vimscript helper function that fashions the invocation parameters to <code>ag</code>
+   sets the search query to <code>'^(?=.)'</code> by default if a search term is not provided.
+   The effect of this is that <code>ag</code> will print out every single line of every single
+   file in the repo if <code>:A</code> is invoked as such without the search parameter, which
+   makes no sense.<br>
+   So instead, I <a href="https://github.com/guru-das-s/fzf.vim/commit/a9f45fe47b10bdfd0b88efbe36ae02175fc6f2cf">changed</a> the default search query to
+   <code>expand("&lt;cword&gt;")</code> in case of an empty search query.  The effect of this is that
+   I can just place my cursor on a word and then say <code>:A</code> to search for that word,
+   which is highly effective.</li>
+</ol>
+<h5 id="bash-alias-to-add-filename-in-repl-prompt">Bash alias to add filename in REPL prompt</h5>
+<p>Adding this line to <code>~/.bashrc</code> adds the default fzf bindings for bash:</p>
+<div class="highlight"><pre><span></span><code><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>~/.fzf.bash<span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>~/.fzf.bash
+<span class="c1"># Set up fzf key bindings and fuzzy completion</span>
+<span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>fzf<span class="w"> </span>--bash<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Now, <code>Ctrl + T</code> brings the power of <code>fzf</code> to locating deeply-nested build artifact
+files and using them in a command you're building on the fly at the REPL shell
+prompt.</p>
+<h5 id="bash-alias-for-git-log">Bash alias for git log</h5>
+<p>The single most frequent use case is browsing git log output with <code>fzf</code>. This is how
+I've hooked things up - and a warning: it's not that pretty to look at, but gets the
+job done, and well.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">FZF_O_OPTS</span><span class="o">=</span><span class="s2">&quot;--ansi --color=16 --no-mouse --multi --track --tac --disabled --no-print-query --bind j:down,k:up,q:abort&quot;</span>
+
+<span class="k">function</span><span class="w"> </span>do_o<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span>git<span class="w"> </span>log<span class="w"> </span>--color<span class="o">=</span>always<span class="w"> </span>--oneline<span class="w"> </span>--decorate<span class="w"> </span><span class="si">${</span><span class="nv">2</span><span class="k">:-</span><span class="si">}</span><span class="w"> </span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>fzf<span class="w"> </span><span class="nv">$FZF_O_OPTS</span><span class="w"> </span>--preview<span class="w"> </span><span class="s2">&quot;git show --color=always {1}&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+<span class="k">function</span><span class="w"> </span>do_O<span class="o">()</span>
+<span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">num_commits</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">2</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">commit</span><span class="o">=</span><span class="k">$(</span>do_o<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$num_commits</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s2">&quot;{print \$1}&quot;</span><span class="k">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$commit</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>git<span class="w"> </span>show<span class="w"> </span>--color<span class="o">=</span>always<span class="w"> </span>-U10<span class="w"> </span>--stat<span class="w"> </span><span class="nv">$commit</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="k">function</span><span class="w"> </span>o<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="p">;</span><span class="w"> </span>do_O<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;-10&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+<span class="k">function</span><span class="w"> </span>oo<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="p">;</span><span class="w"> </span>do_O<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;-20&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+<span class="k">function</span><span class="w"> </span>ooo<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="p">;</span><span class="w"> </span>do_O<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;-30&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+<span class="k">function</span><span class="w"> </span>O<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="p">;</span><span class="w"> </span>do_O<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+
+<p>Saying <code>o</code> at the terminal thus produces a <code>fzf</code> window containing the 10 most recent
+commits with the highlighted commit <code>git-show</code>n in the preview pane for easy review.
+One can easily cycle up and down the commits via the <code>j</code> and <code>k</code> keys, vim-style.</p>
+<p>Since I do not care about searching for a specific commit in this mode, I pass
+<code>--disabled</code> to the <code>fzf</code> invocation options. Instead, I've chosen to make browsing
+through the list easier by binding the <code>j</code> and <code>k</code> keys vim-style, saving on having
+to hold <code>Ctrl</code> down otherwise.</p>
+<p>If there is a specific commit I want to inspect further, I simply finalize the <code>fzf</code>
+selection via <code>Enter</code>, which then prints out the whole commit with <code>git show -U10
+--stat</code> for full review.</p>
+<p>Since I typically make lots of tiny commits as I develop a feature, I end up with
+dozens of atomic commits that I later would need to squash together or prune, which
+requires reviewing all of them in rapid succession. For this reason, I have the
+functions <code>oo()</code> and <code>ooo()</code> that show me the latest 20 and 30 commits, respectively,
+with the same behaviour as above. Finally, there's also <code>O()</code> (capital O) that just
+lists <em>all</em> the commits of the repo without any limits.</p>
+<p>I came across the <code>fzf</code> maintainer's <a href="https://gist.github.com/junegunn/f4fca918e937e6bf5bad">suggested plumbing</a> for this same
+feature, but I have not tried it out personally as I am quite happy with my own
+solution.</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/vim/" class="tag">vim</a></tt>
+		<tt><a href="https://gurudas.dev/tag/terminal/" class="tag">terminal</a></tt>
+		<tt><a href="https://gurudas.dev/tag/git/" class="tag">git</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/til/vim-execute-current-line-in-bash/">
+			TIL: Execute current line in vim
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/til/firefox-fwd-back-gestures/">
+			TIL: Firefox supports back and forward touchpad gestures by default
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>TIL: Easily cycle through all open tmux sessions - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="TIL: Easily cycle through all open tmux sessions - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/til/tmux-cycle-through-all-open-sessions/" />
+  <meta property="og:url" content="https://gurudas.dev/til/tmux-cycle-through-all-open-sessions/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="tmux configuration options and keybindings to easily cycle through all open sessions with very few keystrokes">
+  <meta property="og:description" content="tmux configuration options and keybindings to easily cycle through all open sessions with very few keystrokes">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/til/tmux-cycle-through-all-open-sessions/">TIL: Easily cycle through all open tmux sessions</a></h4>
+<h6 style="margin-top: -2%"> <b>30 Mar 2024</b> </h6>
+<p>My <code>tmux</code> workflow thus far has been strictly windows- and panes-based, meaning I
+usually launch only one tmux session and then create named windows and panes
+(horizontal and vertical splits) as necessary to deal with the set of projects for
+the day. While this works well, things get quickly out of hand when there is some
+firefighting to be done and context-switching between the projects is frequent,
+involving creating new windows to explore new ideas. </p>
+<p>I draw the line at nine open windows because that's the maximum number of windows I
+can quickly jump to with one keystroke using the <code>prefix + &lt;number&gt;</code> keyboard
+shortcut. I have no interest in dealing with double-digit numbers of windows. But
+what if I have, say, three different projects to work on during the day, and I "run
+out" of windows? This week, I realized that there is a better way to effect a clean
+context switch and also organize my tmux windows better: by using the native sessions
+feature.</p>
+<p><code>man tmux</code> has this to say about sessions:</p>
+<blockquote>
+<p><em>When tmux is started, it creates a new session with a single window and displays it
+on screen.  A status line at the bottom of the screen shows information on the
+current session and is used to enter interactive commands.</em></p>
+<p><em>A session is a single collection of pseudo terminals under the management of tmux.
+Each session has one or more windows linked to it. [...] and any
+number of windows may be present in the same session.  Once all sessions are killed,
+tmux exits.</em></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tmux</code></td>
+<td>Launch new unnamed <code>tmux</code> session</td>
+</tr>
+<tr>
+<td><code>&lt;prefix&gt; + $</code></td>
+<td>From within <code>tmux</code>, rename current session</td>
+</tr>
+<tr>
+<td><code>tmux new -s &lt;session&gt;</code></td>
+<td>Launch new session named <code>&lt;session&gt;</code></td>
+</tr>
+<tr>
+<td><code>tmux ls</code></td>
+<td>List all open <code>tmux</code> sessions</td>
+</tr>
+<tr>
+<td><code>&lt;prefix&gt; + s</code></td>
+<td>List all open <code>tmux</code> sessions from within a session</td>
+</tr>
+<tr>
+<td><code>tmux attach -t &lt;session&gt;</code></td>
+<td>Attach to an open session named <code>&lt;session&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;prefix&gt; + d</code></td>
+<td>From within <code>tmux</code>, detach from current session</td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://github.com/guru-das-s/dotfiles/commit/8fd159707076a5b8a594bf4f6cb1a716042829da">Adding these
+lines</a>
+to my <code>.tmux.conf</code> solved my issue:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Easily cycle between open tmux sessions</span>
+unbind<span class="w"> </span><span class="o">(</span>
+bind-key<span class="w"> </span><span class="m">0</span><span class="w"> </span>switch-client<span class="w"> </span>-p
+unbind<span class="w"> </span><span class="o">)</span>
+bind-key<span class="w"> </span><span class="o">=</span><span class="w"> </span>switch-client<span class="w"> </span>-n
+</code></pre></div>
+
+<p>Turns out that <code>&lt;prefix&gt; + (</code> or <code>)</code> enables switching to the previous or next open
+session. I find this cumbersome because of the need to use the <code>Shift</code> key and so I
+remapped them to single keys. Now I can easily cycle through all my open sessions
+using <code>&lt;prefix&gt; + 0</code> or <code>&lt;prefix&gt; + =</code>.</p>
+<p>And, since I have this ability, I can happily create as many new sessions as I
+need - one per project - without having to fear using the <code>Shift</code> key to type in the
+paranthesis characters each time I want to switch to another session I created.</p>
+<p>You may well wonder how I could access the <code>0</code>-th pane if <code>&lt;prefix&gt; + 0</code> has been
+re-bound as above. I don't, because I don't have a <code>0</code>-th pane at all. I number my
+panes starting from <code>1</code> and not <code>0</code> via these lines:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Start windows and panes at 1, not 0</span>
+<span class="nb">set</span><span class="w"> </span>-g<span class="w"> </span>base-index<span class="w"> </span><span class="m">1</span>
+setw<span class="w"> </span>-g<span class="w"> </span>pane-base-index<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+
+<p>And for good measure and clean pane number management:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Automatically renumber all windows/panes when one is killed</span>
+<span class="c1"># e.g. 1 2 [3] 4   .... 3 is killed, results in:</span>
+<span class="c1">#      1 2 3       .... and not 1 2 4, which would call for a :movew -r</span>
+<span class="nb">set</span><span class="w"> </span>-g<span class="w"> </span>renumber-windows<span class="w"> </span>on
+</code></pre></div>
+
+<p>And I chose <code>=</code> to switch to the next session because of its proximity to the
+<code>Backspace</code> key (easier to reach).</p>
+<p>Bottom line: my workflow is now the following.</p>
+<ol>
+<li>Open terminal, navigate to project directory, launch first <code>tmux</code> session</li>
+<li>Create/kill as many windows and panes I need</li>
+<li>If I need to switch to a new project, detach from current session</li>
+<li>Navigate to new project directory, launch new session</li>
+<li>Cycle through open sessions using <code>&lt;prefix&gt; + 0</code> or <code>&lt;prefix&gt; + =</code><ul>
+<li>I mostly end up using only the latter because of its proximity to the Backspace
+    key.</li>
+</ul>
+</li>
+</ol>
+<p>The explicit switching from one session to another not only separates one project's
+windows from another in <code>tmux</code>, making for clean organization, but also helps me
+context-switch in my mind more effectively.</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/tmux/" class="tag">tmux</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/til/vim-show-current-c-function/">
+			TIL: Show current C function in vim status line sans plugins
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/til/vim-execute-current-line-in-bash/">
+			TIL: Execute current line in vim
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

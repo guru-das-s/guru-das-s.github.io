@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Nand2Tetris - Projects 4 to 5 - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Nand2Tetris - Projects 4 to 5 - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="How I built my own Nand2Tetris Hack computer by creating a CPU, Memory unit and ROM and wiring them all together">
+  <meta property="og:description" content="How I built my own Nand2Tetris Hack computer by creating a CPU, Memory unit and ROM and wiring them all together">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/">Nand2Tetris - Projects 4 to 5</a></h4>
+<h6 style="margin-top: -2%"> <b>28 Aug 2024</b> </h6>
+<p>Continuing from <a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/">where I left off</a> in my
+<a href="https://www.nand2tetris.org/course">Nand2Tetris</a> journey, I went ahead and completed
+Projects 4 (Machine Language) and Project 5 (Computer Architecture) and I now have
+"built" my very own Hack computer from scratch!</p>
+<p>Follow my progress on Github here:
+<a href="https://github.com/guru-das-s/nand2tetris/commits/master/">guru-das-s/nand2tetris</a>.</p>
+<h5 id="project-4-machine-language">Project 4: Machine Language</h5>
+<p>This project introduces the Hack instruction set architecture (ISA) and assembly
+language corresponding to the Hack computer we're building, and tasks the student
+with writing two programs that provide a good understanding and feel for the
+platform.</p>
+<p>The first program, <code>Mult.asm</code> is quite straightforward - to multiply two numbers.</p>
+<p>The second program, <code>Fill.asm</code> has a particularly satisfying end result - to turn the
+screen in the CPU Emulator completely black or white based on keyboard input.</p>
+<p>I haven't written a lot of assembly code, so it was very gratifying to reason about a
+problem in terms of assembly and write code while conforming to the constraints of
+the ISA.</p>
+<h5 id="project-5-computer-architecture">Project 5: Computer Architecture</h5>
+<p>This is the first big project in the course according to me, and the most climactic
+so far, as we progressively build:</p>
+<ol>
+<li>a Memory unit from the RAM chips built earlier,</li>
+<li>a CPU from the ALU built earlier,</li>
+</ol>
+<p>and finally wire them both together along with a ROM unit (separate instruction and
+data memories), thus creating a full-fledged Hack computer that can load and execute
+any arbitrary program!</p>
+<p>The textbook chapter says it best:</p>
+<blockquote>
+<p><em>The computer that will emerge from this project will be as simple as possible, but
+not simpler.</em></p>
+</blockquote>
+<p>It's true - this computer does not have fancy stuff like pipelining, or branch
+predictors or caches of any kind. It also implements the Harvard architecture -
+separate instruction and data memories instead of the Von Neumann architecture model.</p>
+<p><strong>The Memory unit</strong></p>
+<p>The memory unit consists of a 16K RAM, a memory-mapped screen, and a memory-mapped
+keyboard all laid out adjacent to each other with no holes.</p>
+<p><strong>The CPU</strong></p>
+<p>This is the crux of the whole project - decoding an instruction from its bits and
+figuring out what action needs to take place for it. To that end, various bits and
+bitfields of the instruction encode specific pieces of information, like the type of
+ALU operation that needs to take place, where to store the results of the operation,
+and what kind of jump is requested.</p>
+<p>The challenge in this part of the project is to route various bits and bitfields of
+the 16-bit instruction to the A, D and PC registers and implement the
+hardware-software contract.</p>
+<p>There are a couple of gotchas that make things interesting when testing the code
+using the provided tests. I caught <a href="https://github.com/guru-das-s/nand2tetris/commit/582b905ef29b420295ecda1bcef1e9d9e6605ead">one edge
+case</a>
+only when running the test for the next part of the project, i.e. building the
+Computer.</p>
+<p><code>DMux8Way</code> saved my ass in both the Memory and CPU parts of this project. It took me
+a while to recognize that the logic for powering the jump detection could easily make
+use of this building block - a side effect of not being a hardware guy, I suppose.</p>
+<p><strong>The Computer</strong></p>
+<p>After the rigours of the CPU design part of the project, this turned out to be
+relatively straightforward. Just three lines of code wiring the ROM, RAM and CPU
+together.</p>
+<h5 id="looking-ahead">Looking ahead</h5>
+<p>The next project, Project 6, is to build an assembler that converts Hack assembly
+code into binary. I've not attempted something of this nature before, and am really
+excited about this!</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/nand2tetris/" class="tag">nand2tetris</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/">
+			Build your own shell - Codecrafters style
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">
+			Nand2Tetris - Project 6 (Assembler)
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

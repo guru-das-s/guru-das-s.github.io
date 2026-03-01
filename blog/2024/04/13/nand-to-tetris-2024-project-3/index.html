@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Nand2Tetris - Projects 1 to 3 - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Nand2Tetris - Projects 1 to 3 - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="My account of taking the NAND2Tetris course in 2024, up until Project 3: Sequential logic and memory">
+  <meta property="og:description" content="My account of taking the NAND2Tetris course in 2024, up until Project 3: Sequential logic and memory">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/">Nand2Tetris - Projects 1 to 3</a></h4>
+<h6 style="margin-top: -2%"> <b>13 Apr 2024</b> </h6>
+<p><a href="https://www.nand2tetris.org/">Nand2Tetris</a> is a very interesting "learning by doing"
+free and open-source course that enables one to learn how a computer is designed from the
+ground up, and also how it is programmed from the very lowest of levels. It is a
+fantastic course offered in two parts (first building the hardware for the computer,
+and then the software) and is very rewarding to those who finish it. I started
+working on it this year after having discovered it via <a href="https://news.ycombinator.com/item?id=38735066">Hacker
+News</a> and have completed Projects 1 to
+3 of 12 projects in total. You may follow my progress on Github here:
+<a href="https://github.com/guru-das-s/nand2tetris/commits/master/">guru-das-s/nand2tetris</a>.</p>
+<p>The <a href="https://www.nand2tetris.org/course">projects</a> in this course start from
+designing various boolean gates using NAND gates as a building block and slowly build
+upon each other to create a full-fledged computer, complete with its own corresponding
+assembler, compiler and operating system, thus allowing for running rich and
+complex full-featured programs such as
+<a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a>.</p>
+<p>My motivation for starting and committing to this project is to fill in any gaps in
+my understanding of how computing systems work, from the application layer down to
+the individual components. Modern-day computer architectures such as x86 and ARM have
+many layers of optimization and complexity to achieve industrial levels of
+performance. This course pares away all inessential elements during the design
+process, retaining only clean and simple elements for illustrating the basic
+concepts. Most of all, I <em>love</em> the 100% hands-on approach because I learn better by
+<em>doing</em>.</p>
+<p>Here are some thoughts and observations on each of the projects I've completed so
+far:</p>
+<h5 id="project-1-boolean-logic">Project 1: Boolean logic</h5>
+<ol>
+<li>This project is about creating gates such as OR, NOT, and MUX along with their
+   16-bit versions using basic Boolean logic. The NAND gate is provided as a
+   fundamental building block (no need to build it).</li>
+<li>This introduces the Hardware Simulator Java program, the custom Hardware
+   Description Language (HDL) and the whole write-test-debug iteration cycle.</li>
+<li>Being an software guy myself, writing and thinking in HDL was a pleasant
+   challenge. I didn't get to do much of this during my undergrad which was not all
+   that electronics-focused, so it was quite enjoyable to do it now.</li>
+<li>I noticed that a couple of test scripts and "ground-truth" comparison files
+   provided in the project's source code were incorrect and had to fetch the right
+   versions from poking around on Github. I also sent the Nand2Tetris admins an email
+   about this; Prof. Shimon responded, acknowledging a recent issue with the software
+   suite.</li>
+<li>Overall, this project was very satisfying and straightforward.</li>
+</ol>
+<h5 id="project-2-boolean-arithmetic-and-building-an-alu">Project 2: Boolean arithmetic and building an ALU</h5>
+<ol>
+<li>The concept of two's complement was explained clearly with motivation for its
+   existence, and illustrated with examples of subtraction and addition with
+   overflow.</li>
+<li>The most thrilling part of this project was to build an Arithmetic and Logic Unit
+   from scratch, and really understand how various operations could be built using
+   just addition and subtraction.</li>
+<li>The ALU is to be built in two stages. I thought the first stage was going to be
+   difficult (getting all the operations right) and the second stage (detecting
+   negative numbers and zero in the output), easy. It was the opposite - I struggled
+   with the second stage mostly because I didn't know a quirk of the HDL's syntax. I
+   had to read the HDL Guide and also consult the
+   <a href="http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/">forum</a> for
+   guidance.</li>
+</ol>
+<h5 id="project-3-building-ram-chips">Project 3: Building RAM chips</h5>
+<ol>
+<li>This project introduces sequential logic and building a 16K Random Access Memory
+   (RAM) chip using banks of registers, which are built from individual registers
+   which, in turn, are built from Bits. The D Flip-flop is provided as a fundamental
+   building block (no need to build it).</li>
+<li>This was a very satisfying project to do because working with sequential logic was
+   a nice change after two projects of combinatorial logic.</li>
+<li>Once the basic RAM8 was complete (RAM chip containing just 8 registers), it was a
+   breeze to complete the other larger RAM chips, <em>mutatis mutandis</em>.</li>
+<li>Creating the Program Counter (PC) was also very interesting because of the clever
+   ways in which internal pins need to be used.</li>
+</ol>
+<h5 id="looking-ahead">Looking ahead</h5>
+<p>Things start to get even more interesting from Project 4 onward. It is about learning
+the assembly language of the particular computer that is being built and writing
+programs in it using the reference assembler provided. Project 5 is to create a full
+computer using the ALU and RAM that were just built earlier, and Project 6 is to
+write an assembler in any high-level language, to replace the provided assembler.</p>
+<p>Really excited for the upcoming projects!</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/nand2tetris/" class="tag">nand2tetris</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/">
+			Fun with git rebase --interactive
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/">
+			Build your own shell - Codecrafters style
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

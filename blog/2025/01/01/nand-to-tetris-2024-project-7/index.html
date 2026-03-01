@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Nand2Tetris - Project 7 (VM Translator Part 1) - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Nand2Tetris - Project 7 (VM Translator Part 1) - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Part one of the Nand2Tetris VM Translator in Rust, complete with code excerpts and rationale behind design choices made.">
+  <meta property="og:description" content="Part one of the Nand2Tetris VM Translator in Rust, complete with code excerpts and rationale behind design choices made.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/">Nand2Tetris - Project 7 (VM Translator Part 1)</a></h4>
+<h6 style="margin-top: -2%"> <b>01 Jan 2025</b> </h6>
+<p><a href="https://www.nand2tetris.org/course">Project 7</a> of Nand2Tetris is about translating virtual machine <sup id="sf-nand-to-tetris-2024-project-7-1-back"><a href="#sf-nand-to-tetris-2024-project-7-1" class="simple-footnote" title=" No, not that virtual machine; rather, the Hack computer virtual machine conceptualized as a stack machine. ">1</a></sup> (VM) commands for the Hack
+computer platform to a series of Hack assembly language (asm) instructions. The main
+focus of this project is determining the sequence of assembly language instructions
+corresponding to each VM command, given that the programming model of the computer is
+that of a <a href="https://en.wikipedia.org/wiki/Stack_machine">stack machine</a>. Here, VM commands are roughly equivalent to
+<a href="https://en.wikipedia.org/wiki/Bytecode">bytecode</a>. The virtual machine translator that emerges from this project
+shall form the backend of the compiler that shall be built upon it.</p>
+<p>Continuing my Rust journey from <a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">Project 6</a>,
+this blogpost describes in detail my solution to Project 7 in Rust.</p>
+<p>The source code is here:
+<a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7">guru-das-s/nand2tetris</a></p>
+<hr>
+<div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#problem-description">Problem description</a></li>
+<li><a href="#vm-translator-code-architecture">VM Translator – Code architecture</a></li>
+<li><a href="#development-and-testing-workflow">Development and testing workflow</a></li>
+<li><a href="#interesting-problems">Interesting problems</a><ul>
+<li><a href="#labels-must-be-unique-for-conditional-operator-phrases">Labels must be unique for conditional operator phrases</a></li>
+<li><a href="#to-increment-sp-or-not-to-increment-sp">To increment SP, or not to increment SP?</a></li>
+<li><a href="#implementing-the-pop-operation">Implementing the pop operation</a></li>
+<li><a href="#implementing-the-static-code-segment">Implementing the static code segment</a></li>
+</ul>
+</li>
+<li><a href="#what-i-learnt-about-rust-programming">What I learnt about Rust programming</a></li>
+<li><a href="#test-script">Test script</a></li>
+<li><a href="#postscript">Postscript</a></li>
+</ul>
+</div>
+<hr>
+<h5 id="problem-description">Problem description</h5>
+<p>What does a VM file even look like? Here's <code>SimpleAdd.vm</code>:</p>
+<div class="highlight"><pre><span></span><code>// Pushes and adds two constants.
+
+push constant 7
+push constant 8
+add
+</code></pre></div>
+
+<p>This is the "bytecode" that the Jack language compiler (which will be introduced
+later!) will compile to - the first of a two-step process of converting high-level
+Jack language code to Hack asm code.</p>
+<p>The goal of this project is to translate the above VM instructions to asm
+instructions that effect the intended operations: <code>push</code> and <code>add</code> in the above
+example. A stack area is assigned for us in the RAM of the Hack machine to be used in
+the asm instructions. We are responsible for growing and shrinking the stack.</p>
+<p>There are code segments other than <code>constant</code>, e.g. <code>BasicTest.vm</code>:</p>
+<div class="highlight"><pre><span></span><code>...
+pop temp 6
+push local 0
+push that 5
+add
+push argument 1
+sub
+...
+</code></pre></div>
+
+<p>These segments all map to various designated sections of RAM. The <code>local</code> segment
+starts from the RAM address stored in the <code>LCL</code> RAM address which, as we know from
+the Assembler design from <a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">Project 6</a>, is
+a synonym of <code>RAM[1]</code>. The <code>N</code> in <code>local N</code> specifies the offset that must be applied
+to the base address stored in <code>LCL</code>, i.e. <code>RAM[LCL + N]</code>. That's just <code>local</code>, though
+– other segments must be interpreted differently as specified in the design
+instructions.</p>
+<p>There are also operations other than <code>add</code> such as <code>sub</code> in the above example, all of
+which operate on the stack. Being a binary operator needing two operands, <code>add</code> adds
+the two top-most entries present on the stack. A unary operator such as <code>not</code> only
+works on the top-most entry on the stack.</p>
+<h5 id="vm-translator-code-architecture">VM Translator – Code architecture</h5>
+<p>The basic idea animating the design of the VM Translator is twofold:</p>
+<ol>
+<li>having stock "phrases" of asm code corresponding to each combination of arithmetic
+   operation, segment, and VM command that are crafted with placeholder-stubs in
+   place of the actual values involved in the computation of the offsets required,
+   and</li>
+<li>replacing those stubs with the actual correct values derived from parsing the vm
+   commands.</li>
+</ol>
+<p>The code is, thus, organized into five modules:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Module</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>main.rs</code></td>
+<td>Handles command line args, calls <code>parser</code> and <code>asmwriter</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>spec.rs</code></td>
+<td>Defines basic enums and structs to represent parsed VM commands</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>phrases.rs</code></td>
+<td>Stubbed-out asm code fragments for every operation and code segment</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>parser.rs</code></td>
+<td>Parses a <code>.vm</code> file and returns a <code>Vec</code> of <code>VmCommand</code>s</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>asmwriter.rs</code></td>
+<td>Writes the asm code for each <code>VmCommand</code> in the <code>Vec</code> to the output file</td>
+</tr>
+</tbody>
+</table>
+<h5 id="development-and-testing-workflow">Development and testing workflow</h5>
+<p>The first step was to figure out the "phrases", i.e. the sequence of Hack asm
+instructions, corresponding to a given vm command such as <code>push constant 7</code> and
+<code>add</code>. But where does one start?</p>
+<p>One starts by observing what is actually happening in the memory space when those
+commands are being run. The stock <code>VMEmulator.sh</code> provides a powerful and convenient
+GUI readout of the contents of the stack, RAM memory, the various code segments of
+the Hack programming model and the ability to step through each VM command. Every
+sample vm program provided has a corresponding <code>*VME.tst</code> that runs it on the VM
+Emulator.</p>
+<p>When the behaviour of the command under scrutiny is thus understood, the next logical
+step is to actually write down – by hand – the asm instructions that make
+those commands happen, and then run them on the stock <code>CPUEmulator.sh</code> that we
+encountered in <a href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/">Project 4</a>. This requires
+simulating the test setup conditions that the <code>*VME.tst</code> script uses.</p>
+<p>For example: While working on the first test (<code>SimpleAdd.vm</code>), I ran
+<code>SimpleAddVME.tst</code> on the VM Emulator and observed the (rather simple) effects on the
+Stack Pointer and the Stack. I then inspected the VM test script and recreated what
+it was doing by hand-coding its setup phase in asm – viz., initializing the
+Stack Pointer to a small enough value that would be visible in the <code>CPUEmulator</code>
+without having to scroll down. With this setup, I was able to write the
+spectacularly-named <code>handcode/stuff.asm</code> (hehe) that helped me hash out the asm
+instructions to <code>push</code> a few arbitrarily-chosen <code>constant</code>s and implement the binary
+operator <code>add</code> and unary operator <code>not</code> for them, testing everything on the
+<code>CPUEmulator</code>. I followed a similar approach for <a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7/handcode">the other</a> tests and
+operations.</p>
+<p>The next step was to generalize the phrases from the hand-coded asm files by
+stubbing out the arbitrary values with placeholder text <code>"XYZ"</code> and code segment
+names with <code>"SEG"</code> that would be substituted with the values from the parsed <code>.vm</code>
+files by the VM Translator being developed.</p>
+<p>After hooking up the parser logic and asm writer logic in the VM Translator, the
+final step was to run the <code>*.tst</code> script for each test that would run the asm output file
+generated by the VM Translator on the <code>CPUEmulator</code> and return success or failure. An
+intermediate step was also to compare the asm output file with the one generated by
+the stock <code>VMEmulator</code>.</p>
+<h5 id="interesting-problems">Interesting problems</h5>
+<h6 id="labels-must-be-unique-for-conditional-operator-phrases">Labels must be unique for conditional operator phrases</h6>
+<p>This problem was encountered while working on the second test, <code>StackTest.vm</code>. Fresh
+from having figured out the basic approach of the overall project in the first test,
+<code>SimpleAdd.vm</code>, I plugged in the phrases for other arithmetic and conditional
+operators, including <code>Equals</code>, <code>Lesser Than</code> and <code>Greater Than</code>, only to eventually
+find that the assembler was not translating the labels within those phrases in the
+expected manner.</p>
+<p>To illustrate the problem: the hand-coded asm implementation of <code>Equals</code> is <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/handcode/eq.asm">as
+follows</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Implement Eq</span>
+<span class="c1">// ------------</span>
+
+<span class="c1">// Get first parameter and store it in D</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="c1">// D has first parameter now. Get second parameter next</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="c1">// Second parameter is in RAM[SP], store it in A</span>
+<span class="c1">// after dereferencing RAM[SP] which is a pointer</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="c1">// M has second parameter now.</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">D</span><span class="o">-</span><span class="nx">M</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=-</span><span class="mi">1</span>
+<span class="err">@</span><span class="nx">ISEQUAL</span>
+<span class="nx">D</span><span class="o">;</span><span class="nx">JEQ</span>
+<span class="c1">// We will get here only if</span>
+<span class="c1">// D is not zero, i.e. the two numbers</span>
+<span class="c1">// are dissimilar.</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=!</span><span class="nx">M</span>
+<span class="p">(</span><span class="nx">ISEQUAL</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Notice the definition and use of the label <code>ISEQUAL</code>. The expectation is that this
+label will resolve to the ROM address of the instruction right after <code>(ISEQUAL)</code>.</p>
+<p>The phrases for the other two conditional operators mentioned above also follow a
+similar structure, each using a label to conditionally skip over the result.</p>
+<p>The problem occurs when the same phrase is plugged in multiple times in the same file
+as the result of multiple occurrences of a conditional operator in the <code>.vm</code> file
+being translated. When this happens, the label <code>(ISEQUAL)</code> is defined multiple times
+and the assembler resolves it to the ROM address of the instruction after the <em>very
+last occurrence of the label</em>. This leads to incorrect jump addresses for all the
+other instances of the operator that come before the last occurrence.</p>
+<p>It is thus evident that the label in the phrases for conditional operators have to be
+made unique so that the assembler can resolve the labels separately. One way to make
+this happen is to append a monotonically increasing variable to the label used in the
+phrases. This implies the use of a local static variable (in C terms). Example:
+instead of <code>(ISEQUAL)</code>, use <code>(ISEQUAL.0)</code>, <code>(ISEQUAL.1)</code>, <code>(ISEQUAL.2)</code>, et c.</p>
+<p>I implemented local static variables in Rust using <code>OnceLock</code><sup id="sf-nand-to-tetris-2024-project-7-2-back"><a href="#sf-nand-to-tetris-2024-project-7-2" class="simple-footnote" title=" The use of the Mutex may be unnecessary and even overkill as this program is only single-threaded. Using std::sync::atomic may be sufficient.">2</a></sup>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">E</span>: <span class="nc">OnceLock</span><span class="o">&lt;</span><span class="n">Mutex</span><span class="o">&lt;</span><span class="kt">u16</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OnceLock</span>::<span class="n">new</span><span class="p">();</span>
+<span class="o">..</span><span class="p">.</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">E</span><span class="p">.</span><span class="n">get_or_init</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+<span class="o">..</span><span class="p">.</span>
+<span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">eq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="o">..</span><span class="p">.</span>
+<span class="o">*</span><span class="n">eq</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="o">..</span><span class="p">.</span>
+</code></pre></div>
+
+<p>Correspondingly, the label in the phrase was amended to <code>(ISEQUAL.XYZ)</code> with the
+above code replacing <code>XYZ</code> with the static variable <code>eq</code><sup id="sf-nand-to-tetris-2024-project-7-3-back"><a href="#sf-nand-to-tetris-2024-project-7-3" class="simple-footnote" title="Code excerpt showing labels in conditional phrases being made unique.">3</a></sup>.</p>
+<h6 id="to-increment-sp-or-not-to-increment-sp">To increment SP, or not to increment SP?</h6>
+<p>The project instructions caution against forgetting to increment the Stack Pointer
+(SP). The SP is to be incremented only for the arithmetic and logic operations
+phrases, and not for the phrases that set each code segment's offset and calculate
+its address.</p>
+<h6 id="implementing-the-pop-operation">Implementing the <code>pop</code> operation</h6>
+<p>Implementing the <code>pop segment i</code> operation was initially difficult to do without the
+use of extra scratch registers – my <a href="https://github.com/guru-das-s/nand2tetris/blob/a78a71b76e24e371ee3793f19f98b15983cddd6d/projects/7/hand_code_pop_local_2.asm">first attempt</a> utilized
+two. But something seemed fishy as running <code>BasicTestVME.tst</code> through the
+<code>VMEmulator</code> did not show those two registers being touched at all:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Pop local 2 begins now</span>
+<span class="c1">// ........................</span>
+<span class="c1">// Step 1: Get value to pop</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="c1">// Store it in first scratch register</span>
+<span class="c1">// Only R13, R14 and R15 are free to use</span>
+<span class="c1">// in my view, the TEMP segment taking up</span>
+<span class="c1">// R5 - R12 for itself.</span>
+<span class="c1">// The BasicTestVME.tst does not seem to be</span>
+<span class="c1">// using R13 - R15 in my test run, or it</span>
+<span class="c1">// must be cleverly clearing them to not</span>
+<span class="c1">// give away this insight.</span>
+<span class="p">...</span>
+<span class="c1">// Now, triumphantly do *(M[R14]) = M[R13]</span>
+<span class="c1">// (R14 is a pointer)</span>
+<span class="err">@</span><span class="nx">R13</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="err">@</span><span class="nx">R14</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">D</span>
+</code></pre></div>
+
+<p>It wasn't until later that it dawned on me that I could just <a href="https://github.com/guru-das-s/nand2tetris/commit/4d4d2e81e9b961dc2d86cddd92b3915f1e5fa190">use the
+stack</a> instead.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Pop local 2 begins now</span>
+<span class="c1">// ........................</span>
+<span class="c1">// Step 1: Get data to pop</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="c1">// Step 2: Push this data to stack</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">+</span><span class="mi">1</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">D</span>
+<span class="c1">// Now last two elements in stack</span>
+<span class="c1">// are the same, with SP pointing</span>
+<span class="c1">// to the last NON-EMPTY element.</span>
+<span class="c1">// Set SP to the second-to-last spot.</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="c1">// Step 3: Calculate address to pop to</span>
+<span class="err">@</span><span class="nx">LCL</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="err">@</span><span class="mi">2</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">D</span><span class="o">+</span><span class="nx">A</span>
+<span class="c1">// Set SP to this value</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">D</span>
+<span class="c1">// Increment SP</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">+</span><span class="mi">1</span>
+<span class="c1">// Now last two elements of stack are</span>
+<span class="c1">// (N-1) ----- address</span>
+<span class="c1">// (N)   ----- data     &lt;SP points here&gt;</span>
+<span class="c1">// Now, finish it off</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">D</span><span class="o">=</span><span class="nx">M</span>
+<span class="err">@</span><span class="nx">SP</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">A</span><span class="o">=</span><span class="nx">M</span>
+<span class="nx">M</span><span class="o">=</span><span class="nx">D</span>
+<span class="c1">// Now SP points to right place.</span>
+</code></pre></div>
+
+<p>This, then, translated to a <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L235-L263">two-part phrase</a> for the operation: a preamble and the
+actual operation.</p>
+<h6 id="implementing-the-static-code-segment">Implementing the <code>static</code> code segment</h6>
+<p>The <code>static i</code> code segment needs to be translated to a variable <code>@FILE.i</code> where
+<code>FILE</code> is the filename of the VM file being translated. Because of the good
+level of code encapsulation in the project, it was possible to implement it like
+this:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// XYZ will be handled by VmCommand::code_segment_i(), and</span>
+<span class="c1">// FILE will be handled by Asmwriter::write().</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">STATIC</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// Push Static XYZ</span>
+<span class="s">@FILE.XYZ</span>
+<span class="s">A=M</span>
+<span class="s">D=A</span>
+<span class="s">"#</span><span class="p">;</span>
+</code></pre></div>
+
+<p>This is the only point in the project (so far!) that the replacement logic spills
+over to an unrelated module (<code>Asmwriter</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">write</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="n">Error</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">vmcmd</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">vmcmds</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">asm_code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vmcmd</span><span class="p">.</span><span class="n">code</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
+
+<span class="w">            </span><span class="n">asm_code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">vmcmd</span><span class="p">.</span><span class="n">arg1</span><span class="p">.</span><span class="n">is_some_and</span><span class="p">(</span><span class="o">|</span><span class="n">segment</span><span class="o">|</span><span class="w"> </span><span class="n">segment</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Segment</span>::<span class="n">Static</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">asm_code</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"FILE"</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">filename</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">asm_code</span>
+<span class="w">            </span><span class="p">};</span>
+
+<span class="w">            </span><span class="fm">writeln!</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="s">"{}"</span><span class="p">,</span><span class="w"> </span><span class="n">asm_code</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(())</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h5 id="what-i-learnt-about-rust-programming">What I learnt about Rust programming</h5>
+<p>New things I learnt about Rust and implemented in Project 7 that I did not in the
+previous <a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">Project 6</a>:</p>
+<ul>
+<li>Followed the idiomatic way of defining a <a href="https://rust-unofficial.github.io/patterns/idioms/ctor.html">constructor</a> for
+    <code>struct Parser</code> and <code>struct Asmwriter</code> structs and, thus, keeping the <code>main</code>
+    module <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/main.rs">simple</a>.</li>
+<li>Used the iterator methods <code>peekable()</code> and <code>peek()</code> to keep track of the current
+    line in the <code>Vec</code> of lines constructed from <code>BufReader</code>. This helped the design
+    conform to the suggested API of <code>advance()</code> in the parser.</li>
+<li>Used lifetimes for the first time to yoke the lifetime of a raw string to the
+    struct it was embedded in (<code>struct Asmwriter</code>) and to store the <code>Peekable()</code> line
+    iterator in <code>struct Parser</code>.</li>
+<li>Used the raw string literal <code>r#"&lt;string&gt;"#</code> <a href="https://doc.rust-lang.org/reference/tokens.html#raw-string-literals">syntax</a> to define multiline
+    strings for each of the phrases. This made the asm sequences easy to write and
+    iterate on.</li>
+<li>Added tests for the very first time: only for the parser, though – didn't
+  have time for any other module.</li>
+</ul>
+<h5 id="test-script">Test script</h5>
+<p>I wrote a short shell script to ensure that the VM Translator passes all test cases.</p>
+<div class="highlight"><pre><span></span><code>$ ./projects/7/test.sh &amp;&amp; echo "All test cases passed"
+    Finished `release` profile [optimized] target(s) in 0.14s
+     Running `target/release/vmt -f projects/7/MemoryAccess/BasicTest/BasicTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/MemoryAccess/PointerTest/PointerTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/MemoryAccess/StaticTest/StaticTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/StackArithmetic/SimpleAdd/SimpleAdd.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/StackArithmetic/StackTest/StackTest.vm`
+End of script - Comparison ended successfully
+All test cases passed
+</code></pre></div>
+
+<h5 id="postscript">Postscript</h5>
+<p>I find that writing code is easy while blogging about it is hard and seemingly more
+time-consuming. Perfection is the enemy of progress, so I would much rather have an
+imperfect blogpost that gets published in a reasonable amount of time than a
+fully-fleshed one that takes forever to be published.</p>
+<p>The next project, Project 8, extends the VM Translator to add program flow constructs
+such as <code>IF</code>, <code>RETURN</code>, <code>FUNCTION</code>, <code>GOTO</code>, et c. Looking forward to hacking on
+this in the new year!</p>
+<hr><ol class="simple-footnotes"><li id="sf-nand-to-tetris-2024-project-7-1"> No,
+not <a href="https://en.wikipedia.org/wiki/Virtual_machine#System_virtual_machines">that</a> virtual machine; rather, the Hack computer virtual machine
+conceptualized as a <a href="https://en.wikipedia.org/wiki/Stack_machine">stack machine</a>.  <a href="#sf-nand-to-tetris-2024-project-7-1-back" class="simple-footnote-back">↩</a></li><li id="sf-nand-to-tetris-2024-project-7-2">
+The use of the <code>Mutex</code> may be unnecessary and even overkill as this program is only
+single-threaded. Using <code>std::sync::atomic</code> may be sufficient. <a href="#sf-nand-to-tetris-2024-project-7-2-back" class="simple-footnote-back">↩</a></li><li id="sf-nand-to-tetris-2024-project-7-3"><a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/spec.rs#L35-L40">Code
+excerpt</a>
+showing labels in conditional phrases being made unique. <a href="#sf-nand-to-tetris-2024-project-7-3-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/nand2tetris/" class="tag">nand2tetris</a></tt>
+		<tt><a href="https://gurudas.dev/tag/rust/" class="tag">rust</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">
+			Nand2Tetris - Project 6 (Assembler)
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2025/11/08/nand-to-tetris-2024-project-8/">
+			Nand2Tetris - Project 8 (VM Translator Part 2)
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

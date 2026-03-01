@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>TIL: How to unify all three of Ubuntu's clipboards - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="TIL: How to unify all three of Ubuntu's clipboards - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/til/single-clipboard-ubuntu/" />
+  <meta property="og:url" content="https://gurudas.dev/til/single-clipboard-ubuntu/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Make Ubuntu share one single clipboard for easy copy-pasting using both mouse as well as standard keyboard shortcuts.">
+  <meta property="og:description" content="Make Ubuntu share one single clipboard for easy copy-pasting using both mouse as well as standard keyboard shortcuts.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/til/single-clipboard-ubuntu/">TIL: How to unify all three of Ubuntu's clipboards</a></h4>
+<h6 style="margin-top: -2%"> <b>02 Mar 2024</b> </h6>
+<p>Yes, you read that right - Ubuntu (which uses the X server) has a grand total of
+<em>three</em> clipboards: As the Inter-Client Communication Conventions Manual (ICCCM)
+<a href="https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html#:~:text=large%20data%20transfers.-,Use%20of%20Selection%20Atoms,-Defining%20a%20new">explains</a>:</p>
+<blockquote>
+<p>Selection Atoms</p>
+<p>There can be an arbitrary number of selections, each named by an atom. To conform
+with the inter-client conventions, however, clients need deal with only these three
+selections:</p>
+<ul>
+<li>PRIMARY</li>
+<li>SECONDARY</li>
+<li>CLIPBOARD</li>
+</ul>
+</blockquote>
+<p>Of these, only <code>PRIMARY</code> and <code>CLIPBOARD</code> are commonly used by applications. As
+<code>freedesktop.org</code>
+<a href="https://specifications.freedesktop.org/clipboards-spec/clipboards-latest.txt">explains</a>:</p>
+<blockquote>
+<p>There are two historical interpretations of the ICCCM:</p>
+<p>a) use PRIMARY for mouse selection, middle mouse button paste, and
+   explicit cut/copy/paste menu items (Qt 2, GNU Emacs 20)</p>
+<p>b) use CLIPBOARD for the Windows-style cut/copy/paste menu items;
+   use PRIMARY for the currently-selected text, even if it isn't
+   explicitly copied, and for middle-mouse-click (Netscape, Mozilla,
+   XEmacs, some GTK+ apps)</p>
+<p>No one ever does anything interesting with SECONDARY as far as I can
+tell.</p>
+</blockquote>
+<h5 id="what-led-me-to-this-discovery">What led me to this discovery? <a name="copyways"></a></h5>
+<p>There are two main ways to copy and paste stuff from one application to another on
+Ubuntu:</p>
+<ol>
+<li>Select text using mouse, <code>Ctrl-C</code>, <code>Ctrl-V</code></li>
+<li>Select text using mouse, paste using middle click of mouse.</li>
+</ol>
+<p>It was when I found myself naturally mixing up these two methods and expecting this
+unsupported hybrid scheme to work that I grew frustrated and decided to investigate
+why the scheme that occurred to me naturally did not, in fact, work. Allow me to
+explain using a couple of scenarios.</p>
+<h5 id="terminal-terminal">Terminal → Terminal</h5>
+<p>As a heavy terminal and <code>tmux</code> user, my workflow involves frequently copying stuff I
+use <code>tmux</code>, so I need to copy stuff from one tmux pane to another. To achieve this, I
+use the second method above.</p>
+<p>This is intuitive to me because the two operations occur in the same application and
+what the mouse selects, it copies, too. The first method also works, albeit with a twist:
+need to use <code>Ctrl-Shift-C</code> and <code>Ctrl-Shift-V</code>. So this is technically a <em>third</em> way
+of copying and pasting on Ubuntu.</p>
+<h5 id="non-terminal-application-non-terminal-application">Non-terminal application → non-terminal application</h5>
+<p>Example: copying from one Google Chrome tab to another.</p>
+<p>Here, the first method is intuitive to me because it is what has been ingrained in me
+from a young age thanks to Windows.</p>
+<h5 id="non-terminal-application-terminal">Non-terminal application → Terminal</h5>
+<p>Example: copying from Google Chrome to the terminal.</p>
+<p>Here, too, the first method is intuitive to me, albeit with a twist. The twist is
+that you need to paste using <code>Ctrl-Shift-V</code> in the terminal. So this is technically a
+<em>fourth</em> way of copying and pasting on Ubuntu.</p>
+<h5 id="terminal-non-terminal-application">Terminal → non-terminal application</h5>
+<p>Example: copying from the terminal to Google Chrome.</p>
+<p>Here is where my brain crosses out disruptively. What is intuitive to me is copying
+by selecting the text using the mouse, and pasting using <code>Ctrl-V</code>. This does not
+work. This is what is intuitive to me because I used PuTTy on Windows for a long time
+for work and this is how it works there.</p>
+<p>Really, this was the main use case that frustrated me because I frequently have to
+look up a compilation error message, or copy some logs to a chat client. I would
+select to copy using the mouse, paste using <code>Ctrl-V</code>, fail, then middle-click. I did
+this so many times that I found it disruptive to my workflow and had to fix this.</p>
+<h5 id="the-fix-unify-both-clipboards">The fix: unify both clipboards</h5>
+<p>Install <a href="https://www.nongnu.org/autocutsel/">autocutsel</a> and add this to your
+<code>.bashrc</code>:</p>
+<div class="highlight"><pre><span></span><code>autocutsel<span class="w"> </span>-s<span class="w"> </span>CLIPBOARD<span class="w"> </span><span class="p">&amp;</span>
+autocutsel<span class="w"> </span>-s<span class="w"> </span>PRIMARY<span class="w">   </span><span class="p">&amp;</span>
+</code></pre></div>
+
+<p>Now, Ubuntu behaves as though there is only a single, common clipboard for all
+applications - terminal or otherwise. To add to the <a href="#copyways">above list</a>, you now
+can:</p>
+<ol>
+<li>Select text using mouse, <code>Ctrl-C</code>, paste using middle click of mouse.</li>
+<li>Select text using mouse, paste using <code>Ctrl-V</code></li>
+</ol>
+<p>You can also go one step further and unify the third clipboard too, but I have not
+tried this out personally.</p>
+<div class="highlight"><pre><span></span><code>autocutsel<span class="w"> </span>-s<span class="w"> </span>SECONDARY<span class="w"> </span><span class="p">&amp;</span>
+</code></pre></div>
+
+<p>StackOverflow helped me a lot <sup id="sf-single-clipboard-ubuntu-1-back"><a href="#sf-single-clipboard-ubuntu-1" class="simple-footnote" title="Merge primary and clipboard X selections ">1</a></sup> <sup id="sf-single-clipboard-ubuntu-2-back"><a href="#sf-single-clipboard-ubuntu-2" class="simple-footnote" title=" How can I merge the gnome clipboard and the X selection? ">2</a></sup> while researching this fix and learning more about the underlying architecture.</p>
+<hr><ol class="simple-footnotes"><li id="sf-single-clipboard-ubuntu-1"><a href="https://unix.stackexchange.com/questions/628492/merge-primary-and-clipboard-x-selections">Merge primary and clipboard X
+selections</a>
+ <a href="#sf-single-clipboard-ubuntu-1-back" class="simple-footnote-back">↩</a></li><li id="sf-single-clipboard-ubuntu-2"> <a href="https://superuser.com/questions/68170/how-can-i-merge-the-gnome-clipboard-and-the-x-selection">How can I merge the gnome clipboard and the X
+selection?</a>
+ <a href="#sf-single-clipboard-ubuntu-2-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/terminal/" class="tag">terminal</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<p> </p>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/til/vim-show-current-c-function/">
+			TIL: Show current C function in vim status line sans plugins
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

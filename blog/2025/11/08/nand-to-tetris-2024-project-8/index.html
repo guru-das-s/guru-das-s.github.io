@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Nand2Tetris - Project 8 (VM Translator Part 2) - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Nand2Tetris - Project 8 (VM Translator Part 2) - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2025/11/08/nand-to-tetris-2024-project-8/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2025/11/08/nand-to-tetris-2024-project-8/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Part two of the Nand2Tetris VM Translator in Rust, complete with code excerpts and rationale behind design choices made.">
+  <meta property="og:description" content="Part two of the Nand2Tetris VM Translator in Rust, complete with code excerpts and rationale behind design choices made.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2025/11/08/nand-to-tetris-2024-project-8/">Nand2Tetris - Project 8 (VM Translator Part 2)</a></h4>
+<h6 style="margin-top: -2%"> <b>08 Nov 2025</b> </h6>
+<p>In <a href="https://drive.google.com/file/d/1BexrNmdqYhKPkqD_Y81qNAUeyfzl-ZtO/view">Project
+8</a> of
+<a href="https://www.nand2tetris.org/course">Nand2Tetris</a>, we get to finish the
+implementation of the VM Translator that was begun in <a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/">Project
+7</a>. Having gotten the hang of translating
+arithmetic and logical VM commands from there, we now focus on translating the
+remaining VM commands that deal with control flow and function call flow - specifically,
+<code>label</code>, <code>goto</code>, <code>if-goto</code>, <code>function</code>, <code>call</code> and <code>return</code>.</p>
+<p>This completes the implementation of the VM Translator, i.e. the Jack language
+compiler's backend – but let's not get ahead of ourselves. This project was an
+order of magnitude more involved to put together than Project 7 because it's really
+three tasks in one, in decreasing order of difficulty:</p>
+<ol>
+<li>Translate the control flow VM commands.</li>
+<li>Translate the function call flow VM commands.</li>
+<li>Two parts:<ul>
+<li>(a) Handle both a single <code>.vm</code> file as input as well as a directory containing <code>.vm</code>
+   files.</li>
+<li>(b) When translating the multiple <code>.vm</code> files together from a directory, add "bootstrapping"
+   code as preamble.</li>
+</ul>
+</li>
+</ol>
+<p>As always, the code is here:
+<a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7">guru-das-s/nand2tetris</a>.
+In hindsight, the generated assembly "phrases" could indeed be better optimized and
+not so verbose, but that's a task for another day.</p>
+<hr>
+<div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#preparatory-refactoring">Preparatory refactoring</a></li>
+<li><a href="#task-1-emit-code-for-the-control-flow-vm-commands">Task 1: Emit code for the control flow VM commands</a><ul>
+<li><a href="#the-label-and-goto-commands">The label and goto commands</a></li>
+<li><a href="#the-if-goto-command">The if-goto command</a></li>
+</ul>
+</li>
+<li><a href="#task-2-emit-code-for-the-function-related-vm-commands">Task 2: Emit code for the function-related VM commands</a><ul>
+<li><a href="#changes-to-phrases-that-occur-within-a-function">Changes to phrases that occur within a function</a></li>
+<li><a href="#the-function-command">The function command</a></li>
+<li><a href="#the-call-command">The call command</a></li>
+<li><a href="#the-return-command">The return command</a></li>
+</ul>
+</li>
+<li><a href="#task-3-emit-bootstrapping-code">Task 3: Emit bootstrapping code</a></li>
+<li><a href="#reflections">Reflections</a></li>
+<li><a href="#test-script">Test script</a></li>
+<li><a href="#postscript">Postscript</a></li>
+</ul>
+</div>
+<hr>
+<h5 id="preparatory-refactoring">Preparatory refactoring</h5>
+<p>While scoping out the changes required to support the control flow statements, I
+realized that thus far, the first argument to a VM command was geared to support only
+a <code>Segment</code> <sup id="sf-nand-to-tetris-2024-project-8-1-back"><a href="#sf-nand-to-tetris-2024-project-8-1" class="simple-footnote" title=" An example to refresh one's memory: the segment in the push local 5 VM command is local.">1</a></sup> and not a named label or a function name. This was
+<a href="https://github.com/guru-das-s/nand2tetris/commit/f925735fee5ca55976f96adaad3060b0bcd4d388">remedied</a> with the help of the <a href="https://doc.rust-lang.org/std/macro.todo.html"><code>todo!()</code>
+macro</a> to get things compiled and
+moving.</p>
+<h5 id="task-1-emit-code-for-the-control-flow-vm-commands">Task 1: Emit code for the control flow VM commands</h5>
+<h6 id="the-label-and-goto-commands">The <code>label</code> and <code>goto</code> commands</h6>
+<p>The codegen for these two commands are trivial and are almost natively supported by
+the asm syntax without the need for any extra scaffolding.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">LABEL</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// LABEL</span>
+<span class="s">(XYZ)</span>
+<span class="s">"#</span><span class="p">;</span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">GOTO</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// GOTO</span>
+<span class="s">@XYZ</span>
+<span class="s">0;JMP</span>
+<span class="s">"#</span><span class="p">;</span>
+</code></pre></div>
+
+<h6 id="the-if-goto-command">The <code>if-goto</code> command</h6>
+<p>The syntax of this command is:</p>
+<div class="highlight"><pre><span></span><code>gt // Or any other logical comparison operator
+if-goto LABEL
+</code></pre></div>
+
+<p>In hindsight, I implemented this command in a very roundabout fashion:</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">IF_GOTO</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// IF_GOTO</span>
+<span class="s">// first, get results of prev bool op</span>
+<span class="s">@SP</span>
+<span class="s">M=M-1</span>
+<span class="s">A=M</span>
+<span class="s">D=M</span>
+<span class="s">@DONTJUMP.XYZ</span>
+<span class="s">D;JEQ</span>
+<span class="s">@LABL</span>
+<span class="s">0;JMP</span>
+<span class="s">(DONTJUMP.XYZ)</span>
+<span class="s">"#</span><span class="p">;</span>
+</code></pre></div>
+
+<p>That is, if the result of the previous boolean operation is <code>false</code>, jump over the
+part where we do the unconditional jump to the target label; else, take the jump.
+This can be simplified to "take the jump if the result is <code>true</code>":</p>
+<div class="highlight"><pre><span></span><code>...
+@LABL
+D;JNE
+"#;
+...
+</code></pre></div>
+
+<h5 id="task-2-emit-code-for-the-function-related-vm-commands">Task 2: Emit code for the function-related VM commands</h5>
+<h6 id="changes-to-phrases-that-occur-within-a-function">Changes to phrases that occur within a function</h6>
+<p>The codegen for the control flow VM commands, and phrases that use phrase-local
+labels, are both affected by their occurrence within a function body.</p>
+<p>The symbol names need to be made unique; otherwise, the assembler will not resolve
+them to the intended addresses <sup id="sf-nand-to-tetris-2024-project-8-2-back"><a href="#sf-nand-to-tetris-2024-project-8-2" class="simple-footnote" title=" Described here in more detail. ">2</a></sup>. This is made by prefixing label symbol names and phrase-local labels
+by the function's name.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">LABEL_IN_FUNC</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// LABEL_IN_FUN</span>
+<span class="s">(FUNC$XYZ)</span>
+<span class="s">"#</span><span class="p">;</span>
+
+<span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">GOTO_IN_FUNC</span>: <span class="kp">&amp;</span><span class="kt">str</span> <span class="o">=</span><span class="w"> </span><span class="s">r#"// GOTO_IN_FUN</span>
+<span class="s">@FUNC$XYZ</span>
+<span class="s">0;JMP</span>
+<span class="s">"#</span><span class="p">;</span>
+</code></pre></div>
+
+<h6 id="the-function-command">The <code>function</code> command</h6>
+<p>The syntax of this command is:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">function</span><span class="w"> </span><span class="no">functionName</span><span class="w"> </span><span class="no">nVars</span>
+</code></pre></div>
+
+<p>with the following semantics:</p>
+<blockquote>
+<p><em>Here starts the declaration of a function that has name functionName and nVars
+local variables</em></p>
+</blockquote>
+<p>The codegen for this command followed as two parts: to first emit a label containing
+the function name, and then the emission of as many local variables as is specified.
+This forms the "function frame" on the stack.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">function_phrase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">phrases</span>::<span class="n">FUNCTION</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"FUNC"</span><span class="p">,</span><span class="w"> </span><span class="n">func_name</span><span class="p">);</span>
+<span class="n">function_phrase</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">phrases</span>::<span class="n">FUNCTION_LOCAL_VAR</span><span class="p">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">num_local_vars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">);</span>
+<span class="nb">Ok</span><span class="p">(</span><span class="n">function_phrase</span><span class="p">)</span>
+</code></pre></div>
+
+<p>The phrases are listed in <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L375-L388"><code>phrases.rs</code></a>.</p>
+<h6 id="the-call-command">The <code>call</code> command</h6>
+<p>The syntax of this command is:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// &lt;numArgs&gt; arguments to functionName have been pushed to stack</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">functionName</span><span class="w"> </span><span class="no">numArgs</span>
+</code></pre></div>
+
+<p>Before we <code>call</code> a function, we must first know where to return to after executing
+that function. This necessarily has to be the first instruction <em>following</em> the
+<code>call</code>. How do we determine this address and use this in the emitted asm?</p>
+<p>This may seem like a circular problem in asm land because at this
+point in the (to-be-translated) asm code...</p>
+<div class="highlight"><pre><span></span><code>VM land             asm land
+-------             --------
+call multiply       &lt;to-be-emitted call code&gt;
+                    &lt;to-be-emitted call code&gt;
+                    &lt;to-be-emitted call code&gt;
+                    ...
+                    &lt;to-be-emitted call code&gt;
+
+pop temp 0          ADDRESS_TO_JUMP_TO_AFTER_CALL: &lt;pop code follows&gt;
+</code></pre></div>
+
+<p>...how do we know the <code>ADDRESS_TO_JUMP_TO_AFTER_CALL</code> if we haven't finished writing
+the implementation of <code>call</code> yet?</p>
+<p>The solution is to preemptively add a "return label" to the end of the <code>call</code> asm,
+say, <code>@CALLER$ret</code> and then save that label name to the stack as the first step.
+Remember, we can easily use a symbol that is defined only later because the assembler
+will trivially take care of it in its first pass where it resolves symbol names to
+addresses.</p>
+<p>And since we can <code>call</code> any (<code>CALLEE</code>) function more than once from a given (<code>CALLER</code>)
+function, we need to make the "return label" unique, so we need to tack on a
+monotonically-increasing number to it: <code>@CALLER$ret.XYZ</code> (we will replace the <code>XYZ</code>
+with the number in code).</p>
+<p>The rest of the steps are to:</p>
+<ul>
+<li>save the current context (registers) to the stack</li>
+<li>modify the <code>ARG</code> pointer-register to point to the start of the <code>numArgs</code> number of function arguments</li>
+<li>that were pushed to the stack prior to the <code>call</code></li>
+<li>modify the <code>LCL</code> pointer-register to point to the top of the stack for the callee
+   function's use.</li>
+<li>actually jump to the callee function's code and start executing it</li>
+</ul>
+<p>The implementation of <code>call</code> is listed in <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L309-L373"><code>phrases.rs</code></a>.</p>
+<h6 id="the-return-command">The <code>return</code> command</h6>
+<p>The syntax of this command is:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">return</span><span class="w"> </span><span class="c1">// no arguments</span>
+</code></pre></div>
+
+<p>This trivial-seeming command is the yin to the yang of <code>call</code>. It does a ton of heavy
+lifting from its vantage point in the callee's code:</p>
+<ul>
+<li>Replacing the caller-pushed function arguments with the function's return value</li>
+<li>Invalidating the callee's function frame in the stack</li>
+<li>Restoring the (register) context saved on the stack by the caller, and finally,</li>
+<li>Jumping to the "return label", the instruction right after the <code>call</code>.</li>
+</ul>
+<p>The implementation of <code>return</code> is listed in <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L390-L448"><code>phrases.rs</code></a>.</p>
+<h5 id="task-3-emit-bootstrapping-code">Task 3: Emit bootstrapping code</h5>
+<p>When translating a single file, the corresponding <code>.tst</code> test script provided in the
+project src directory sets up the stack pointer to its value in the standard mapping
+(<code>256</code>) and takes care of setting up any arguments as necessary. When translating
+multiple files, however, we need to add this bootstrapping code first thing before
+any other translations can take place.</p>
+<p>The bootstrapping code sets <code>SP</code> to <code>256</code> and then <code>call</code>s <code>Sys.init</code>.</p>
+<p>The implementation of the bootstrap is listed in <a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L450-L518"><code>phrases.rs</code></a>.</p>
+<h5 id="reflections">Reflections</h5>
+<blockquote>
+<p><em>Any sufficiently advanced technology is indistinguishable from magic</em></p>
+<p><em>- Arthur C. Clarke</em></p>
+</blockquote>
+<p>There are broadly three parts to a magic trick: the pledge, the turn and the
+prestige:</p>
+<ul>
+<li>the <em>pledge</em> forms the setup of the trick, the <em>mise en place</em>. The audience is
+    shown something ordinary: a rabbit sitting on a table.</li>
+<li>the <em>turn</em> generates great surprise: the rabbit disappears!</li>
+<li>the <em>prestige</em> is the climax of the trick and provides resolution: the rabbit
+    reappears from a hat. The audience marvels at the trick and wonders how it was
+    achieved.</li>
+</ul>
+<p>Allowing for some poetic licence, this basic structure may be applied to our
+understanding of the implementation of a function call.</p>
+<ul>
+<li><code>function</code> as the <em>pledge</em>: We know that <code>multiply()</code> multiplies two numbers
+    together.</li>
+<li><code>call</code> as the <em>turn</em>: Execution jumps from the caller to the callee and the
+    multiplication takes place!</li>
+<li><code>return</code> as the <em>prestige</em>: We magically return to wherever we left with the result
+    of the multiplication ready and waiting for us in the caller's context.</li>
+</ul>
+<p>Only, we now know how this was achieved.</p>
+<h5 id="test-script">Test script</h5>
+<p>Following the example of the test scripts added in the previous two projects, I added
+one for Project 8 too.</p>
+<div class="highlight"><pre><span></span><code>$ ./projects/8/test.sh
+   Compiling nand2tetris v0.1.0 (/home/gurus/projects/nand2tetris)
+    Finished `release` profile [optimized] target(s) in 2.84s
+     Running `target/release/vmt -i projects/8/ProgramFlow/BasicLoop/BasicLoop.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/ProgramFlow/FibonacciSeries/FibonacciSeries.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/SimpleFunction/SimpleFunction.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/NestedCall/`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/FibonacciElement/`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/StaticsTest/`
+End of script - Comparison ended successfully
+</code></pre></div>
+
+<h5 id="postscript">Postscript</h5>
+<p>The code was complete in August and I had begun work on this post shortly thereafter.
+Life intervened (many times) as I tried to make progress on finishing this post, and
+I could only publish this blog post now. No AI tools or LLMs were used in writing
+this post.</p>
+<hr><ol class="simple-footnotes"><li id="sf-nand-to-tetris-2024-project-8-1"> An example to refresh one's memory: the segment in the <code>push local
+5</code> VM command is <code>local</code>. <a href="#sf-nand-to-tetris-2024-project-8-1-back" class="simple-footnote-back">↩</a></li><li id="sf-nand-to-tetris-2024-project-8-2"> Described
+<a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/#labels-must-be-unique-for-conditional-operator-phrases">here</a>
+in more detail.  <a href="#sf-nand-to-tetris-2024-project-8-2-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/nand2tetris/" class="tag">nand2tetris</a></tt>
+		<tt><a href="https://gurudas.dev/tag/rust/" class="tag">rust</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/">
+			Nand2Tetris - Project 7 (VM Translator Part 1)
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<p> </p>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Build your own shell - Codecrafters style - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Build your own shell - Codecrafters style - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="I created a shell using the Codecrafters Make your own shell challenge. My experience taking the challenge and things I learnt.">
+  <meta property="og:description" content="I created a shell using the Codecrafters Make your own shell challenge. My experience taking the challenge and things I learnt.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/">Build your own shell - Codecrafters style</a></h4>
+<h6 style="margin-top: -2%"> <b>28 Jul 2024</b> </h6>
+<p>I created my own shell in Rust using the Codecrafters <a href="https://app.codecrafters.io/courses/shell/overview">Build your own
+shell</a> challenge.</p>
+<p>As part of my ongoing efforts to <a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/">learn by
+doing</a>, I came across the course on
+LinkedIn and resolved to try it out using Rust, another goal of mine. Here's my
+experience of completing the challenge, and also my thoughts on the Codecrafters platform
+as a whole.</p>
+<h5 id="capabilities-of-the-shell">Capabilities of the shell</h5>
+<p>But first, what can the shell do?</p>
+<ul>
+<li>REPL: Read-Evaluate-Print-Loop structure</li>
+<li>Handle the following builtin commands:<ol>
+<li><code>exit</code>: exit shell with desired exit code</li>
+<li><code>echo</code></li>
+<li><code>type</code>: identify command as a shell builtin, or print its absolute path</li>
+<li><code>pwd</code></li>
+<li><code>cd</code>: both absolute and relative paths, and also <code>~</code></li>
+</ol>
+</li>
+<li>Run arbitrary programs present in <code>$PATH</code> and print their output.</li>
+<li>Gracefully handle unidentified commands or programs not in <code>$PATH</code>.</li>
+</ul>
+<p>The code is available on Github:
+<a href="https://github.com/guru-das-s/codecrafters-shell">https://github.com/guru-das-s/codecrafters-shell</a>.
+Compiling and running it is quite straightforward, with <code>cargo build</code> and <code>cargo
+run</code>. </p>
+<p>There are more "extensions" in the pipeline: piping, history, autocompletion of
+commands, et c. Really excited to do those when they're available!</p>
+<h5 id="the-codecrafters-platform">The Codecrafters platform</h5>
+<p>I am thoroughly impressed by the Codecrafters platform.</p>
+<ul>
+<li>Sign up was smooth, with Github login</li>
+<li>They provide skeleton code to begin the challenge with</li>
+<li>The shell is built up, stage by stage, with clear instructions for each stage</li>
+<li>A convenient one-stop shell script to compile and run your code is provided too</li>
+<li>The <a href="https://codecrafters.io/blog/cli">cli tool</a> runs all the tests for a stage
+    locally before <code>push</code>-ing</li>
+<li>The tool also runs tests for all the previous stages to ensure nothing breaks</li>
+<li><code>git push</code>-ing to their server (<code>origin</code> already configured in the clone step)
+    advances to the next stage</li>
+</ul>
+<h5 id="working-on-the-challenge">Working on the challenge</h5>
+<p>Making time to work on the challenge was challenging in itself with a full time job
+and other quotidian demands on my time. It was only during my vacation in India that
+I had the time and mindspace to finally take the plunge and start.</p>
+<p>Visual Studio Code is a great coding tool for Rust, especially with the Rust
+extensions. Being able to see the return types of functions and of function
+parameters is highly useful, as are the real-time compilation errors and the compiler
+diagnostic messages. The vim mode emulation is adequate for my needs too.</p>
+<p>I chose to go with the C-style mental model of having a list of function pointers for
+every shell builtin:</p>
+<div class="highlight"><pre><span></span><code><span class="k">enum</span> <span class="nc">CmdHandler</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Exit</span><span class="p">(</span><span class="k">fn</span><span class="p">(</span><span class="kt">i32</span><span class="p">)),</span>
+<span class="w">    </span><span class="n">Echo</span><span class="p">(</span><span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="o">&amp;</span><span class="kt">str</span><span class="p">])),</span>
+<span class="w">    </span><span class="n">Type</span><span class="p">(</span><span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="n">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">CmdHandler</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="kt">str</span><span class="p">)),</span>
+<span class="w">    </span><span class="n">Pwd</span><span class="p">(</span><span class="k">fn</span><span class="p">()),</span>
+<span class="w">    </span><span class="n">Cd</span><span class="p">(</span><span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="kt">str</span><span class="p">)),</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>And a hashmap to map builtin commands to their handlers:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">builtins</span>: <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">CmdHandler</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HashMap</span>::<span class="n">new</span><span class="p">();</span>
+</code></pre></div>
+
+<p>This allowed me to add new commands easily and keep things neat and organized.</p>
+<p>It was great to discover the Rust equivalents of a few well-known C library functions:</p>
+<ul>
+<li><code>stat()</code> &ndash; <code>fs::metadata()</code></li>
+<li><code>exec()</code> &ndash; <code>std::process:Command::new()</code></li>
+<li><code>getenv()</code> &ndash; <code>std::process:env::var()</code></li>
+</ul>
+<p>A pleasant surprise was that I did not have to write any code to support relative
+filepaths for the <code>cd</code> builtin - the code for the absolute filepaths was sufficient.
+The difficulty level for that stage is marked as <em>Hard</em> but I literally had to write
+zero new code to pass that!</p>
+<h5 id="closing-thoughts">Closing thoughts</h5>
+<p>I feel quite proud of the fact that I got to build something tangible in Rust.</p>
+<p>My earlier attempts at learning Rust were limited to solving Advent of Code 2023
+problems. In my experience, it was quite thrilling to work on them in real time, i.e.
+in December when every day would bring forth a new problem, but once I "fell off the
+wagon" I found it difficult to keep my motivation levels up and feel excited about
+solving them. Being part of an active community seems like a great motivator for me.</p>
+<p>Now that I'm done with the challenge, I've been checking out other solutions in Rust
+on Github to see what I can learn from them. I realize that my solution is very
+C-like (because I'm primarily a C programmer) and doesn't use many Rust-y features
+like <a href="https://doc.rust-lang.org/stable/rust-by-example/attribute.html">attributes</a> or
+<a href="https://doc.rust-lang.org/stable/rust-by-example/trait.html">traits</a>. Learning a new
+programming language is like learning a new language in many ways - immersing oneself
+in well-written code accelerates and supplements self-learning.</p>
+<p>I also appreciated the autogenerated email I received upon completion which had great
+suggestions on what to do next: retrying the challenge in a different language,
+sharing the experience (and code) with others, or trying a new challenge. I'm
+seriously considering taking up the final suggestion!</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/rust/" class="tag">rust</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/">
+			Nand2Tetris - Projects 1 to 3
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/">
+			Nand2Tetris - Projects 4 to 5
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

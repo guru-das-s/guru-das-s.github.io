@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Script to add maintainers to a Linux kernel patch - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Script to add maintainers to a Linux kernel patch - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2023/08/16/linux-kernel-add-maintainer/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2023/08/16/linux-kernel-add-maintainer/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="A Python script to improve kernel patch submission workflow">
+  <meta property="og:description" content="A Python script to improve kernel patch submission workflow">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2023/08/16/linux-kernel-add-maintainer/">Script to add maintainers to a Linux kernel patch</a></h4>
+<h6 style="margin-top: -2%"> <b>16 Aug 2023</b> </h6>
+<h5 id="introducing-add-maintainerpy">Introducing <code>add-maintainer.py</code></h5>
+<p>I worked on adding a new script to improve the workflow of developers contributing patches to the Linux kernel. Here it is:</p>
+<p><a href="https://lore.kernel.org/lkml/cover.1691049436.git.quic_gurus@quicinc.com/">[PATCH v2 0/1] Add add-maintainer.py script - Guru Das Srinagesh</a></p>
+<p>Its fate is yet to be decided - it's only at v2 now, and looks like there is already a mature tool named <a href="https://b4.docs.kernel.org/en/latest/"><code>b4</code></a> that possibly <a href="https://b4.docs.kernel.org/en/latest/contributor/prep.html#prepare-the-list-of-recipients">does the same thing</a> as my script.</p>
+<h5 id="update-sep-1">Update (Sep 1)</h5>
+<p>The upstream maintainers have ruled in favour of <code>b4</code>, sounding the death knell
+for my script<sup id="sf-linux-kernel-add-maintainer-1-back"><a href="#sf-linux-kernel-add-maintainer-1" class="simple-footnote" title="Mark Brown's response to v3 of my script">1</a></sup>
+<sup id="sf-linux-kernel-add-maintainer-2-back"><a href="#sf-linux-kernel-add-maintainer-2" class="simple-footnote" title="Krzysztof being his usual blunt and brutal self">2</a></sup></p>
+<h5 id="takeaways-and-learnings">Takeaways and Learnings</h5>
+<p>I am extremely proud of the effort I put into <code>v3</code> - I even added an <code>--undo</code>
+flag! I think it's a fantastic nifty little script and:</p>
+<ol>
+<li>Not only did I get to learn some Python, but also</li>
+<li>Earned the satisfaction of independently identifying a problem that needed fixing, and</li>
+<li>Solving the non-trivial problem using Python in Pythonic ways and following best practices.</li>
+</ol>
+<p>Onwards and upwards, I say! On to the next problem. I'm on a roll.</p>
+<hr><ol class="simple-footnotes"><li id="sf-linux-kernel-add-maintainer-1">Mark Brown's response to <a href="https://lore.kernel.org/lkml/0f7b32e1-1b26-4543-bfec-471641a67416@sirena.org.uk/">v3 of my script</a> <a href="#sf-linux-kernel-add-maintainer-1-back" class="simple-footnote-back">↩</a></li><li id="sf-linux-kernel-add-maintainer-2">Krzysztof being his usual <a href="https://lore.kernel.org/lkml/db8d5123-19d7-50d0-935b-a25d235e6e2e@linaro.org/">blunt and brutal self</a> <a href="#sf-linux-kernel-add-maintainer-2-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/linux/" class="tag">linux</a></tt>
+		<tt><a href="https://gurudas.dev/tag/kernel/" class="tag">kernel</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2023/06/07/how-i-generate-gurudas-dev/">
+			How I generate gurudas.dev
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2023/09/01/vscode-vim-config/">
+			Configuring the Visual Studio Code vim extension
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

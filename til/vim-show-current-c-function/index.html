@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>TIL: Show current C function in vim status line sans plugins - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="TIL: Show current C function in vim status line sans plugins - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/til/vim-show-current-c-function/" />
+  <meta property="og:url" content="https://gurudas.dev/til/vim-show-current-c-function/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="A very useful plain vanilla vimscript function to display the function the cursor is currently at, in the vim statusline.">
+  <meta property="og:description" content="A very useful plain vanilla vimscript function to display the function the cursor is currently at, in the vim statusline.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/til/vim-show-current-c-function/">TIL: Show current C function in vim status line sans plugins</a></h4>
+<h6 style="margin-top: -2%"> <b>13 Mar 2024</b> </h6>
+<p>I primarily work on the Linux kernel (which is written almost entirely in C) and I
+frequently find myself needing to know which function I'm currently in while browsing
+the codebase. There is, of course, the dictum that functions should be as small as
+possible and not more than a screen's length long; this is mostly just a guiding
+principle.</p>
+<p>There are plugins to do this sort of thing, but I do not want to become overly
+dependent on them. I am more partial towards things I can use that are just plain
+vanilla vimscript because I can just stick them in my <code>.vimrc</code> when setting up a new
+workstation or logging into a remote server somewhere.</p>
+<h5 id="the-function">The function</h5>
+<p>Here's the function in all its inscrutable beauty:</p>
+<div class="highlight"><pre><span></span><code><span class="c">&quot; Show function name on demand, mapped to key &#39;,&#39;</span>
+<span class="k">fun</span><span class="p">!</span> ShowFuncName<span class="p">()</span>
+    echohl ModeMsg
+    echo getline<span class="p">(</span>search<span class="p">(</span><span class="s2">&quot;^[^ \t#/]\\{2}.*[^:]\s*$&quot;</span><span class="p">,</span> <span class="s1">&#39;bWn&#39;</span><span class="p">))</span>
+    echohl None
+<span class="k">endfun</span>
+
+nmap <span class="p">,</span> :<span class="k">call</span> ShowFuncName<span class="p">()&lt;</span>CR<span class="p">&gt;</span>
+</code></pre></div>
+
+<p>I couldn't locate the StackOverflow answer I had sourced this from (even though this
+post says TIL, I did not learn this <em>literally</em> today) so I used <a href="https://gemini.google.com/app">Gemini
+AI</a> to break this down for me.</p>
+<h5 id="the-breakdown">The breakdown</h5>
+<p><code>echohl ModeMsg</code>: Sets the highlighting for the echo output to the mode message
+style. This ensures the function name visually stands out.</p>
+<p><code>getline(search("^[^ \t#/]\\{2}.*[^:]\s*$", 'bWn'))</code>: This line is the core
+logic for finding the function name. Let's break down the search pattern:</p>
+<ul>
+<li><code>^[^ \t#/]</code> - Matches the beginning of the line (<code>^</code>) and excludes whitespace (<code></code> and <code>\t</code>), tabs (<code>/</code>), and comments (<code>#</code>).</li>
+<li><code>\\{2}</code> - Matches exactly two characters (the function name can have at least two characters).</li>
+<li><code>.*</code> - Matches any characters (captures the function name).</li>
+<li><code>[^:]</code> - Excludes the colon (<code>:</code>) which might follow the function name.</li>
+<li><code>\s*$</code> - Matches whitespace at the end of the line.</li>
+<li><code>bWn</code> - Flags:<ul>
+<li><code>b</code> - Starts searching backward from the current line.</li>
+<li><code>W</code> - Considers word boundaries.</li>
+<li><code>n</code> - Doesn't include the matching pattern in the returned line.</li>
+</ul>
+</li>
+</ul>
+<p>This search essentially finds the line before the current line that starts with
+two non-whitespace, non-tab, non-comment characters, followed by any characters
+(the function name), excluding the colon and ending with whitespace.</p>
+<p><code>echo</code>: Prints the captured line containing the function name.</p>
+<p><code>echohl None</code>: Resets the highlighting back to the default.</p>
+<h5 id="the-demo">The demo</h5>
+<p>If you were at <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mfd/qcom-pm8008.c?h=v6.8#n178">this
+line</a>
+in <code>drivers/mfd/qcom-pm8008.c</code> (which is a driver I authored) and pressed <code>,</code>
+to trigger the above command, you would see this in the vim statusline:</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">pm8008_probe</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">i2c_client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">)</span>
+</code></pre></div>
+
+<p>which is, in my view, a very clean way of doing things.</p>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/vim/" class="tag">vim</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/til/single-clipboard-ubuntu/">
+			TIL: How to unify all three of Ubuntu's clipboards
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/til/tmux-cycle-through-all-open-sessions/">
+			TIL: Easily cycle through all open tmux sessions
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

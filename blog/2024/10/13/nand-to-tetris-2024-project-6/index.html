@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Nand2Tetris - Project 6 (Assembler) - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Nand2Tetris - Project 6 (Assembler) - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="How I wrote an assembler for the Hack computer in Rust, complete with code excerpts and explanations.">
+  <meta property="og:description" content="How I wrote an assembler for the Hack computer in Rust, complete with code excerpts and explanations.">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/">Nand2Tetris - Project 6 (Assembler)</a></h4>
+<h6 style="margin-top: -2%"> <b>13 Oct 2024</b> </h6>
+<p>I wrote a two-pass assembler for the Hack assembly language!</p>
+<p>This is the sixth and final project of the first half (Hardware) of the Nand2Tetris
+course. In <a href="https://www.nand2tetris.org/course">Project 6</a>, the task is to write an
+<a href="https://en.wikipedia.org/wiki/Assembly_language#Assembler">assembler</a> for the Hack
+assembly language. Unlike the previous projects which could only be written using the
+custom hardware description language (HDL) used by the Nand2Tetris project, Projects
+6 to 12 allow the use of any programming language that is convenient. I chose to
+write the assembler in Rust because I wanted to continue building substantial things
+with it and learn more of its features in the process.</p>
+<p>Follow my progress on Github here:
+<a href="https://github.com/guru-das-s/nand2tetris/commits/master/">guru-das-s/nand2tetris</a>.</p>
+<hr>
+<div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#introducing-the-has-assembler">Introducing: The has assembler</a></li>
+<li><a href="#code-walkthrough">Code walkthrough</a><ul>
+<li><a href="#main-data-structures-used">Main data structures used</a></li>
+<li><a href="#code-flow">Code flow</a></li>
+</ul>
+</li>
+<li><a href="#does-has-output-match-the-stock-assemblers">Does has output match the stock assembler's?</a></li>
+<li><a href="#post-completion-thoughts">Post-completion thoughts</a></li>
+</ul>
+</div>
+<hr>
+<h5 id="introducing-the-has-assembler">Introducing: The <code>has</code> assembler</h5>
+<p>My Hack assembler is named <code>has</code> - a simple portmanteau of the two words. It has the
+following calling card:</p>
+<div class="highlight"><pre><span></span><code>$ cargo run --release --bin has -- --help
+    Finished `release` profile [optimized] target(s) in 0.12s
+     Running `/home/gurus/projects/nand2tetris/target/release/has --help`
+Hack assembler
+
+Converts Hack assembly files to Hack binary
+
+Usage: has [OPTIONS] --filename &lt;FILENAME&gt;
+
+Options:
+  -f, --filename &lt;FILENAME&gt;
+          Path to Hack ASM file (e.g. Max.asm)
+
+  -o, --output &lt;OUTPUT&gt;
+          Output filename (e.g. Max.hack)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+</code></pre></div>
+
+<p>The only required argument to the assembler is the input filename. The default output
+filename is the input filename with the extension replaced by <code>.hack</code> unless
+overridden by the <code>--output</code> flag.</p>
+<p>Defining a separate binary <code>[[bin]]</code> for the assembler in <code>Cargo.toml</code> seemed a
+natural choice to keep using this same repository for all future projects and easily
+build separate binaries for them:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[[bin]]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"has"</span>
+<span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"projects/6/has/src/main.rs"</span>
+</code></pre></div>
+
+<h5 id="code-walkthrough">Code walkthrough</h5>
+<p>I followed the same sequence of developing the Hack assembler as suggested in the
+project docs - first, developing the ability to assemble symbol-less asm files and
+then adding a symbol table and enabling the handling of symbols too. <a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/6/has/src">Source code
+here</a>.</p>
+<p>There are four modules in the project in addition to <code>main.rs</code>:</p>
+<div class="highlight"><pre><span></span><code>$ tree projects/6/has/src/
+projects/6/has/src/
+├── main.rs
+├── parser.rs
+├── spec.rs
+├── symboltable.rs
+└── to_binary.rs
+</code></pre></div>
+
+<h6 id="main-data-structures-used">Main data structures used</h6>
+<p>The fact that there is a finite number of valid values for each of the fields in a
+C-instruction and a max value for the number contained in an A-instruction led me to
+choose enums as my fundamental data structure to base all the logic on.</p>
+<p>The members of Rust enums have two forms:<sup id="sf-nand-to-tetris-2024-project-6-1-back"><a href="#sf-nand-to-tetris-2024-project-6-1" class="simple-footnote" title="Defining an Enum - The Rust Programming Language">1</a></sup></p>
+<ol>
+<li>Regular C-like enum members/variants that are just equated to constant values, and</li>
+<li>Arbitrary constructions of structs/tuples/enums of any datatype!</li>
+</ol>
+<p>This makes it really intuitive to represent the various forms that a valid line of
+Hack assembly code can take:</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">HackLine</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Whitespace</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Comment</span><span class="p">,</span>
+<span class="w">    </span><span class="n">Label</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">label</span>: <span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">value</span>: <span class="kt">u16</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">Variable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">name</span>: <span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="n">C</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">dest</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Destination</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">comp</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Comp</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">jump</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Jump</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>I chose to represent a raw A-instruction (with a value spelt out explicitly) and a
+variable separately even though the latter is also technically a valid A-instruction.
+The members of <code>HackLine::C</code> are all <code>Options</code> in order to differentiate erroneous
+<code>None</code> values from valid <code>&lt;enum&gt;::Null</code> values.</p>
+<p>The <code>HackLine</code> enum is <code>pub</code> because I'm using modules to encapsulate code cleanly as
+separate files and I need the enum to be visible to all modules in the project. This
+enum lives in the <code>parser.rs</code> module.</p>
+<p><code>Destination</code> and <code>Jump</code> are C-style enums. Excerpts edited for brevity:</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">Destination</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Null</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="o">..</span><span class="p">.</span>
+<span class="p">}</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">Jump</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Null</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">JGT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">JEQ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">JGE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="o">..</span><span class="p">.</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>Comp</code> is also one, too, but with a custom <code>impl</code> that defines helper functions to
+map synonym enum variants such as <code>Comp::A</code> and <code>Comp::M</code> to the same hex values and figuring out
+the corresponding <code>a</code>-value for an enum variants.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">Comp</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Zero</span><span class="p">,</span>
+<span class="w">    </span><span class="n">One</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MinusOne</span><span class="p">,</span>
+<span class="w">    </span><span class="n">D</span><span class="p">,</span>
+<span class="w">    </span><span class="n">A</span><span class="p">,</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span>
+<span class="w">    </span><span class="n">NotD</span><span class="p">,</span>
+<span class="w">    </span><span class="n">NotA</span><span class="p">,</span>
+<span class="w">    </span><span class="n">NotM</span><span class="p">,</span>
+<span class="w">    </span><span class="n">MinusD</span><span class="p">,</span>
+<span class="w">    </span><span class="o">..</span><span class="p">.</span>
+<span class="p">}</span>
+<span class="k">impl</span><span class="w"> </span><span class="n">Comp</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">to_u8</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">u8</span> <span class="p">{</span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="bp">self</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">Zero</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b101010</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">One</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b111111</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">MinusOne</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b111010</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">D</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b001100</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">A</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Comp</span>::<span class="n">M</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b110000</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">NotD</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b001101</span><span class="p">,</span>
+<span class="w">            </span><span class="n">Comp</span>::<span class="n">NotA</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Comp</span>::<span class="n">NotM</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mb">0b110001</span><span class="p">,</span>
+<span class="w">            </span><span class="o">..</span><span class="p">.</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>This <code>impl</code> was required because Rust does not allow multiple enum variants to be
+equated to the same numeric value.</p>
+<p>These enums all live in the <code>spec.rs</code> module - which, originally, was intended to
+capture all the specifications of the Hack asm language but now appears to contain
+only the specifications of the C-instruction, the A-instruction being relatively
+trivial to represent.</p>
+<p>The symbol table is represented as follows, and it lives in its own <code>symboltable.rs</code>
+module, along with its attendant <code>impl</code> methods <sup id="sf-nand-to-tetris-2024-project-6-2-back"><a href="#sf-nand-to-tetris-2024-project-6-2" class="simple-footnote" title="Methods - Rust by Example">2</a></sup>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">SymbolTable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">next_free_ram_address</span>: <span class="kt">u16</span><span class="p">,</span>
+<span class="w">    </span><span class="n">m</span>: <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="kt">u16</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h6 id="code-flow">Code flow</h6>
+<p>Starting from the <code>main.rs</code> entry point: </p>
+<p>After the <code>clap</code> crate does its thing and parses command-line arguments passed to the
+program, we read the contents of the input asm file into a <code>Vec</code> and <code>assemble()</code> it,
+passing to <code>assemble()</code> a mutable reference to a <code>symbol_table</code> duly initialized with
+known arch-specific symbols.</p>
+<p><code>assemble()</code> shows the two-pass architecture of the assembler. Why are two passes
+required? It is primarily to handle labels in the asm source file that are forward
+references, i.e. the first use of the label in an instruction occurs <em>before</em> its
+definition, thus making it impossible to know <em>at that first-use location</em> what code
+memory location to translate the label to.</p>
+<p>So in the first pass, the input file is iterated through line-by-line and only
+<code>HackLine::Label</code>s are processed, adding labels to the list of known symbols in the
+<code>symbol_table</code> and storing their code memory locations in the symbol table's hashmap.
+In the second pass, each line is parsed, including the labels and variables and
+converted to its binary representation.</p>
+<p>The <code>parser.rs</code> module parses each line and returns the <code>HackLine</code> enum variants it
+maps to, or an <code>Err()</code> if the line is not a valid Hack asm line.</p>
+<p>The <code>to_binary.rs</code> module then takes in the parsed line, i.e. the <code>HackLine</code> enum
+type and converts it to its binary representation. Here, Rust's automatic
+destructuring of enum types allows for easily accessing the parsed data of the
+<code>HackLine</code> enum type.</p>
+<div class="highlight"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">binary_of</span><span class="p">(</span><span class="n">line</span>: <span class="nc">HackLine</span><span class="p">,</span><span class="w"> </span><span class="n">symboltable</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">SymbolTable</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">HackLine</span>::<span class="n">Whitespace</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">HackLine</span>::<span class="n">Comment</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">HackLine</span>::<span class="n">Label</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
+<span class="w">        </span><span class="n">HackLine</span>::<span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">binary_of_a_type_instruction</span><span class="p">(</span><span class="n">value</span><span class="p">)),</span>
+<span class="w">        </span><span class="n">HackLine</span>::<span class="n">C</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="p">,</span><span class="w"> </span><span class="n">jump</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">binary_of_c_type_instruction</span><span class="p">(</span>
+<span class="w">            </span><span class="n">dest</span><span class="p">.</span><span class="n">unwrap</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">comp</span><span class="p">.</span><span class="n">unwrap</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">jump</span><span class="p">.</span><span class="n">unwrap</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">)),</span>
+<span class="w">        </span><span class="n">HackLine</span>::<span class="n">Variable</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">binary_of_variable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">symboltable</span><span class="p">)),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The implementation of <code>binary_of_variable()</code> bears illustration here (the other two
+functions are relatively straightforward):</p>
+<div class="highlight"><pre><span></span><code><span class="k">fn</span> <span class="nf">binary_of_variable</span><span class="p">(</span><span class="n">variable</span>: <span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">symbol_table</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">SymbolTable</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">String</span> <span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">symbol_table</span><span class="p">.</span><span class="n">is_known</span><span class="p">(</span><span class="o">&amp;</span><span class="n">variable</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">symbol_table</span><span class="p">.</span><span class="n">add_new_variable</span><span class="p">(</span><span class="o">&amp;</span><span class="n">variable</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">symbol_table</span><span class="p">.</span><span class="n">get_variable_address</span><span class="p">(</span><span class="o">&amp;</span><span class="n">variable</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">binary_of_a_type_instruction</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h5 id="does-has-output-match-the-stock-assemblers">Does <code>has</code> output match the stock assembler's?</h5>
+<p>With the assembler in place, I also wrote a shell script to verify that it matches
+the output of the stock assembler that is provided by the Nand2Tetris team in the
+repo. It first runs the stock assembler, <code>tools/Assembler.sh</code>, on all the <code>.asm</code>
+files in the Project 6 directory to generate the "ground truth" <code>.hack</code> files. The
+stock assembler converts a Hack asm file named, say, <code>Test.asm</code> to <code>Test.hack</code>.</p>
+<p>Next, I run my <code>has</code> assembler on the same files, taking care to specify a different suffix
+to the output binary in order to distinguish it from the ground truth files. The <code>has</code>
+assembler converts a Hack asm file named, say, <code>Test.asm</code> to <code>Test.has.hack</code>.</p>
+<p>These two files are <code>diff</code>-ed in the next step. Since the <code>set -e</code> command is set in
+the test script, any mismatches in the files will cause the <code>diff</code> command to error
+out and, consequently, the test script itself. Let's run the test script to check:</p>
+<div class="highlight"><pre><span></span><code>$ ./projects/6/test.sh &amp;&amp; echo "No diffs!"
+Assembling /home/gurus/projects/nand2tetris/projects/6/rect/Rect.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/rect/RectL.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/max/Max.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/max/MaxL.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/add/Add.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/pong/Pong.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/pong/PongL.asm
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/rect/Rect.asm -o projects/6/rect/Rect.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/rect/RectL.asm -o projects/6/rect/RectL.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `target/release/has -f projects/6/max/Max.asm -o projects/6/max/Max.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/max/MaxL.asm -o projects/6/max/MaxL.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/add/Add.asm -o projects/6/add/Add.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/pong/Pong.asm -o projects/6/pong/Pong.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/pong/PongL.asm -o projects/6/pong/PongL.has.hack`
+No diffs!
+</code></pre></div>
+
+<p>Yes - no diffs.</p>
+<p>The script also cleans up after itself using the Bash <code>trap &lt;command&gt; EXIT</code> method.
+This causes <code>&lt;command&gt;</code> to run at the end of the Bash script's execution - either
+graceful or erroneous. In this case, I clean up all the generated <code>.hack</code> files in a
+<code>cleanup()</code> routine upon <code>EXIT</code>.</p>
+<h5 id="post-completion-thoughts">Post-completion thoughts</h5>
+<p>Writing this assembler was really rewarding not just in terms of learning how a basic
+two-pass assembler works but also because it afforded me the means and opportunity to
+learn more about Rust:</p>
+<ul>
+<li>Rust enums and their automatic destructuring in <code>match</code>es</li>
+<li>Rust associated methods vs plain functions in <code>impl</code>s</li>
+<li>Smartly using <code>None</code> to indicate an error condition that should not happen vs
+    a valid "empty" value such as, say, <code>Destination::Null</code></li>
+<li>The compiler forcing me to learn about chaining <code>.as_ref()</code> to continue accessing a
+    variable more than once</li>
+<li>Working with modules and setting visibility to functions via <code>pub</code></li>
+<li>Adding <code>#[cfg(debug_assertions)]</code> to <code>println!()</code> macros to effectively make them
+    debug prints</li>
+<li>Using the <code>clap</code> crate for parsing command line arguments and doc comments</li>
+<li>Appreciating how Rust forces you to contend with all possible values of an enum and
+    also errors</li>
+</ul>
+<p>The end of Project 6 marks the half-way point of the entire Nand2Tetris course. I'm
+half way done! This is so cool. With the so-called "Hardware" half of the course
+behind me, now I'm focussed on the next half, the "Software" half. Since the official
+website does not offer PDFs of the relevant chapters from the textbook for the
+remaining projects, I bought <a href="https://www.amazon.com/dp/0262539802?ref=ppx_yo2ov_dt_b_fed_asin_title">the
+textbook</a>
+instead.</p>
+<p>During the course of the next projects, I'll be building a virtual machine
+translator, a compiler for a Java-like high-level language, and an operating system
+for the Hack computer. I am really excited to read the textbook and learn about
+compilers and a "stack machine" in detail.</p>
+<p>Finally, since I recently added tags to all my blog posts, it is now convenient to
+view all my Nand2Tetris-related posts by checking <a href="https://gurudas.dev/tag/nand2tetris/">tag:
+nand2tetris</a>.</p>
+<hr><ol class="simple-footnotes"><li id="sf-nand-to-tetris-2024-project-6-1"><a href="https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html">Defining an Enum - The Rust Programming
+Language</a> <a href="#sf-nand-to-tetris-2024-project-6-1-back" class="simple-footnote-back">↩</a></li><li id="sf-nand-to-tetris-2024-project-6-2"><a href="https://doc.rust-lang.org/rust-by-example/fn/methods.html">Methods - Rust by
+Example</a> <a href="#sf-nand-to-tetris-2024-project-6-2-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/nand2tetris/" class="tag">nand2tetris</a></tt>
+		<tt><a href="https://gurudas.dev/tag/rust/" class="tag">rust</a></tt>
+		<tt><a href="https://gurudas.dev/tag/opensource/" class="tag">opensource</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/">
+			Nand2Tetris - Projects 4 to 5
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/">
+			Nand2Tetris - Project 7 (VM Translator Part 1)
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

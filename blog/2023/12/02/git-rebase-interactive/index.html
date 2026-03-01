@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>Fun with git rebase --interactive - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="Fun with git rebase --interactive - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="The amazing exec and autosquash features of git rebase interactive">
+  <meta property="og:description" content="The amazing exec and autosquash features of git rebase interactive">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/">Fun with git rebase --interactive</a></h4>
+<h6 style="margin-top: -2%"> <b>02 Dec 2023</b> </h6>
+<p><em>This is the second in a series of blog posts related to some powerful features of
+<code>git</code> I've used over the years. Previously, I wrote about <code>git rebase --onto</code> which
+<a href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/">you can read here</a>.</em></p>
+<p><code>git</code> offers many powerful features, and one such feature I have used
+extensively in kernel development is <code>git rebase --interactive</code>. Here is what the man
+page has to say about it:</p>
+<div class="highlight"><pre><span></span><code>-i, --interactive
+    Make a list of the commits which are about to be rebased. Let the user edit that
+    list before rebasing. This mode can also be used to split commits (see SPLITTING
+    COMMITS below).
+</code></pre></div>
+
+<p>That this feature exists is impressive on its own: in the list of commits that
+appears, one can reorder commits, delete them, rework their commit messages, combine
+("squash", "fixup") them, and even merge them in recent versions of <code>git</code>. But where
+this really shines is how it allows, via an optional flag, for executing any
+arbitrary shell command for one or even all of the commits in the list. I'm talking
+about <code>git rebase --interactive --exec</code>.</p>
+<h5 id="usecase-pick-a-bunch-of-linux-next-commits">Usecase: Pick a bunch of <code>linux-next</code> commits</h5>
+<p>Frequently we run into the situation where we need some patches that are accepted by
+maintainers into their own trees but are not merged by Linus into his main
+repository. This occurs when a developer posts a patch to the mailing lists ("pushes
+a patch upstream") that is an urgent fix of some kind, required in a product
+kernel ("downstream"). The downstream kernel, such as the one the Android Open Source
+Project uses (the Android Common Kernel), usually has <a href="https://android.googlesource.com/kernel/common/+/refs/heads/android-mainline#common-kernel-patch-requirements">strict
+requirements</a>
+of the commit messages of patches it accepts for merging. One of these requirements
+is:</p>
+<blockquote>
+<p><em>If the patch is not merged from an upstream branch, the subject must be tagged
+with the type of patch: <code>UPSTREAM:</code>, <code>BACKPORT:</code>, <code>FROMGIT:</code>, <code>FROMLIST:</code>, or
+<code>ANDROID:</code></em></p>
+</blockquote>
+<p>Some projects may even require specific
+<code>git-trailers</code> <sup id="sf-git-rebase-interactive-1-back"><a href="#sf-git-rebase-interactive-1" class="simple-footnote" title=" Git - git-interpret-trailers Documentation ">1</a></sup>
+in the commit message, e.g.:</p>
+<div class="highlight"><pre><span></span><code>Git-commit: 26b4ca3c39012368ab22b06cd35dd6b77f0f3e00
+Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+</code></pre></div>
+
+<p>This means every single patch being pushed to the downstream kernel project would
+need to be tagged this way. If we need to get, say, 10 or 20 patches merged from a
+maintainer's tree or linux-next, we need a scalable way of tagging all of them with
+one of the above subject prefixes and adding those git trailers. This is where <code>git
+rebase --interactive --exec</code> really shines.</p>
+<p>From within the downstream kernel, add the <code>linux-next</code> remote:</p>
+<div class="highlight"><pre><span></span><code>git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+git fetch linux-next
+</code></pre></div>
+
+<p>Gather list of commits required. These may be abbreviated SHAs too, for convenience.</p>
+<div class="highlight"><pre><span></span><code>base_sha=$(git rev-parse HEAD)
+pick_commits=(&lt;sha1&gt; &lt;sha2&gt; ... &lt;shaN&gt;)
+</code></pre></div>
+
+<p>Cherry pick each commit and add the first trailer:</p>
+<div class="highlight"><pre><span></span><code>for commit in "${pick_commits[@]}"; do
+    git cherry-pick $commit
+    git commit --amend --no-edit --trailer "Git-commit: $(git rev-parse $commit)"
+done
+</code></pre></div>
+
+<p>Now, add the subject prefix <code>FROMGIT:</code> to all the commits that were just cherry picked:</p>
+<div class="highlight"><pre><span></span><code>git rebase -i --exec 'git commit --amend -m "FROMGIT: $(git show -s --format=%B)"' $base_sha
+</code></pre></div>
+
+<p>Next, add the second trailer to all the commits that were cherry picked:</p>
+<div class="highlight"><pre><span></span><code>git rebase -i --exec 'git commit --amend --no-edit --trailer "Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"' $base_sha
+</code></pre></div>
+
+<p>Finally, add one's own Signed-off-by to all the cherry picked commits:</p>
+<div class="highlight"><pre><span></span><code>git rebase -i --exec 'git commit --amend --no-edit -s' $base_sha
+</code></pre></div>
+
+<h5 id="git-fixup-and-git-rebase-interactive-autosquash">git fixup and <code>git rebase --interactive --autosquash</code></h5>
+<p>This blog post: <a href="https://thoughtbot.com/blog/autosquashing-git-commits">Auto-squashing Git
+Commits</a> goes into great
+detail on what this feature is, and how it may be made use of.</p>
+<hr><ol class="simple-footnotes"><li id="sf-git-rebase-interactive-1"> <a href="https://git-scm.com/docs/git-interpret-trailers#_description">Git - git-interpret-trailers
+Documentation</a>  <a href="#sf-git-rebase-interactive-1-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/git/" class="tag">git</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/">
+			How I used git rebase --onto
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/">
+			Nand2Tetris - Projects 1 to 3
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

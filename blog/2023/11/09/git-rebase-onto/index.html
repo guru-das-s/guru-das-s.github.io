@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Basic Page Needs
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<title>How I used git rebase --onto - Guru Das Srinagesh</title>
+<meta charset="utf-8">
+<meta name="author" content="Guru Das Srinagesh">
+<meta property="og:image" content="https://gurudas.dev/theme/images/favicon-og.png" />
+<meta property="og:title" content="How I used git rebase --onto - Guru Das Srinagesh" />
+
+<!-- Mobile Specific Metas
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- FONT
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&family=Source+Code+Pro&display=swap" rel="stylesheet">
+
+<!-- CSS
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/normalize.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/skeleton.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/custom.css">
+<link rel="stylesheet" href="https://gurudas.dev/theme/css/codehighlight.css">
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+<script src="https://gurudas.dev/theme/js/site.js"></script>
+
+<!-- Favicon
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<link rel="icon" type="image/png" href="https://gurudas.dev/theme/images/favicon.png">
+
+
+<!-- Add canonical link to solve Page Indexing issues
+––––––––––––––––––––––––––––––––––––––––––––––––- -->
+  <link rel="canonical" href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/" />
+  <meta property="og:url" content="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/" />
+  <meta property="og:type" content="article" />
+  <meta name="description" content="Git rebase onto, an underrated but powerful command">
+  <meta property="og:description" content="Git rebase onto, an underrated but powerful command">
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+  <div class="navbar">
+    <div class="container-nav">
+      <ul class="navbar-list">
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#meNavPopover">Me</a>
+          <div id="meNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#about">About</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/now/">Now</a></li>
+        <li class="navbar-item">
+          <a class="navbar-link" href="https://gurudas.dev/#" data-popover="#etcNavPopover">Etc</a>
+          <div id="etcNavPopover" class="popover">
+            <ul class="popover-list">
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/uses/">Uses</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/til/">TIL</a></li>
+              <li class="popover-item"><a class="popover-link" href="https://gurudas.dev/quotes/">Quotes</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="navbar-item"><a class="navbar-link" href="https://gurudas.dev/blog/">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+    <section class="header">
+      <h2><a class="title-link" href="https://gurudas.dev">Guru Das Srinagesh</a></h2>
+    </section>
+
+<div class="page-section">
+<h4><a href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/">How I used git rebase --onto</a></h4>
+<h6 style="margin-top: -2%"> <b>09 Nov 2023</b> </h6>
+<p>On one of my daily trawlings of Hacker News, I came across Julia Evans' blogpost on
+<a href="https://jvns.ca/blog/2023/11/01/confusing-git-terminology/#rebase-onto">confusing git
+terminology</a>
+that lists <code>git rebase --onto</code> as one such confusing command. I had never used this
+<code>--onto</code> flag before and her description didn't really help me visualize the problem
+or the solution.</p>
+<p>I shrugged and let it go, not thinking much of it at the time.</p>
+<p>I ended up using it recently, when I had to rebase a feature branch based off a
+couple of weeks old, stale, <code>master</code> branch <strong><em>onto</em></strong> the up-to-date tip of the
+same <code>master</code> branch.</p>
+<hr>
+<p>Since I was using Gerrit, my feature branch had a <code>topic:XYZ</code> set. This <code>XYZ</code> topic
+series of mine had about ~20 commits, and the master branch had advanced quite a bit
+with almost ~15K commits <sup id="sf-git-rebase-onto-1-back"><a href="#sf-git-rebase-onto-1" class="simple-footnote" title=" This large number of changes is because the project was the Linux kernel actively being developed by a global team of developers. ">1</a></sup>,
+some of which were also large merge commits.</p>
+<p>My erstwhile strategy for cherrypicking the whole series onto the moving tip of the
+<code>master</code> branch was as follows:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>pull.rebase<span class="w"> </span><span class="nb">true</span>
+git<span class="w"> </span>pull<span class="w"> </span>&lt;server/project&gt;<span class="w"> </span>&lt;refs/changes/12345/4&gt;
+</code></pre></div>
+
+<p>(where <code>12345</code> was the last change in the series)</p>
+<p>This worked at the time I had published this strategy to our internal documentation
+at work so that other developers could make use of my <code>XYZ</code> series on top of the
+latest, up-to-date <code>master</code> branch. Over time, though, the series ran into a merge
+conflict once the master branch had advanced sufficiently enough. And that is when I
+was asked to rebase the series to fix this merge conflict and update the
+documentation.</p>
+<p>When I tried the above instructions on top of the up-to-date master branch, it did
+not work because git tried to interactively rebase <em>all</em> the ~15K changes one by one
+and then somehow ran into merge conflicts on changes unrelated to mine. Resolving
+merge conflicts unrelated to my changes was a clear sign that I was doing something
+wrong — there <em>had</em> to be a better way.</p>
+<p>After a bit of Googling, I found this answer <sup id="sf-git-rebase-onto-2-back"><a href="#sf-git-rebase-onto-2" class="simple-footnote" title=" Git: Interactively rebase a range of commits - Stack Overflow ">2</a></sup>
+on Stack Overflow that succintly expressed what I had to do:</p>
+<div class="highlight"><pre><span></span><code>git rebase --onto &lt;final_base_commit&gt; &lt;initial_base_commit&gt; &lt;head&gt;
+</code></pre></div>
+
+<p>This was interesting. The fact that I had come across this recently was fresh in my
+mind, and hence I quickly consulted the <code>man</code> page for <code>git-rebase</code>:</p>
+<div class="highlight"><pre><span></span><code>First let’s assume your topic is based on branch next. For example, a feature
+developed in topic depends on some functionality which is found in next.
+
+        o---o---o---o---o  master
+             \
+              o---o---o---o---o  next
+                               \
+                                o---o---o  topic
+
+We want to make topic forked from branch master; for example, because the
+functionality on which topic depends was merged into the more stable master branch.
+We want our tree to look like this:
+
+        o---o---o---o---o  master
+            |            \
+            |             o'--o'--o'  topic
+             \
+              o---o---o---o---o  next
+
+We can get this using the following command:
+
+    git rebase --onto master next topic
+</code></pre></div>
+
+<p>Aha! When read alongside the man page, the Stack Overflow answer's recommendation
+started to make sense.</p>
+<p><code>final_base_commit</code> would be my current <code>HEAD</code>, i.e. the current (up-to-date)
+tip of the <code>master</code> branch.</p>
+<p><code>initial_base_commit</code> would be the <strong>parent of</strong> the first patch in my series.
+In my case, this was <code>&lt;SHA&gt;^</code> where <code>&lt;SHA&gt;</code> was that of the first patch - easily
+available by inspection on Gerrit. Let's say this was <code>43487e7b567cfb^</code>.</p>
+<p><code>head</code> would be the <code>FETCH_HEAD</code> after running <code>git fetch</code> on the <strong>last change</strong> in
+my series, i.e.</p>
+<div class="highlight"><pre><span></span><code>git fetch &lt;server/project&gt; &lt;refs/changes/12345/4&gt;
+</code></pre></div>
+
+<p>Thus, the final command became:</p>
+<div class="highlight"><pre><span></span><code>git rebase --onto HEAD 43487e7b567cfb^ FETCH_HEAD
+</code></pre></div>
+
+<p>The merge conflict I had to fix was fairly trivial, and I was done in no time.</p>
+<p>I was really impressed by the power of this feature as I was dreading having to
+manually cherry-pick all of the ~20 changes in my series.</p>
+<hr><ol class="simple-footnotes"><li id="sf-git-rebase-onto-1"> This large number of changes is because the project
+was the Linux kernel actively being developed by a global team of developers.  <a href="#sf-git-rebase-onto-1-back" class="simple-footnote-back">↩</a></li><li id="sf-git-rebase-onto-2">
+<a href="https://stackoverflow.com/questions/45336573/git-interactively-rebase-a-range-of-commits">Git: Interactively rebase a range of commits - Stack
+Overflow</a>
+ <a href="#sf-git-rebase-onto-2-back" class="simple-footnote-back">↩</a></li></ol>
+</div>
+<p>
+		<tt><a href="https://gurudas.dev/tag/git/" class="tag">git</a></tt>
+</p>
+<hr>
+<div class="row">
+	<div class="six columns">
+		<div style="text-align: left">&lt; Previous
+			<br>
+		<a href="https://gurudas.dev/blog/2023/09/19/learning-go/">
+			Learning Go
+		</a>
+		</div>
+	</div>
+	<div class="six columns">
+		<div style="text-align: right">Next &gt;
+			<br>
+		<a href="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/">
+			Fun with git rebase --interactive
+		</a>
+		</div>
+	</div>
+</div>
+
+
+  </div>
+
+  <footer>
+
+<p class="footer">
+⭐<br>
+&copy; 2023-26 Guru Das Srinagesh | <a href="https://gurudas.dev/feed.atom.xml"><img src="https://gurudas.dev/images/rss.svg" style=height:.8em;margin-right:.2em> Feed </a>
+</p>
+  </footer>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>
