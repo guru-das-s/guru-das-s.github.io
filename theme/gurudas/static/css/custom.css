@@ -242,7 +242,7 @@ footer {
 
 .code-example-body {
   white-space: pre;
-  word-wrap: break-word
+  word-wrap: break-word;
 }
 
 .example {
@@ -323,7 +323,6 @@ code {
   overflow-x: auto;
 }
 
-@media (max-width: 549px) {}
 
 /* Larger than phone */
 @media (min-width: 550px) {
