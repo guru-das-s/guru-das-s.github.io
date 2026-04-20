@@ -2,7 +2,7 @@
     <div class="container-nav">
       <ul class="navbar-list">
         <li class="navbar-item">
-          <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#meNavPopover">Me</a>
+          <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#meNavPopover" role="button" aria-haspopup="true" aria-expanded="false">Me</a>
           <div id="meNavPopover" class="popover">
             <ul class="popover-list">
               {% for page in draft_pages %}
@@ -13,7 +13,7 @@
         </li>
         <li class="navbar-item"><a class="navbar-link" href="{{ SITEURL }}/now/">Now</a></li>
         <li class="navbar-item">
-          <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#etcNavPopover">Etc</a>
+          <a class="navbar-link" href="{{ SITEURL }}/#" data-popover="#etcNavPopover" role="button" aria-haspopup="true" aria-expanded="false">Etc</a>
           <div id="etcNavPopover" class="popover">
             <ul class="popover-list">
               <li class="popover-item"><a class="popover-link" href="{{ SITEURL }}/uses/">Uses</a></li>
