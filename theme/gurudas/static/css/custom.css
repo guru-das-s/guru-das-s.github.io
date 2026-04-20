@@ -534,3 +534,7 @@ code {
   margin-left: 0;
   padding-left: 0;
 }
+
+.row-list li {
+  font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
