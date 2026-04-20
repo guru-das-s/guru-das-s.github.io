@@ -20,7 +20,6 @@ $(document).ready(function() {
     $popoverLink.on('click', openPopover)
     $document.on('click', closePopover)
     $('a[href^="#"]').on('click', smoothScroll)
-    buildSnippets();
   }
 
   function openPopover(e) {
@@ -37,11 +36,14 @@ $(document).ready(function() {
     }
   }
 
-  $("#button").click(function() {
-    $('html, body').animate({
-        scrollTop: $("#elementtoScrollToID").offset().top
-    }, 2000);
-});
+  function smoothScroll(e) {
+    var target = this.hash;
+    var $target = $(target);
+    if ($target.length) {
+      e.preventDefault();
+      $('html, body').animate({ scrollTop: $target.offset().top }, 600);
+    }
+  }
 
   init();
 
