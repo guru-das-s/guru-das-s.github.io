@@ -1,0 +1,1847 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Guru Das Srinagesh</title><link href="https://gurudas.dev/" rel="alternate"></link><link href="https://gurudas.dev/feed.atom.xml" rel="self"></link><id>https://gurudas.dev/</id><updated>2025-11-08T21:19:59-08:00</updated><entry><title>Nand2Tetris - Project 8 (VM Translator Part 2)</title><link href="https://gurudas.dev/blog/2025/11/08/nand-to-tetris-2024-project-8/" rel="alternate"></link><published>2025-11-08T21:19:59-08:00</published><updated>2025-11-08T21:19:59-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2025-11-08:/blog/2025/11/08/nand-to-tetris-2024-project-8/</id><summary type="html">&lt;p&gt;In &lt;a href="https://drive.google.com/file/d/1BexrNmdqYhKPkqD_Y81qNAUeyfzl-ZtO/view"&gt;Project
+8&lt;/a&gt; of
+&lt;a href="https://www.nand2tetris.org/course"&gt;Nand2Tetris&lt;/a&gt;, we get to finish the
+implementation of the VM Translator that was begun in &lt;a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/"&gt;Project
+7&lt;/a&gt;. Having gotten the hang of translating
+arithmetic and logical VM commands from there, we now focus on translating the
+remaining VM commands that deal with control flow and function call flow - specifically,
+&lt;code&gt;label&lt;/code&gt;, &lt;code&gt;goto&lt;/code&gt;, &lt;code&gt;if-goto&lt;/code&gt;, &lt;code&gt;function&lt;/code&gt;, &lt;code&gt;call&lt;/code&gt; and &lt;code&gt;return ... &lt;/code&gt;&lt;a class="read-more" href="/blog/2025/11/08/nand-to-tetris-2024-project-8/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;In &lt;a href="https://drive.google.com/file/d/1BexrNmdqYhKPkqD_Y81qNAUeyfzl-ZtO/view"&gt;Project
+8&lt;/a&gt; of
+&lt;a href="https://www.nand2tetris.org/course"&gt;Nand2Tetris&lt;/a&gt;, we get to finish the
+implementation of the VM Translator that was begun in &lt;a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/"&gt;Project
+7&lt;/a&gt;. Having gotten the hang of translating
+arithmetic and logical VM commands from there, we now focus on translating the
+remaining VM commands that deal with control flow and function call flow - specifically,
+&lt;code&gt;label&lt;/code&gt;, &lt;code&gt;goto&lt;/code&gt;, &lt;code&gt;if-goto&lt;/code&gt;, &lt;code&gt;function&lt;/code&gt;, &lt;code&gt;call&lt;/code&gt; and &lt;code&gt;return&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This completes the implementation of the VM Translator, i.e. the Jack language
+compiler's backend – but let's not get ahead of ourselves. This project was an
+order of magnitude more involved to put together than Project 7 because it's really
+three tasks in one, in decreasing order of difficulty:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Translate the control flow VM commands.&lt;/li&gt;
+&lt;li&gt;Translate the function call flow VM commands.&lt;/li&gt;
+&lt;li&gt;Two parts:&lt;ul&gt;
+&lt;li&gt;(a) Handle both a single &lt;code&gt;.vm&lt;/code&gt; file as input as well as a directory containing &lt;code&gt;.vm&lt;/code&gt;
+   files.&lt;/li&gt;
+&lt;li&gt;(b) When translating the multiple &lt;code&gt;.vm&lt;/code&gt; files together from a directory, add "bootstrapping"
+   code as preamble.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;As always, the code is here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7"&gt;guru-das-s/nand2tetris&lt;/a&gt;.
+In hindsight, the generated assembly "phrases" could indeed be better optimized and
+not so verbose, but that's a task for another day.&lt;/p&gt;
+&lt;hr&gt;
+&lt;div class="toc"&gt;&lt;span class="toctitle"&gt;Table of Contents&lt;/span&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#preparatory-refactoring"&gt;Preparatory refactoring&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#task-1-emit-code-for-the-control-flow-vm-commands"&gt;Task 1: Emit code for the control flow VM commands&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#the-label-and-goto-commands"&gt;The label and goto commands&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#the-if-goto-command"&gt;The if-goto command&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#task-2-emit-code-for-the-function-related-vm-commands"&gt;Task 2: Emit code for the function-related VM commands&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#changes-to-phrases-that-occur-within-a-function"&gt;Changes to phrases that occur within a function&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#the-function-command"&gt;The function command&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#the-call-command"&gt;The call command&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#the-return-command"&gt;The return command&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#task-3-emit-bootstrapping-code"&gt;Task 3: Emit bootstrapping code&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#reflections"&gt;Reflections&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#test-script"&gt;Test script&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#postscript"&gt;Postscript&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;hr&gt;
+&lt;h5 id="preparatory-refactoring"&gt;Preparatory refactoring&lt;/h5&gt;
+&lt;p&gt;While scoping out the changes required to support the control flow statements, I
+realized that thus far, the first argument to a VM command was geared to support only
+a &lt;code&gt;Segment&lt;/code&gt; &lt;sup id="sf-nand-to-tetris-2024-project-8-1-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-8-1" class="simple-footnote" title=" An example to refresh one's memory: the segment in the push local 5 VM command is local."&gt;1&lt;/a&gt;&lt;/sup&gt; and not a named label or a function name. This was
+&lt;a href="https://github.com/guru-das-s/nand2tetris/commit/f925735fee5ca55976f96adaad3060b0bcd4d388"&gt;remedied&lt;/a&gt; with the help of the &lt;a href="https://doc.rust-lang.org/std/macro.todo.html"&gt;&lt;code&gt;todo!()&lt;/code&gt;
+macro&lt;/a&gt; to get things compiled and
+moving.&lt;/p&gt;
+&lt;h5 id="task-1-emit-code-for-the-control-flow-vm-commands"&gt;Task 1: Emit code for the control flow VM commands&lt;/h5&gt;
+&lt;h6 id="the-label-and-goto-commands"&gt;The &lt;code&gt;label&lt;/code&gt; and &lt;code&gt;goto&lt;/code&gt; commands&lt;/h6&gt;
+&lt;p&gt;The codegen for these two commands are trivial and are almost natively supported by
+the asm syntax without the need for any extra scaffolding.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LABEL&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// LABEL&lt;/span&gt;
+&lt;span class="s"&gt;(XYZ)&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GOTO&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// GOTO&lt;/span&gt;
+&lt;span class="s"&gt;@XYZ&lt;/span&gt;
+&lt;span class="s"&gt;0;JMP&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h6 id="the-if-goto-command"&gt;The &lt;code&gt;if-goto&lt;/code&gt; command&lt;/h6&gt;
+&lt;p&gt;The syntax of this command is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;gt // Or any other logical comparison operator
+if-goto LABEL
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In hindsight, I implemented this command in a very roundabout fashion:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;IF_GOTO&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// IF_GOTO&lt;/span&gt;
+&lt;span class="s"&gt;// first, get results of prev bool op&lt;/span&gt;
+&lt;span class="s"&gt;@SP&lt;/span&gt;
+&lt;span class="s"&gt;M=M-1&lt;/span&gt;
+&lt;span class="s"&gt;A=M&lt;/span&gt;
+&lt;span class="s"&gt;D=M&lt;/span&gt;
+&lt;span class="s"&gt;@DONTJUMP.XYZ&lt;/span&gt;
+&lt;span class="s"&gt;D;JEQ&lt;/span&gt;
+&lt;span class="s"&gt;@LABL&lt;/span&gt;
+&lt;span class="s"&gt;0;JMP&lt;/span&gt;
+&lt;span class="s"&gt;(DONTJUMP.XYZ)&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That is, if the result of the previous boolean operation is &lt;code&gt;false&lt;/code&gt;, jump over the
+part where we do the unconditional jump to the target label; else, take the jump.
+This can be simplified to "take the jump if the result is &lt;code&gt;true&lt;/code&gt;":&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;...
+@LABL
+D;JNE
+"#;
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="task-2-emit-code-for-the-function-related-vm-commands"&gt;Task 2: Emit code for the function-related VM commands&lt;/h5&gt;
+&lt;h6 id="changes-to-phrases-that-occur-within-a-function"&gt;Changes to phrases that occur within a function&lt;/h6&gt;
+&lt;p&gt;The codegen for the control flow VM commands, and phrases that use phrase-local
+labels, are both affected by their occurrence within a function body.&lt;/p&gt;
+&lt;p&gt;The symbol names need to be made unique; otherwise, the assembler will not resolve
+them to the intended addresses &lt;sup id="sf-nand-to-tetris-2024-project-8-2-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-8-2" class="simple-footnote" title=" Described here in more detail. "&gt;2&lt;/a&gt;&lt;/sup&gt;. This is made by prefixing label symbol names and phrase-local labels
+by the function's name.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LABEL_IN_FUNC&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// LABEL_IN_FUN&lt;/span&gt;
+&lt;span class="s"&gt;(FUNC$XYZ)&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GOTO_IN_FUNC&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// GOTO_IN_FUN&lt;/span&gt;
+&lt;span class="s"&gt;@FUNC$XYZ&lt;/span&gt;
+&lt;span class="s"&gt;0;JMP&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h6 id="the-function-command"&gt;The &lt;code&gt;function&lt;/code&gt; command&lt;/h6&gt;
+&lt;p&gt;The syntax of this command is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nf"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="no"&gt;functionName&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="no"&gt;nVars&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;with the following semantics:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Here starts the declaration of a function that has name functionName and nVars
+local variables&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The codegen for this command followed as two parts: to first emit a label containing
+the function name, and then the emission of as many local variables as is specified.
+This forms the "function frame" on the stack.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;function_phrase&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;phrases&lt;/span&gt;::&lt;span class="n"&gt;FUNCTION&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"FUNC"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;func_name&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="n"&gt;function_phrase&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;phrases&lt;/span&gt;::&lt;span class="n"&gt;FUNCTION_LOCAL_VAR&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;repeat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num_local_vars&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;usize&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="nb"&gt;Ok&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;function_phrase&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The phrases are listed in &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L375-L388"&gt;&lt;code&gt;phrases.rs&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h6 id="the-call-command"&gt;The &lt;code&gt;call&lt;/code&gt; command&lt;/h6&gt;
+&lt;p&gt;The syntax of this command is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// &amp;lt;numArgs&amp;gt; arguments to functionName have been pushed to stack&lt;/span&gt;
+&lt;span class="nf"&gt;call&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="no"&gt;functionName&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="no"&gt;numArgs&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Before we &lt;code&gt;call&lt;/code&gt; a function, we must first know where to return to after executing
+that function. This necessarily has to be the first instruction &lt;em&gt;following&lt;/em&gt; the
+&lt;code&gt;call&lt;/code&gt;. How do we determine this address and use this in the emitted asm?&lt;/p&gt;
+&lt;p&gt;This may seem like a circular problem in asm land because at this
+point in the (to-be-translated) asm code...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;VM land             asm land
+-------             --------
+call multiply       &amp;lt;to-be-emitted call code&amp;gt;
+                    &amp;lt;to-be-emitted call code&amp;gt;
+                    &amp;lt;to-be-emitted call code&amp;gt;
+                    ...
+                    &amp;lt;to-be-emitted call code&amp;gt;
+
+pop temp 0          ADDRESS_TO_JUMP_TO_AFTER_CALL: &amp;lt;pop code follows&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;...how do we know the &lt;code&gt;ADDRESS_TO_JUMP_TO_AFTER_CALL&lt;/code&gt; if we haven't finished writing
+the implementation of &lt;code&gt;call&lt;/code&gt; yet?&lt;/p&gt;
+&lt;p&gt;The solution is to preemptively add a "return label" to the end of the &lt;code&gt;call&lt;/code&gt; asm,
+say, &lt;code&gt;@CALLER$ret&lt;/code&gt; and then save that label name to the stack as the first step.
+Remember, we can easily use a symbol that is defined only later because the assembler
+will trivially take care of it in its first pass where it resolves symbol names to
+addresses.&lt;/p&gt;
+&lt;p&gt;And since we can &lt;code&gt;call&lt;/code&gt; any (&lt;code&gt;CALLEE&lt;/code&gt;) function more than once from a given (&lt;code&gt;CALLER&lt;/code&gt;)
+function, we need to make the "return label" unique, so we need to tack on a
+monotonically-increasing number to it: &lt;code&gt;@CALLER$ret.XYZ&lt;/code&gt; (we will replace the &lt;code&gt;XYZ&lt;/code&gt;
+with the number in code).&lt;/p&gt;
+&lt;p&gt;The rest of the steps are to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;save the current context (registers) to the stack&lt;/li&gt;
+&lt;li&gt;modify the &lt;code&gt;ARG&lt;/code&gt; pointer-register to point to the start of the &lt;code&gt;numArgs&lt;/code&gt; number of function arguments&lt;/li&gt;
+&lt;li&gt;that were pushed to the stack prior to the &lt;code&gt;call&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;modify the &lt;code&gt;LCL&lt;/code&gt; pointer-register to point to the top of the stack for the callee
+   function's use.&lt;/li&gt;
+&lt;li&gt;actually jump to the callee function's code and start executing it&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The implementation of &lt;code&gt;call&lt;/code&gt; is listed in &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L309-L373"&gt;&lt;code&gt;phrases.rs&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h6 id="the-return-command"&gt;The &lt;code&gt;return&lt;/code&gt; command&lt;/h6&gt;
+&lt;p&gt;The syntax of this command is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nf"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// no arguments&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This trivial-seeming command is the yin to the yang of &lt;code&gt;call&lt;/code&gt;. It does a ton of heavy
+lifting from its vantage point in the callee's code:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Replacing the caller-pushed function arguments with the function's return value&lt;/li&gt;
+&lt;li&gt;Invalidating the callee's function frame in the stack&lt;/li&gt;
+&lt;li&gt;Restoring the (register) context saved on the stack by the caller, and finally,&lt;/li&gt;
+&lt;li&gt;Jumping to the "return label", the instruction right after the &lt;code&gt;call&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The implementation of &lt;code&gt;return&lt;/code&gt; is listed in &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L390-L448"&gt;&lt;code&gt;phrases.rs&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h5 id="task-3-emit-bootstrapping-code"&gt;Task 3: Emit bootstrapping code&lt;/h5&gt;
+&lt;p&gt;When translating a single file, the corresponding &lt;code&gt;.tst&lt;/code&gt; test script provided in the
+project src directory sets up the stack pointer to its value in the standard mapping
+(&lt;code&gt;256&lt;/code&gt;) and takes care of setting up any arguments as necessary. When translating
+multiple files, however, we need to add this bootstrapping code first thing before
+any other translations can take place.&lt;/p&gt;
+&lt;p&gt;The bootstrapping code sets &lt;code&gt;SP&lt;/code&gt; to &lt;code&gt;256&lt;/code&gt; and then &lt;code&gt;call&lt;/code&gt;s &lt;code&gt;Sys.init&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The implementation of the bootstrap is listed in &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L450-L518"&gt;&lt;code&gt;phrases.rs&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;h5 id="reflections"&gt;Reflections&lt;/h5&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Any sufficiently advanced technology is indistinguishable from magic&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;- Arthur C. Clarke&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;There are broadly three parts to a magic trick: the pledge, the turn and the
+prestige:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the &lt;em&gt;pledge&lt;/em&gt; forms the setup of the trick, the &lt;em&gt;mise en place&lt;/em&gt;. The audience is
+    shown something ordinary: a rabbit sitting on a table.&lt;/li&gt;
+&lt;li&gt;the &lt;em&gt;turn&lt;/em&gt; generates great surprise: the rabbit disappears!&lt;/li&gt;
+&lt;li&gt;the &lt;em&gt;prestige&lt;/em&gt; is the climax of the trick and provides resolution: the rabbit
+    reappears from a hat. The audience marvels at the trick and wonders how it was
+    achieved.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Allowing for some poetic licence, this basic structure may be applied to our
+understanding of the implementation of a function call.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;function&lt;/code&gt; as the &lt;em&gt;pledge&lt;/em&gt;: We know that &lt;code&gt;multiply()&lt;/code&gt; multiplies two numbers
+    together.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;call&lt;/code&gt; as the &lt;em&gt;turn&lt;/em&gt;: Execution jumps from the caller to the callee and the
+    multiplication takes place!&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;return&lt;/code&gt; as the &lt;em&gt;prestige&lt;/em&gt;: We magically return to wherever we left with the result
+    of the multiplication ready and waiting for us in the caller's context.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Only, we now know how this was achieved.&lt;/p&gt;
+&lt;h5 id="test-script"&gt;Test script&lt;/h5&gt;
+&lt;p&gt;Following the example of the test scripts added in the previous two projects, I added
+one for Project 8 too.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./projects/8/test.sh
+   Compiling nand2tetris v0.1.0 (/home/gurus/projects/nand2tetris)
+    Finished `release` profile [optimized] target(s) in 2.84s
+     Running `target/release/vmt -i projects/8/ProgramFlow/BasicLoop/BasicLoop.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/ProgramFlow/FibonacciSeries/FibonacciSeries.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/SimpleFunction/SimpleFunction.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/NestedCall/`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/FibonacciElement/`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -i projects/8/FunctionCalls/StaticsTest/`
+End of script - Comparison ended successfully
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="postscript"&gt;Postscript&lt;/h5&gt;
+&lt;p&gt;The code was complete in August and I had begun work on this post shortly thereafter.
+Life intervened (many times) as I tried to make progress on finishing this post, and
+I could only publish this blog post now. No AI tools or LLMs were used in writing
+this post.&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-nand-to-tetris-2024-project-8-1"&gt; An example to refresh one's memory: the segment in the &lt;code&gt;push local
+5&lt;/code&gt; VM command is &lt;code&gt;local&lt;/code&gt;. &lt;a href="#sf-nand-to-tetris-2024-project-8-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-nand-to-tetris-2024-project-8-2"&gt; Described
+&lt;a href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/#labels-must-be-unique-for-conditional-operator-phrases"&gt;here&lt;/a&gt;
+in more detail.  &lt;a href="#sf-nand-to-tetris-2024-project-8-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="blog"></category><category term="nand2tetris"></category><category term="rust"></category><category term="opensource"></category></entry><entry><title>TIL: Firefox supports back and forward touchpad gestures by default</title><link href="https://gurudas.dev/til/firefox-fwd-back-gestures/" rel="alternate"></link><published>2025-02-22T23:02:00-08:00</published><updated>2025-02-22T23:02:00-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2025-02-22:/til/firefox-fwd-back-gestures/</id><content type="html">&lt;p&gt;Firefox supports the two-finger left and right swipe actions on the touchpad by
+default on Ubuntu.&lt;/p&gt;
+&lt;p&gt;Chrome does not.&lt;/p&gt;
+&lt;p&gt;I have now adopted Firefox as my default browser.&lt;/p&gt;</content><category term="til"></category><category term="opensource"></category></entry><entry><title>Nand2Tetris - Project 7 (VM Translator Part 1)</title><link href="https://gurudas.dev/blog/2025/01/01/nand-to-tetris-2024-project-7/" rel="alternate"></link><published>2025-01-01T09:58:42-08:00</published><updated>2025-01-01T09:58:42-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2025-01-01:/blog/2025/01/01/nand-to-tetris-2024-project-7/</id><summary type="html">&lt;p&gt;&lt;a href="https://www.nand2tetris.org/course"&gt;Project 7&lt;/a&gt; of Nand2Tetris is about translating virtual machine &lt;sup id="sf-nand-to-tetris-2024-project-7-1-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-7-1" class="simple-footnote" title=" No, not that virtual machine; rather, the Hack computer virtual machine conceptualized as a stack machine. "&gt;1&lt;/a&gt;&lt;/sup&gt; (VM) commands for the Hack
+computer platform to a series of Hack assembly language (asm) instructions. The main
+focus of this project is determining the sequence of assembly language instructions
+corresponding to each VM command, given that the programming model of the computer is
+that of a &lt;a href="https://en.wikipedia.org/wiki/Stack_machine"&gt;stack machine&lt;/a&gt;. Here ... &lt;a class="read-more" href="/blog/2025/01/01/nand-to-tetris-2024-project-7/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;a href="https://www.nand2tetris.org/course"&gt;Project 7&lt;/a&gt; of Nand2Tetris is about translating virtual machine &lt;sup id="sf-nand-to-tetris-2024-project-7-1-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-7-1" class="simple-footnote" title=" No, not that virtual machine; rather, the Hack computer virtual machine conceptualized as a stack machine. "&gt;1&lt;/a&gt;&lt;/sup&gt; (VM) commands for the Hack
+computer platform to a series of Hack assembly language (asm) instructions. The main
+focus of this project is determining the sequence of assembly language instructions
+corresponding to each VM command, given that the programming model of the computer is
+that of a &lt;a href="https://en.wikipedia.org/wiki/Stack_machine"&gt;stack machine&lt;/a&gt;. Here, VM commands are roughly equivalent to
+&lt;a href="https://en.wikipedia.org/wiki/Bytecode"&gt;bytecode&lt;/a&gt;. The virtual machine translator that emerges from this project
+shall form the backend of the compiler that shall be built upon it.&lt;/p&gt;
+&lt;p&gt;Continuing my Rust journey from &lt;a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/"&gt;Project 6&lt;/a&gt;,
+this blogpost describes in detail my solution to Project 7 in Rust.&lt;/p&gt;
+&lt;p&gt;The source code is here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7"&gt;guru-das-s/nand2tetris&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;div class="toc"&gt;&lt;span class="toctitle"&gt;Table of Contents&lt;/span&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#problem-description"&gt;Problem description&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#vm-translator-code-architecture"&gt;VM Translator – Code architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#development-and-testing-workflow"&gt;Development and testing workflow&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#interesting-problems"&gt;Interesting problems&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#labels-must-be-unique-for-conditional-operator-phrases"&gt;Labels must be unique for conditional operator phrases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#to-increment-sp-or-not-to-increment-sp"&gt;To increment SP, or not to increment SP?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#implementing-the-pop-operation"&gt;Implementing the pop operation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#implementing-the-static-code-segment"&gt;Implementing the static code segment&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#what-i-learnt-about-rust-programming"&gt;What I learnt about Rust programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#test-script"&gt;Test script&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#postscript"&gt;Postscript&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;hr&gt;
+&lt;h5 id="problem-description"&gt;Problem description&lt;/h5&gt;
+&lt;p&gt;What does a VM file even look like? Here's &lt;code&gt;SimpleAdd.vm&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;// Pushes and adds two constants.
+
+push constant 7
+push constant 8
+add
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the "bytecode" that the Jack language compiler (which will be introduced
+later!) will compile to - the first of a two-step process of converting high-level
+Jack language code to Hack asm code.&lt;/p&gt;
+&lt;p&gt;The goal of this project is to translate the above VM instructions to asm
+instructions that effect the intended operations: &lt;code&gt;push&lt;/code&gt; and &lt;code&gt;add&lt;/code&gt; in the above
+example. A stack area is assigned for us in the RAM of the Hack machine to be used in
+the asm instructions. We are responsible for growing and shrinking the stack.&lt;/p&gt;
+&lt;p&gt;There are code segments other than &lt;code&gt;constant&lt;/code&gt;, e.g. &lt;code&gt;BasicTest.vm&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;...
+pop temp 6
+push local 0
+push that 5
+add
+push argument 1
+sub
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;These segments all map to various designated sections of RAM. The &lt;code&gt;local&lt;/code&gt; segment
+starts from the RAM address stored in the &lt;code&gt;LCL&lt;/code&gt; RAM address which, as we know from
+the Assembler design from &lt;a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/"&gt;Project 6&lt;/a&gt;, is
+a synonym of &lt;code&gt;RAM[1]&lt;/code&gt;. The &lt;code&gt;N&lt;/code&gt; in &lt;code&gt;local N&lt;/code&gt; specifies the offset that must be applied
+to the base address stored in &lt;code&gt;LCL&lt;/code&gt;, i.e. &lt;code&gt;RAM[LCL + N]&lt;/code&gt;. That's just &lt;code&gt;local&lt;/code&gt;, though
+– other segments must be interpreted differently as specified in the design
+instructions.&lt;/p&gt;
+&lt;p&gt;There are also operations other than &lt;code&gt;add&lt;/code&gt; such as &lt;code&gt;sub&lt;/code&gt; in the above example, all of
+which operate on the stack. Being a binary operator needing two operands, &lt;code&gt;add&lt;/code&gt; adds
+the two top-most entries present on the stack. A unary operator such as &lt;code&gt;not&lt;/code&gt; only
+works on the top-most entry on the stack.&lt;/p&gt;
+&lt;h5 id="vm-translator-code-architecture"&gt;VM Translator – Code architecture&lt;/h5&gt;
+&lt;p&gt;The basic idea animating the design of the VM Translator is twofold:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;having stock "phrases" of asm code corresponding to each combination of arithmetic
+   operation, segment, and VM command that are crafted with placeholder-stubs in
+   place of the actual values involved in the computation of the offsets required,
+   and&lt;/li&gt;
+&lt;li&gt;replacing those stubs with the actual correct values derived from parsing the vm
+   commands.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The code is, thus, organized into five modules:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;#&lt;/th&gt;
+&lt;th&gt;Module&lt;/th&gt;
+&lt;th&gt;Function&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;main.rs&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Handles command line args, calls &lt;code&gt;parser&lt;/code&gt; and &lt;code&gt;asmwriter&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;spec.rs&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Defines basic enums and structs to represent parsed VM commands&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;phrases.rs&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Stubbed-out asm code fragments for every operation and code segment&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;parser.rs&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Parses a &lt;code&gt;.vm&lt;/code&gt; file and returns a &lt;code&gt;Vec&lt;/code&gt; of &lt;code&gt;VmCommand&lt;/code&gt;s&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;asmwriter.rs&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Writes the asm code for each &lt;code&gt;VmCommand&lt;/code&gt; in the &lt;code&gt;Vec&lt;/code&gt; to the output file&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h5 id="development-and-testing-workflow"&gt;Development and testing workflow&lt;/h5&gt;
+&lt;p&gt;The first step was to figure out the "phrases", i.e. the sequence of Hack asm
+instructions, corresponding to a given vm command such as &lt;code&gt;push constant 7&lt;/code&gt; and
+&lt;code&gt;add&lt;/code&gt;. But where does one start?&lt;/p&gt;
+&lt;p&gt;One starts by observing what is actually happening in the memory space when those
+commands are being run. The stock &lt;code&gt;VMEmulator.sh&lt;/code&gt; provides a powerful and convenient
+GUI readout of the contents of the stack, RAM memory, the various code segments of
+the Hack programming model and the ability to step through each VM command. Every
+sample vm program provided has a corresponding &lt;code&gt;*VME.tst&lt;/code&gt; that runs it on the VM
+Emulator.&lt;/p&gt;
+&lt;p&gt;When the behaviour of the command under scrutiny is thus understood, the next logical
+step is to actually write down – by hand – the asm instructions that make
+those commands happen, and then run them on the stock &lt;code&gt;CPUEmulator.sh&lt;/code&gt; that we
+encountered in &lt;a href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/"&gt;Project 4&lt;/a&gt;. This requires
+simulating the test setup conditions that the &lt;code&gt;*VME.tst&lt;/code&gt; script uses.&lt;/p&gt;
+&lt;p&gt;For example: While working on the first test (&lt;code&gt;SimpleAdd.vm&lt;/code&gt;), I ran
+&lt;code&gt;SimpleAddVME.tst&lt;/code&gt; on the VM Emulator and observed the (rather simple) effects on the
+Stack Pointer and the Stack. I then inspected the VM test script and recreated what
+it was doing by hand-coding its setup phase in asm – viz., initializing the
+Stack Pointer to a small enough value that would be visible in the &lt;code&gt;CPUEmulator&lt;/code&gt;
+without having to scroll down. With this setup, I was able to write the
+spectacularly-named &lt;code&gt;handcode/stuff.asm&lt;/code&gt; (hehe) that helped me hash out the asm
+instructions to &lt;code&gt;push&lt;/code&gt; a few arbitrarily-chosen &lt;code&gt;constant&lt;/code&gt;s and implement the binary
+operator &lt;code&gt;add&lt;/code&gt; and unary operator &lt;code&gt;not&lt;/code&gt; for them, testing everything on the
+&lt;code&gt;CPUEmulator&lt;/code&gt;. I followed a similar approach for &lt;a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/7/handcode"&gt;the other&lt;/a&gt; tests and
+operations.&lt;/p&gt;
+&lt;p&gt;The next step was to generalize the phrases from the hand-coded asm files by
+stubbing out the arbitrary values with placeholder text &lt;code&gt;"XYZ"&lt;/code&gt; and code segment
+names with &lt;code&gt;"SEG"&lt;/code&gt; that would be substituted with the values from the parsed &lt;code&gt;.vm&lt;/code&gt;
+files by the VM Translator being developed.&lt;/p&gt;
+&lt;p&gt;After hooking up the parser logic and asm writer logic in the VM Translator, the
+final step was to run the &lt;code&gt;*.tst&lt;/code&gt; script for each test that would run the asm output file
+generated by the VM Translator on the &lt;code&gt;CPUEmulator&lt;/code&gt; and return success or failure. An
+intermediate step was also to compare the asm output file with the one generated by
+the stock &lt;code&gt;VMEmulator&lt;/code&gt;.&lt;/p&gt;
+&lt;h5 id="interesting-problems"&gt;Interesting problems&lt;/h5&gt;
+&lt;h6 id="labels-must-be-unique-for-conditional-operator-phrases"&gt;Labels must be unique for conditional operator phrases&lt;/h6&gt;
+&lt;p&gt;This problem was encountered while working on the second test, &lt;code&gt;StackTest.vm&lt;/code&gt;. Fresh
+from having figured out the basic approach of the overall project in the first test,
+&lt;code&gt;SimpleAdd.vm&lt;/code&gt;, I plugged in the phrases for other arithmetic and conditional
+operators, including &lt;code&gt;Equals&lt;/code&gt;, &lt;code&gt;Lesser Than&lt;/code&gt; and &lt;code&gt;Greater Than&lt;/code&gt;, only to eventually
+find that the assembler was not translating the labels within those phrases in the
+expected manner.&lt;/p&gt;
+&lt;p&gt;To illustrate the problem: the hand-coded asm implementation of &lt;code&gt;Equals&lt;/code&gt; is &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/handcode/eq.asm"&gt;as
+follows&lt;/a&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// Implement Eq&lt;/span&gt;
+&lt;span class="c1"&gt;// ------------&lt;/span&gt;
+
+&lt;span class="c1"&gt;// Get first parameter and store it in D&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="c1"&gt;// D has first parameter now. Get second parameter next&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="c1"&gt;// Second parameter is in RAM[SP], store it in A&lt;/span&gt;
+&lt;span class="c1"&gt;// after dereferencing RAM[SP] which is a pointer&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="c1"&gt;// M has second parameter now.&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;ISEQUAL&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;&lt;span class="nx"&gt;JEQ&lt;/span&gt;
+&lt;span class="c1"&gt;// We will get here only if&lt;/span&gt;
+&lt;span class="c1"&gt;// D is not zero, i.e. the two numbers&lt;/span&gt;
+&lt;span class="c1"&gt;// are dissimilar.&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=!&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ISEQUAL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Notice the definition and use of the label &lt;code&gt;ISEQUAL&lt;/code&gt;. The expectation is that this
+label will resolve to the ROM address of the instruction right after &lt;code&gt;(ISEQUAL)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The phrases for the other two conditional operators mentioned above also follow a
+similar structure, each using a label to conditionally skip over the result.&lt;/p&gt;
+&lt;p&gt;The problem occurs when the same phrase is plugged in multiple times in the same file
+as the result of multiple occurrences of a conditional operator in the &lt;code&gt;.vm&lt;/code&gt; file
+being translated. When this happens, the label &lt;code&gt;(ISEQUAL)&lt;/code&gt; is defined multiple times
+and the assembler resolves it to the ROM address of the instruction after the &lt;em&gt;very
+last occurrence of the label&lt;/em&gt;. This leads to incorrect jump addresses for all the
+other instances of the operator that come before the last occurrence.&lt;/p&gt;
+&lt;p&gt;It is thus evident that the label in the phrases for conditional operators have to be
+made unique so that the assembler can resolve the labels separately. One way to make
+this happen is to append a monotonically increasing variable to the label used in the
+phrases. This implies the use of a local static variable (in C terms). Example:
+instead of &lt;code&gt;(ISEQUAL)&lt;/code&gt;, use &lt;code&gt;(ISEQUAL.0)&lt;/code&gt;, &lt;code&gt;(ISEQUAL.1)&lt;/code&gt;, &lt;code&gt;(ISEQUAL.2)&lt;/code&gt;, et c.&lt;/p&gt;
+&lt;p&gt;I implemented local static variables in Rust using &lt;code&gt;OnceLock&lt;/code&gt;&lt;sup id="sf-nand-to-tetris-2024-project-7-2-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-7-2" class="simple-footnote" title=" The use of the Mutex may be unnecessary and even overkill as this program is only single-threaded. Using std::sync::atomic may be sufficient."&gt;2&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;static&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;E&lt;/span&gt;: &lt;span class="nc"&gt;OnceLock&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Mutex&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;u16&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OnceLock&lt;/span&gt;::&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;E&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_or_init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;||&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Mutex&lt;/span&gt;::&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;eq&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lock&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;eq&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Correspondingly, the label in the phrase was amended to &lt;code&gt;(ISEQUAL.XYZ)&lt;/code&gt; with the
+above code replacing &lt;code&gt;XYZ&lt;/code&gt; with the static variable &lt;code&gt;eq&lt;/code&gt;&lt;sup id="sf-nand-to-tetris-2024-project-7-3-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-7-3" class="simple-footnote" title="Code excerpt showing labels in conditional phrases being made unique."&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;h6 id="to-increment-sp-or-not-to-increment-sp"&gt;To increment SP, or not to increment SP?&lt;/h6&gt;
+&lt;p&gt;The project instructions caution against forgetting to increment the Stack Pointer
+(SP). The SP is to be incremented only for the arithmetic and logic operations
+phrases, and not for the phrases that set each code segment's offset and calculate
+its address.&lt;/p&gt;
+&lt;h6 id="implementing-the-pop-operation"&gt;Implementing the &lt;code&gt;pop&lt;/code&gt; operation&lt;/h6&gt;
+&lt;p&gt;Implementing the &lt;code&gt;pop segment i&lt;/code&gt; operation was initially difficult to do without the
+use of extra scratch registers – my &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/a78a71b76e24e371ee3793f19f98b15983cddd6d/projects/7/hand_code_pop_local_2.asm"&gt;first attempt&lt;/a&gt; utilized
+two. But something seemed fishy as running &lt;code&gt;BasicTestVME.tst&lt;/code&gt; through the
+&lt;code&gt;VMEmulator&lt;/code&gt; did not show those two registers being touched at all:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// Pop local 2 begins now&lt;/span&gt;
+&lt;span class="c1"&gt;// ........................&lt;/span&gt;
+&lt;span class="c1"&gt;// Step 1: Get value to pop&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="c1"&gt;// Store it in first scratch register&lt;/span&gt;
+&lt;span class="c1"&gt;// Only R13, R14 and R15 are free to use&lt;/span&gt;
+&lt;span class="c1"&gt;// in my view, the TEMP segment taking up&lt;/span&gt;
+&lt;span class="c1"&gt;// R5 - R12 for itself.&lt;/span&gt;
+&lt;span class="c1"&gt;// The BasicTestVME.tst does not seem to be&lt;/span&gt;
+&lt;span class="c1"&gt;// using R13 - R15 in my test run, or it&lt;/span&gt;
+&lt;span class="c1"&gt;// must be cleverly clearing them to not&lt;/span&gt;
+&lt;span class="c1"&gt;// give away this insight.&lt;/span&gt;
+&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="c1"&gt;// Now, triumphantly do *(M[R14]) = M[R13]&lt;/span&gt;
+&lt;span class="c1"&gt;// (R14 is a pointer)&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;R13&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;R14&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It wasn't until later that it dawned on me that I could just &lt;a href="https://github.com/guru-das-s/nand2tetris/commit/4d4d2e81e9b961dc2d86cddd92b3915f1e5fa190"&gt;use the
+stack&lt;/a&gt; instead.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// Pop local 2 begins now&lt;/span&gt;
+&lt;span class="c1"&gt;// ........................&lt;/span&gt;
+&lt;span class="c1"&gt;// Step 1: Get data to pop&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="c1"&gt;// Step 2: Push this data to stack&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;
+&lt;span class="c1"&gt;// Now last two elements in stack&lt;/span&gt;
+&lt;span class="c1"&gt;// are the same, with SP pointing&lt;/span&gt;
+&lt;span class="c1"&gt;// to the last NON-EMPTY element.&lt;/span&gt;
+&lt;span class="c1"&gt;// Set SP to the second-to-last spot.&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="c1"&gt;// Step 3: Calculate address to pop to&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;LCL&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;A&lt;/span&gt;
+&lt;span class="c1"&gt;// Set SP to this value&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;
+&lt;span class="c1"&gt;// Increment SP&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="c1"&gt;// Now last two elements of stack are&lt;/span&gt;
+&lt;span class="c1"&gt;// (N-1) ----- address&lt;/span&gt;
+&lt;span class="c1"&gt;// (N)   ----- data     &amp;lt;SP points here&amp;gt;&lt;/span&gt;
+&lt;span class="c1"&gt;// Now, finish it off&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;D&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="nx"&gt;SP&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;M&lt;/span&gt;
+&lt;span class="nx"&gt;M&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nx"&gt;D&lt;/span&gt;
+&lt;span class="c1"&gt;// Now SP points to right place.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This, then, translated to a &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/phrases.rs#L235-L263"&gt;two-part phrase&lt;/a&gt; for the operation: a preamble and the
+actual operation.&lt;/p&gt;
+&lt;h6 id="implementing-the-static-code-segment"&gt;Implementing the &lt;code&gt;static&lt;/code&gt; code segment&lt;/h6&gt;
+&lt;p&gt;The &lt;code&gt;static i&lt;/code&gt; code segment needs to be translated to a variable &lt;code&gt;@FILE.i&lt;/code&gt; where
+&lt;code&gt;FILE&lt;/code&gt; is the filename of the VM file being translated. Because of the good
+level of code encapsulation in the project, it was possible to implement it like
+this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// XYZ will be handled by VmCommand::code_segment_i(), and&lt;/span&gt;
+&lt;span class="c1"&gt;// FILE will be handled by Asmwriter::write().&lt;/span&gt;
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATIC&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;r#"// Push Static XYZ&lt;/span&gt;
+&lt;span class="s"&gt;@FILE.XYZ&lt;/span&gt;
+&lt;span class="s"&gt;A=M&lt;/span&gt;
+&lt;span class="s"&gt;D=A&lt;/span&gt;
+&lt;span class="s"&gt;"#&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the only point in the project (so far!) that the replacement logic spills
+over to an unrelated module (&lt;code&gt;Asmwriter&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;write&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nb"&gt;Result&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Box&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;dyn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Error&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vmcmd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vmcmds&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;asm_code&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vmcmd&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;asm_code&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vmcmd&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;arg1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_some_and&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;segment&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;segment&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Segment&lt;/span&gt;::&lt;span class="n"&gt;Static&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;asm_code&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"FILE"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;asm_code&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="fm"&gt;writeln!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"{}"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;asm_code&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nb"&gt;Ok&lt;/span&gt;&lt;span class="p"&gt;(())&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="what-i-learnt-about-rust-programming"&gt;What I learnt about Rust programming&lt;/h5&gt;
+&lt;p&gt;New things I learnt about Rust and implemented in Project 7 that I did not in the
+previous &lt;a href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/"&gt;Project 6&lt;/a&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Followed the idiomatic way of defining a &lt;a href="https://rust-unofficial.github.io/patterns/idioms/ctor.html"&gt;constructor&lt;/a&gt; for
+    &lt;code&gt;struct Parser&lt;/code&gt; and &lt;code&gt;struct Asmwriter&lt;/code&gt; structs and, thus, keeping the &lt;code&gt;main&lt;/code&gt;
+    module &lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/main.rs"&gt;simple&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Used the iterator methods &lt;code&gt;peekable()&lt;/code&gt; and &lt;code&gt;peek()&lt;/code&gt; to keep track of the current
+    line in the &lt;code&gt;Vec&lt;/code&gt; of lines constructed from &lt;code&gt;BufReader&lt;/code&gt;. This helped the design
+    conform to the suggested API of &lt;code&gt;advance()&lt;/code&gt; in the parser.&lt;/li&gt;
+&lt;li&gt;Used lifetimes for the first time to yoke the lifetime of a raw string to the
+    struct it was embedded in (&lt;code&gt;struct Asmwriter&lt;/code&gt;) and to store the &lt;code&gt;Peekable()&lt;/code&gt; line
+    iterator in &lt;code&gt;struct Parser&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Used the raw string literal &lt;code&gt;r#"&amp;lt;string&amp;gt;"#&lt;/code&gt; &lt;a href="https://doc.rust-lang.org/reference/tokens.html#raw-string-literals"&gt;syntax&lt;/a&gt; to define multiline
+    strings for each of the phrases. This made the asm sequences easy to write and
+    iterate on.&lt;/li&gt;
+&lt;li&gt;Added tests for the very first time: only for the parser, though – didn't
+  have time for any other module.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id="test-script"&gt;Test script&lt;/h5&gt;
+&lt;p&gt;I wrote a short shell script to ensure that the VM Translator passes all test cases.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./projects/7/test.sh &amp;amp;&amp;amp; echo "All test cases passed"
+    Finished `release` profile [optimized] target(s) in 0.14s
+     Running `target/release/vmt -f projects/7/MemoryAccess/BasicTest/BasicTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/MemoryAccess/PointerTest/PointerTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/MemoryAccess/StaticTest/StaticTest.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/StackArithmetic/SimpleAdd/SimpleAdd.vm`
+End of script - Comparison ended successfully
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/vmt -f projects/7/StackArithmetic/StackTest/StackTest.vm`
+End of script - Comparison ended successfully
+All test cases passed
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="postscript"&gt;Postscript&lt;/h5&gt;
+&lt;p&gt;I find that writing code is easy while blogging about it is hard and seemingly more
+time-consuming. Perfection is the enemy of progress, so I would much rather have an
+imperfect blogpost that gets published in a reasonable amount of time than a
+fully-fleshed one that takes forever to be published.&lt;/p&gt;
+&lt;p&gt;The next project, Project 8, extends the VM Translator to add program flow constructs
+such as &lt;code&gt;IF&lt;/code&gt;, &lt;code&gt;RETURN&lt;/code&gt;, &lt;code&gt;FUNCTION&lt;/code&gt;, &lt;code&gt;GOTO&lt;/code&gt;, et c. Looking forward to hacking on
+this in the new year!&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-nand-to-tetris-2024-project-7-1"&gt; No,
+not &lt;a href="https://en.wikipedia.org/wiki/Virtual_machine#System_virtual_machines"&gt;that&lt;/a&gt; virtual machine; rather, the Hack computer virtual machine
+conceptualized as a &lt;a href="https://en.wikipedia.org/wiki/Stack_machine"&gt;stack machine&lt;/a&gt;.  &lt;a href="#sf-nand-to-tetris-2024-project-7-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-nand-to-tetris-2024-project-7-2"&gt;
+The use of the &lt;code&gt;Mutex&lt;/code&gt; may be unnecessary and even overkill as this program is only
+single-threaded. Using &lt;code&gt;std::sync::atomic&lt;/code&gt; may be sufficient. &lt;a href="#sf-nand-to-tetris-2024-project-7-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-nand-to-tetris-2024-project-7-3"&gt;&lt;a href="https://github.com/guru-das-s/nand2tetris/blob/master/projects/7/vmt/src/spec.rs#L35-L40"&gt;Code
+excerpt&lt;/a&gt;
+showing labels in conditional phrases being made unique. &lt;a href="#sf-nand-to-tetris-2024-project-7-3-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="blog"></category><category term="nand2tetris"></category><category term="rust"></category><category term="opensource"></category></entry><entry><title>TIL: The fzf fuzzy finder is amazing</title><link href="https://gurudas.dev/til/using-fzf-vim-ag-bash/" rel="alternate"></link><published>2024-12-14T17:28:27-08:00</published><updated>2024-12-14T17:28:27-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-12-14:/til/using-fzf-vim-ag-bash/</id><summary type="html">&lt;p&gt;&lt;a href="https://github.com/junegunn/fzf"&gt;&lt;code&gt;fzf&lt;/code&gt;&lt;/a&gt; is a general-purpose fuzzy text matching
+tool at its core that takes in a list of newline-separated text and allows the user
+to search for something within those lines and select one or more of the lines by
+typing just a few character sequences into a search field. It is highly customizable
+and the maintainer seems to have a ... &lt;a class="read-more" href="/til/using-fzf-vim-ag-bash/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;a href="https://github.com/junegunn/fzf"&gt;&lt;code&gt;fzf&lt;/code&gt;&lt;/a&gt; is a general-purpose fuzzy text matching
+tool at its core that takes in a list of newline-separated text and allows the user
+to search for something within those lines and select one or more of the lines by
+typing just a few character sequences into a search field. It is highly customizable
+and the maintainer seems to have a good head on his shoulders. I recently started
+using it after a colleague introduced me to it and it has improved my developer
+workflow tremendously.&lt;/p&gt;
+&lt;p&gt;Here are some of the actions and workflows I use &lt;code&gt;fzf&lt;/code&gt; for, multiple times on a daily
+basis.&lt;/p&gt;
+&lt;h5 id="opening-files-in-vim-within-current-directory"&gt;Opening files in vim within current directory&lt;/h5&gt;
+&lt;p&gt;From the shell, it is easy to search for a file within the current directory
+(recursively) and open it in &lt;code&gt;vim&lt;/code&gt;. I have this Bash alias that does that for me with
+just one keystroke:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;f&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;vim $(fzf)&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It is easy to do this from within an open &lt;code&gt;vim&lt;/code&gt; session as well. For this, I use the
+&lt;a href="https://github.com/junegunn/fzf.vim"&gt;&lt;code&gt;fzf.vim&lt;/code&gt; plugin&lt;/a&gt; with these lines in my
+&lt;code&gt;.vimrc&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;C&lt;span class="p"&gt;-&lt;/span&gt;&lt;span class="k"&gt;f&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :GFiles&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:fzf_action &lt;span class="p"&gt;=&lt;/span&gt; {
+        \ &lt;span class="s1"&gt;&amp;#39;ctrl-l&amp;#39;&lt;/span&gt;: &lt;span class="s1"&gt;&amp;#39;split&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        \ &lt;span class="s1"&gt;&amp;#39;ctrl-h&amp;#39;&lt;/span&gt;: &lt;span class="s1"&gt;&amp;#39;vsplit&amp;#39;&lt;/span&gt; }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The above config allows me to use &lt;code&gt;Ctrl + F&lt;/code&gt; from within vim to bring up a list of
+all the files known to Git in that directory (&lt;code&gt;GFiles&lt;/code&gt; = Git Files). From the
+plugin's documentation, one can remap that key combination to just &lt;code&gt;:Files&lt;/code&gt; as well
+for directories that are not git repositories. I can then search for the file I want
+and then open it in a horizontal or vertical split with &lt;code&gt;Ctrl + L&lt;/code&gt; or &lt;code&gt;Ctrl + H&lt;/code&gt;.&lt;/p&gt;
+&lt;h5 id="ag-integration-from-within-vim"&gt;ag integration from within vim&lt;/h5&gt;
+&lt;p&gt;I use &lt;code&gt;ag&lt;/code&gt; (the "silver searcher") instead of &lt;code&gt;grep&lt;/code&gt;, and the &lt;code&gt;fzf.vim&lt;/code&gt; plugin
+supports this natively. I just had to make &lt;a href="https://github.com/guru-das-s/fzf.vim/commits/master/"&gt;a couple of
+customizations&lt;/a&gt; for my
+convenience:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;I &lt;a href="https://github.com/guru-das-s/fzf.vim/commit/07792d18f86aed8853c5bbfa62eb6db871d81551"&gt;renamed&lt;/a&gt; the invocation command from &lt;code&gt;:Ag&lt;/code&gt; to &lt;code&gt;:A&lt;/code&gt;, thereby saving
+   one precious keystroke.&lt;/li&gt;
+&lt;li&gt;The vimscript helper function that fashions the invocation parameters to &lt;code&gt;ag&lt;/code&gt;
+   sets the search query to &lt;code&gt;'^(?=.)'&lt;/code&gt; by default if a search term is not provided.
+   The effect of this is that &lt;code&gt;ag&lt;/code&gt; will print out every single line of every single
+   file in the repo if &lt;code&gt;:A&lt;/code&gt; is invoked as such without the search parameter, which
+   makes no sense.&lt;br&gt;
+   So instead, I &lt;a href="https://github.com/guru-das-s/fzf.vim/commit/a9f45fe47b10bdfd0b88efbe36ae02175fc6f2cf"&gt;changed&lt;/a&gt; the default search query to
+   &lt;code&gt;expand("&amp;lt;cword&amp;gt;")&lt;/code&gt; in case of an empty search query.  The effect of this is that
+   I can just place my cursor on a word and then say &lt;code&gt;:A&lt;/code&gt; to search for that word,
+   which is highly effective.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id="bash-alias-to-add-filename-in-repl-prompt"&gt;Bash alias to add filename in REPL prompt&lt;/h5&gt;
+&lt;p&gt;Adding this line to &lt;code&gt;~/.bashrc&lt;/code&gt; adds the default fzf bindings for bash:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;~/.fzf.bash&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;source&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;~/.fzf.bash
+&lt;span class="c1"&gt;# Set up fzf key bindings and fuzzy completion&lt;/span&gt;
+&lt;span class="nb"&gt;eval&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;fzf&lt;span class="w"&gt; &lt;/span&gt;--bash&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, &lt;code&gt;Ctrl + T&lt;/code&gt; brings the power of &lt;code&gt;fzf&lt;/code&gt; to locating deeply-nested build artifact
+files and using them in a command you're building on the fly at the REPL shell
+prompt.&lt;/p&gt;
+&lt;h5 id="bash-alias-for-git-log"&gt;Bash alias for git log&lt;/h5&gt;
+&lt;p&gt;The single most frequent use case is browsing git log output with &lt;code&gt;fzf&lt;/code&gt;. This is how
+I've hooked things up - and a warning: it's not that pretty to look at, but gets the
+job done, and well.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;FZF_O_OPTS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;--ansi --color=16 --no-mouse --multi --track --tac --disabled --no-print-query --bind j:down,k:up,q:abort&amp;quot;&lt;/span&gt;
+
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_o&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;git&lt;span class="w"&gt; &lt;/span&gt;log&lt;span class="w"&gt; &lt;/span&gt;--color&lt;span class="o"&gt;=&lt;/span&gt;always&lt;span class="w"&gt; &lt;/span&gt;--oneline&lt;span class="w"&gt; &lt;/span&gt;--decorate&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;2&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;fzf&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$FZF_O_OPTS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--preview&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;git show --color=always {1}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_O&lt;span class="o"&gt;()&lt;/span&gt;
+&lt;span class="o"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;num_commits&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;2&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;path&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;commit&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;do_o&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$path&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$num_commits&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;awk&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;{print \$1}&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$commit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;git&lt;span class="w"&gt; &lt;/span&gt;show&lt;span class="w"&gt; &lt;/span&gt;--color&lt;span class="o"&gt;=&lt;/span&gt;always&lt;span class="w"&gt; &lt;/span&gt;-U10&lt;span class="w"&gt; &lt;/span&gt;--stat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$commit&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;o&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;path&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_O&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$path&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-10&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;oo&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;path&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_O&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$path&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-20&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;ooo&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;path&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_O&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$path&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;-30&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;O&lt;span class="o"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;local&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;path&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;1&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;do_O&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$path&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Saying &lt;code&gt;o&lt;/code&gt; at the terminal thus produces a &lt;code&gt;fzf&lt;/code&gt; window containing the 10 most recent
+commits with the highlighted commit &lt;code&gt;git-show&lt;/code&gt;n in the preview pane for easy review.
+One can easily cycle up and down the commits via the &lt;code&gt;j&lt;/code&gt; and &lt;code&gt;k&lt;/code&gt; keys, vim-style.&lt;/p&gt;
+&lt;p&gt;Since I do not care about searching for a specific commit in this mode, I pass
+&lt;code&gt;--disabled&lt;/code&gt; to the &lt;code&gt;fzf&lt;/code&gt; invocation options. Instead, I've chosen to make browsing
+through the list easier by binding the &lt;code&gt;j&lt;/code&gt; and &lt;code&gt;k&lt;/code&gt; keys vim-style, saving on having
+to hold &lt;code&gt;Ctrl&lt;/code&gt; down otherwise.&lt;/p&gt;
+&lt;p&gt;If there is a specific commit I want to inspect further, I simply finalize the &lt;code&gt;fzf&lt;/code&gt;
+selection via &lt;code&gt;Enter&lt;/code&gt;, which then prints out the whole commit with &lt;code&gt;git show -U10
+--stat&lt;/code&gt; for full review.&lt;/p&gt;
+&lt;p&gt;Since I typically make lots of tiny commits as I develop a feature, I end up with
+dozens of atomic commits that I later would need to squash together or prune, which
+requires reviewing all of them in rapid succession. For this reason, I have the
+functions &lt;code&gt;oo()&lt;/code&gt; and &lt;code&gt;ooo()&lt;/code&gt; that show me the latest 20 and 30 commits, respectively,
+with the same behaviour as above. Finally, there's also &lt;code&gt;O()&lt;/code&gt; (capital O) that just
+lists &lt;em&gt;all&lt;/em&gt; the commits of the repo without any limits.&lt;/p&gt;
+&lt;p&gt;I came across the &lt;code&gt;fzf&lt;/code&gt; maintainer's &lt;a href="https://gist.github.com/junegunn/f4fca918e937e6bf5bad"&gt;suggested plumbing&lt;/a&gt; for this same
+feature, but I have not tried it out personally as I am quite happy with my own
+solution.&lt;/p&gt;</content><category term="til"></category><category term="vim"></category><category term="terminal"></category><category term="git"></category></entry><entry><title>Nand2Tetris - Project 6 (Assembler)</title><link href="https://gurudas.dev/blog/2024/10/13/nand-to-tetris-2024-project-6/" rel="alternate"></link><published>2024-10-13T19:32:02-07:00</published><updated>2024-10-13T19:32:02-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-10-13:/blog/2024/10/13/nand-to-tetris-2024-project-6/</id><summary type="html">&lt;p&gt;I wrote a two-pass assembler for the Hack assembly language!&lt;/p&gt;
+&lt;p&gt;This is the sixth and final project of the first half (Hardware) of the Nand2Tetris
+course. In &lt;a href="https://www.nand2tetris.org/course"&gt;Project 6&lt;/a&gt;, the task is to write an
+&lt;a href="https://en.wikipedia.org/wiki/Assembly_language#Assembler"&gt;assembler&lt;/a&gt; for the Hack
+assembly language. Unlike the previous projects which could only be written using the
+custom hardware description language (HDL) used by the ... &lt;a class="read-more" href="/blog/2024/10/13/nand-to-tetris-2024-project-6/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;I wrote a two-pass assembler for the Hack assembly language!&lt;/p&gt;
+&lt;p&gt;This is the sixth and final project of the first half (Hardware) of the Nand2Tetris
+course. In &lt;a href="https://www.nand2tetris.org/course"&gt;Project 6&lt;/a&gt;, the task is to write an
+&lt;a href="https://en.wikipedia.org/wiki/Assembly_language#Assembler"&gt;assembler&lt;/a&gt; for the Hack
+assembly language. Unlike the previous projects which could only be written using the
+custom hardware description language (HDL) used by the Nand2Tetris project, Projects
+6 to 12 allow the use of any programming language that is convenient. I chose to
+write the assembler in Rust because I wanted to continue building substantial things
+with it and learn more of its features in the process.&lt;/p&gt;
+&lt;p&gt;Follow my progress on Github here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/commits/master/"&gt;guru-das-s/nand2tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;div class="toc"&gt;&lt;span class="toctitle"&gt;Table of Contents&lt;/span&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#introducing-the-has-assembler"&gt;Introducing: The has assembler&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#code-walkthrough"&gt;Code walkthrough&lt;/a&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a href="#main-data-structures-used"&gt;Main data structures used&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#code-flow"&gt;Code flow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#does-has-output-match-the-stock-assemblers"&gt;Does has output match the stock assembler's?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#post-completion-thoughts"&gt;Post-completion thoughts&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;hr&gt;
+&lt;h5 id="introducing-the-has-assembler"&gt;Introducing: The &lt;code&gt;has&lt;/code&gt; assembler&lt;/h5&gt;
+&lt;p&gt;My Hack assembler is named &lt;code&gt;has&lt;/code&gt; - a simple portmanteau of the two words. It has the
+following calling card:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ cargo run --release --bin has -- --help
+    Finished `release` profile [optimized] target(s) in 0.12s
+     Running `/home/gurus/projects/nand2tetris/target/release/has --help`
+Hack assembler
+
+Converts Hack assembly files to Hack binary
+
+Usage: has [OPTIONS] --filename &amp;lt;FILENAME&amp;gt;
+
+Options:
+  -f, --filename &amp;lt;FILENAME&amp;gt;
+          Path to Hack ASM file (e.g. Max.asm)
+
+  -o, --output &amp;lt;OUTPUT&amp;gt;
+          Output filename (e.g. Max.hack)
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The only required argument to the assembler is the input filename. The default output
+filename is the input filename with the extension replaced by &lt;code&gt;.hack&lt;/code&gt; unless
+overridden by the &lt;code&gt;--output&lt;/code&gt; flag.&lt;/p&gt;
+&lt;p&gt;Defining a separate binary &lt;code&gt;[[bin]]&lt;/code&gt; for the assembler in &lt;code&gt;Cargo.toml&lt;/code&gt; seemed a
+natural choice to keep using this same repository for all future projects and easily
+build separate binaries for them:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;[[bin]]&lt;/span&gt;
+&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"has"&lt;/span&gt;
+&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"projects/6/has/src/main.rs"&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="code-walkthrough"&gt;Code walkthrough&lt;/h5&gt;
+&lt;p&gt;I followed the same sequence of developing the Hack assembler as suggested in the
+project docs - first, developing the ability to assemble symbol-less asm files and
+then adding a symbol table and enabling the handling of symbols too. &lt;a href="https://github.com/guru-das-s/nand2tetris/tree/master/projects/6/has/src"&gt;Source code
+here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There are four modules in the project in addition to &lt;code&gt;main.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ tree projects/6/has/src/
+projects/6/has/src/
+├── main.rs
+├── parser.rs
+├── spec.rs
+├── symboltable.rs
+└── to_binary.rs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h6 id="main-data-structures-used"&gt;Main data structures used&lt;/h6&gt;
+&lt;p&gt;The fact that there is a finite number of valid values for each of the fields in a
+C-instruction and a max value for the number contained in an A-instruction led me to
+choose enums as my fundamental data structure to base all the logic on.&lt;/p&gt;
+&lt;p&gt;The members of Rust enums have two forms:&lt;sup id="sf-nand-to-tetris-2024-project-6-1-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-6-1" class="simple-footnote" title="Defining an Enum - The Rust Programming Language"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Regular C-like enum members/variants that are just equated to constant values, and&lt;/li&gt;
+&lt;li&gt;Arbitrary constructions of structs/tuples/enums of any datatype!&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This makes it really intuitive to represent the various forms that a valid line of
+Hack assembly code can take:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;HackLine&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Whitespace&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Comment&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Label&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt;: &lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;: &lt;span class="kt"&gt;u16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Variable&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;: &lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;dest&lt;/span&gt;: &lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Destination&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;comp&lt;/span&gt;: &lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;jump&lt;/span&gt;: &lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Jump&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I chose to represent a raw A-instruction (with a value spelt out explicitly) and a
+variable separately even though the latter is also technically a valid A-instruction.
+The members of &lt;code&gt;HackLine::C&lt;/code&gt; are all &lt;code&gt;Options&lt;/code&gt; in order to differentiate erroneous
+&lt;code&gt;None&lt;/code&gt; values from valid &lt;code&gt;&amp;lt;enum&amp;gt;::Null&lt;/code&gt; values.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;HackLine&lt;/code&gt; enum is &lt;code&gt;pub&lt;/code&gt; because I'm using modules to encapsulate code cleanly as
+separate files and I need the enum to be visible to all modules in the project. This
+enum lives in the &lt;code&gt;parser.rs&lt;/code&gt; module.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Destination&lt;/code&gt; and &lt;code&gt;Jump&lt;/code&gt; are C-style enums. Excerpts edited for brevity:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;Destination&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Null&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;M&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;D&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;Jump&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Null&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;JGT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;JEQ&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;JGE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;Comp&lt;/code&gt; is also one, too, but with a custom &lt;code&gt;impl&lt;/code&gt; that defines helper functions to
+map synonym enum variants such as &lt;code&gt;Comp::A&lt;/code&gt; and &lt;code&gt;Comp::M&lt;/code&gt; to the same hex values and figuring out
+the corresponding &lt;code&gt;a&lt;/code&gt;-value for an enum variants.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;Comp&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Zero&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;One&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;MinusOne&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;D&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;M&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;NotD&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;NotA&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;NotM&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;MinusD&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;impl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;to_u8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="kt"&gt;u8&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;Zero&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b101010&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;One&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b111111&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;MinusOne&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b111010&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;D&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b001100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;M&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b110000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;NotD&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b001101&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;NotA&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Comp&lt;/span&gt;::&lt;span class="n"&gt;NotM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mb"&gt;0b110001&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This &lt;code&gt;impl&lt;/code&gt; was required because Rust does not allow multiple enum variants to be
+equated to the same numeric value.&lt;/p&gt;
+&lt;p&gt;These enums all live in the &lt;code&gt;spec.rs&lt;/code&gt; module - which, originally, was intended to
+capture all the specifications of the Hack asm language but now appears to contain
+only the specifications of the C-instruction, the A-instruction being relatively
+trivial to represent.&lt;/p&gt;
+&lt;p&gt;The symbol table is represented as follows, and it lives in its own &lt;code&gt;symboltable.rs&lt;/code&gt;
+module, along with its attendant &lt;code&gt;impl&lt;/code&gt; methods &lt;sup id="sf-nand-to-tetris-2024-project-6-2-back"&gt;&lt;a href="#sf-nand-to-tetris-2024-project-6-2" class="simple-footnote" title="Methods - Rust by Example"&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="nc"&gt;SymbolTable&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;next_free_ram_address&lt;/span&gt;: &lt;span class="kt"&gt;u16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;: &lt;span class="nc"&gt;HashMap&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;u16&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h6 id="code-flow"&gt;Code flow&lt;/h6&gt;
+&lt;p&gt;Starting from the &lt;code&gt;main.rs&lt;/code&gt; entry point: &lt;/p&gt;
+&lt;p&gt;After the &lt;code&gt;clap&lt;/code&gt; crate does its thing and parses command-line arguments passed to the
+program, we read the contents of the input asm file into a &lt;code&gt;Vec&lt;/code&gt; and &lt;code&gt;assemble()&lt;/code&gt; it,
+passing to &lt;code&gt;assemble()&lt;/code&gt; a mutable reference to a &lt;code&gt;symbol_table&lt;/code&gt; duly initialized with
+known arch-specific symbols.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;assemble()&lt;/code&gt; shows the two-pass architecture of the assembler. Why are two passes
+required? It is primarily to handle labels in the asm source file that are forward
+references, i.e. the first use of the label in an instruction occurs &lt;em&gt;before&lt;/em&gt; its
+definition, thus making it impossible to know &lt;em&gt;at that first-use location&lt;/em&gt; what code
+memory location to translate the label to.&lt;/p&gt;
+&lt;p&gt;So in the first pass, the input file is iterated through line-by-line and only
+&lt;code&gt;HackLine::Label&lt;/code&gt;s are processed, adding labels to the list of known symbols in the
+&lt;code&gt;symbol_table&lt;/code&gt; and storing their code memory locations in the symbol table's hashmap.
+In the second pass, each line is parsed, including the labels and variables and
+converted to its binary representation.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;parser.rs&lt;/code&gt; module parses each line and returns the &lt;code&gt;HackLine&lt;/code&gt; enum variants it
+maps to, or an &lt;code&gt;Err()&lt;/code&gt; if the line is not a valid Hack asm line.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;to_binary.rs&lt;/code&gt; module then takes in the parsed line, i.e. the &lt;code&gt;HackLine&lt;/code&gt; enum
+type and converts it to its binary representation. Here, Rust's automatic
+destructuring of enum types allows for easily accessing the parsed data of the
+&lt;code&gt;HackLine&lt;/code&gt; enum type.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;pub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;binary_of&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;: &lt;span class="nc"&gt;HackLine&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;symboltable&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nc"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;SymbolTable&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nb"&gt;Option&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;Whitespace&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;Comment&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;Label&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;None&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Some&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;binary_of_a_type_instruction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;C&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dest&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;comp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;jump&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Some&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;binary_of_c_type_instruction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;dest&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;comp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;jump&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;unwrap&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;HackLine&lt;/span&gt;::&lt;span class="n"&gt;Variable&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;Some&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;binary_of_variable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;symboltable&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The implementation of &lt;code&gt;binary_of_variable()&lt;/code&gt; bears illustration here (the other two
+functions are relatively straightforward):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;binary_of_variable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;: &lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;symbol_table&lt;/span&gt;: &lt;span class="kp"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nc"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;SymbolTable&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="nb"&gt;String&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;symbol_table&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_known&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;symbol_table&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;add_new_variable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;symbol_table&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_variable_address&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;binary_of_a_type_instruction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="does-has-output-match-the-stock-assemblers"&gt;Does &lt;code&gt;has&lt;/code&gt; output match the stock assembler's?&lt;/h5&gt;
+&lt;p&gt;With the assembler in place, I also wrote a shell script to verify that it matches
+the output of the stock assembler that is provided by the Nand2Tetris team in the
+repo. It first runs the stock assembler, &lt;code&gt;tools/Assembler.sh&lt;/code&gt;, on all the &lt;code&gt;.asm&lt;/code&gt;
+files in the Project 6 directory to generate the "ground truth" &lt;code&gt;.hack&lt;/code&gt; files. The
+stock assembler converts a Hack asm file named, say, &lt;code&gt;Test.asm&lt;/code&gt; to &lt;code&gt;Test.hack&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Next, I run my &lt;code&gt;has&lt;/code&gt; assembler on the same files, taking care to specify a different suffix
+to the output binary in order to distinguish it from the ground truth files. The &lt;code&gt;has&lt;/code&gt;
+assembler converts a Hack asm file named, say, &lt;code&gt;Test.asm&lt;/code&gt; to &lt;code&gt;Test.has.hack&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These two files are &lt;code&gt;diff&lt;/code&gt;-ed in the next step. Since the &lt;code&gt;set -e&lt;/code&gt; command is set in
+the test script, any mismatches in the files will cause the &lt;code&gt;diff&lt;/code&gt; command to error
+out and, consequently, the test script itself. Let's run the test script to check:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;$ ./projects/6/test.sh &amp;amp;&amp;amp; echo "No diffs!"
+Assembling /home/gurus/projects/nand2tetris/projects/6/rect/Rect.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/rect/RectL.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/max/Max.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/max/MaxL.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/add/Add.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/pong/Pong.asm
+Assembling /home/gurus/projects/nand2tetris/projects/6/pong/PongL.asm
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/rect/Rect.asm -o projects/6/rect/Rect.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/rect/RectL.asm -o projects/6/rect/RectL.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `target/release/has -f projects/6/max/Max.asm -o projects/6/max/Max.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/max/MaxL.asm -o projects/6/max/MaxL.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/add/Add.asm -o projects/6/add/Add.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/pong/Pong.asm -o projects/6/pong/Pong.has.hack`
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/has -f projects/6/pong/PongL.asm -o projects/6/pong/PongL.has.hack`
+No diffs!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Yes - no diffs.&lt;/p&gt;
+&lt;p&gt;The script also cleans up after itself using the Bash &lt;code&gt;trap &amp;lt;command&amp;gt; EXIT&lt;/code&gt; method.
+This causes &lt;code&gt;&amp;lt;command&amp;gt;&lt;/code&gt; to run at the end of the Bash script's execution - either
+graceful or erroneous. In this case, I clean up all the generated &lt;code&gt;.hack&lt;/code&gt; files in a
+&lt;code&gt;cleanup()&lt;/code&gt; routine upon &lt;code&gt;EXIT&lt;/code&gt;.&lt;/p&gt;
+&lt;h5 id="post-completion-thoughts"&gt;Post-completion thoughts&lt;/h5&gt;
+&lt;p&gt;Writing this assembler was really rewarding not just in terms of learning how a basic
+two-pass assembler works but also because it afforded me the means and opportunity to
+learn more about Rust:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Rust enums and their automatic destructuring in &lt;code&gt;match&lt;/code&gt;es&lt;/li&gt;
+&lt;li&gt;Rust associated methods vs plain functions in &lt;code&gt;impl&lt;/code&gt;s&lt;/li&gt;
+&lt;li&gt;Smartly using &lt;code&gt;None&lt;/code&gt; to indicate an error condition that should not happen vs
+    a valid "empty" value such as, say, &lt;code&gt;Destination::Null&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The compiler forcing me to learn about chaining &lt;code&gt;.as_ref()&lt;/code&gt; to continue accessing a
+    variable more than once&lt;/li&gt;
+&lt;li&gt;Working with modules and setting visibility to functions via &lt;code&gt;pub&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Adding &lt;code&gt;#[cfg(debug_assertions)]&lt;/code&gt; to &lt;code&gt;println!()&lt;/code&gt; macros to effectively make them
+    debug prints&lt;/li&gt;
+&lt;li&gt;Using the &lt;code&gt;clap&lt;/code&gt; crate for parsing command line arguments and doc comments&lt;/li&gt;
+&lt;li&gt;Appreciating how Rust forces you to contend with all possible values of an enum and
+    also errors&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The end of Project 6 marks the half-way point of the entire Nand2Tetris course. I'm
+half way done! This is so cool. With the so-called "Hardware" half of the course
+behind me, now I'm focussed on the next half, the "Software" half. Since the official
+website does not offer PDFs of the relevant chapters from the textbook for the
+remaining projects, I bought &lt;a href="https://www.amazon.com/dp/0262539802?ref=ppx_yo2ov_dt_b_fed_asin_title"&gt;the
+textbook&lt;/a&gt;
+instead.&lt;/p&gt;
+&lt;p&gt;During the course of the next projects, I'll be building a virtual machine
+translator, a compiler for a Java-like high-level language, and an operating system
+for the Hack computer. I am really excited to read the textbook and learn about
+compilers and a "stack machine" in detail.&lt;/p&gt;
+&lt;p&gt;Finally, since I recently added tags to all my blog posts, it is now convenient to
+view all my Nand2Tetris-related posts by checking &lt;a href="https://gurudas.dev/tag/nand2tetris/"&gt;tag:
+nand2tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-nand-to-tetris-2024-project-6-1"&gt;&lt;a href="https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html"&gt;Defining an Enum - The Rust Programming
+Language&lt;/a&gt; &lt;a href="#sf-nand-to-tetris-2024-project-6-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-nand-to-tetris-2024-project-6-2"&gt;&lt;a href="https://doc.rust-lang.org/rust-by-example/fn/methods.html"&gt;Methods - Rust by
+Example&lt;/a&gt; &lt;a href="#sf-nand-to-tetris-2024-project-6-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="blog"></category><category term="nand2tetris"></category><category term="rust"></category><category term="opensource"></category></entry><entry><title>Nand2Tetris - Projects 4 to 5</title><link href="https://gurudas.dev/blog/2024/08/28/nand-to-tetris-2024-project-5/" rel="alternate"></link><published>2024-08-28T00:03:11-07:00</published><updated>2024-08-28T00:03:11-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-08-28:/blog/2024/08/28/nand-to-tetris-2024-project-5/</id><summary type="html">&lt;p&gt;Continuing from &lt;a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/"&gt;where I left off&lt;/a&gt; in my
+&lt;a href="https://www.nand2tetris.org/course"&gt;Nand2Tetris&lt;/a&gt; journey, I went ahead and completed
+Projects 4 (Machine Language) and Project 5 (Computer Architecture) and I now have
+"built" my very own Hack computer from scratch!&lt;/p&gt;
+&lt;p&gt;Follow my progress on Github here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/commits/master/"&gt;guru-das-s/nand2tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;h5 id="project-4-machine-language"&gt;Project 4: Machine Language&lt;/h5&gt;
+&lt;p&gt;This project introduces the Hack instruction set architecture (ISA) and assembly
+language ... &lt;a class="read-more" href="/blog/2024/08/28/nand-to-tetris-2024-project-5/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;Continuing from &lt;a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/"&gt;where I left off&lt;/a&gt; in my
+&lt;a href="https://www.nand2tetris.org/course"&gt;Nand2Tetris&lt;/a&gt; journey, I went ahead and completed
+Projects 4 (Machine Language) and Project 5 (Computer Architecture) and I now have
+"built" my very own Hack computer from scratch!&lt;/p&gt;
+&lt;p&gt;Follow my progress on Github here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/commits/master/"&gt;guru-das-s/nand2tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;h5 id="project-4-machine-language"&gt;Project 4: Machine Language&lt;/h5&gt;
+&lt;p&gt;This project introduces the Hack instruction set architecture (ISA) and assembly
+language corresponding to the Hack computer we're building, and tasks the student
+with writing two programs that provide a good understanding and feel for the
+platform.&lt;/p&gt;
+&lt;p&gt;The first program, &lt;code&gt;Mult.asm&lt;/code&gt; is quite straightforward - to multiply two numbers.&lt;/p&gt;
+&lt;p&gt;The second program, &lt;code&gt;Fill.asm&lt;/code&gt; has a particularly satisfying end result - to turn the
+screen in the CPU Emulator completely black or white based on keyboard input.&lt;/p&gt;
+&lt;p&gt;I haven't written a lot of assembly code, so it was very gratifying to reason about a
+problem in terms of assembly and write code while conforming to the constraints of
+the ISA.&lt;/p&gt;
+&lt;h5 id="project-5-computer-architecture"&gt;Project 5: Computer Architecture&lt;/h5&gt;
+&lt;p&gt;This is the first big project in the course according to me, and the most climactic
+so far, as we progressively build:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;a Memory unit from the RAM chips built earlier,&lt;/li&gt;
+&lt;li&gt;a CPU from the ALU built earlier,&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;and finally wire them both together along with a ROM unit (separate instruction and
+data memories), thus creating a full-fledged Hack computer that can load and execute
+any arbitrary program!&lt;/p&gt;
+&lt;p&gt;The textbook chapter says it best:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;The computer that will emerge from this project will be as simple as possible, but
+not simpler.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It's true - this computer does not have fancy stuff like pipelining, or branch
+predictors or caches of any kind. It also implements the Harvard architecture -
+separate instruction and data memories instead of the Von Neumann architecture model.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The Memory unit&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;The memory unit consists of a 16K RAM, a memory-mapped screen, and a memory-mapped
+keyboard all laid out adjacent to each other with no holes.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The CPU&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This is the crux of the whole project - decoding an instruction from its bits and
+figuring out what action needs to take place for it. To that end, various bits and
+bitfields of the instruction encode specific pieces of information, like the type of
+ALU operation that needs to take place, where to store the results of the operation,
+and what kind of jump is requested.&lt;/p&gt;
+&lt;p&gt;The challenge in this part of the project is to route various bits and bitfields of
+the 16-bit instruction to the A, D and PC registers and implement the
+hardware-software contract.&lt;/p&gt;
+&lt;p&gt;There are a couple of gotchas that make things interesting when testing the code
+using the provided tests. I caught &lt;a href="https://github.com/guru-das-s/nand2tetris/commit/582b905ef29b420295ecda1bcef1e9d9e6605ead"&gt;one edge
+case&lt;/a&gt;
+only when running the test for the next part of the project, i.e. building the
+Computer.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;DMux8Way&lt;/code&gt; saved my ass in both the Memory and CPU parts of this project. It took me
+a while to recognize that the logic for powering the jump detection could easily make
+use of this building block - a side effect of not being a hardware guy, I suppose.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The Computer&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;After the rigours of the CPU design part of the project, this turned out to be
+relatively straightforward. Just three lines of code wiring the ROM, RAM and CPU
+together.&lt;/p&gt;
+&lt;h5 id="looking-ahead"&gt;Looking ahead&lt;/h5&gt;
+&lt;p&gt;The next project, Project 6, is to build an assembler that converts Hack assembly
+code into binary. I've not attempted something of this nature before, and am really
+excited about this!&lt;/p&gt;</content><category term="blog"></category><category term="nand2tetris"></category><category term="opensource"></category></entry><entry><title>TIL: Execute current line in vim</title><link href="https://gurudas.dev/til/vim-execute-current-line-in-bash/" rel="alternate"></link><published>2024-07-29T22:52:04-07:00</published><updated>2024-07-29T22:52:04-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-07-29:/til/vim-execute-current-line-in-bash/</id><summary type="html">&lt;p&gt;I write a lot of notes in Markdown on a daily basis as a sort of personal wiki.
+Almost all of them contain code snippets - shell commands, mostly. Today I learnt
+that there is a much better way to directly execute a shell command listed on its own
+in a single line in &lt;code&gt;vim&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Two ways, in fact.&lt;/p&gt;
+&lt;h5 id="the-first"&gt;The first ... &lt;a class="read-more" href="/til/vim-execute-current-line-in-bash/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/h5&gt;</summary><content type="html">&lt;p&gt;I write a lot of notes in Markdown on a daily basis as a sort of personal wiki.
+Almost all of them contain code snippets - shell commands, mostly. Today I learnt
+that there is a much better way to directly execute a shell command listed on its own
+in a single line in &lt;code&gt;vim&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Two ways, in fact.&lt;/p&gt;
+&lt;h5 id="the-first"&gt;The first&lt;/h5&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;.w&lt;span class="w"&gt; &lt;/span&gt;!bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The fullstop character used here has special significance - it refers to the current
+line. From &lt;code&gt;:help cmdline-ranges&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Some Ex commands accept a line range in front of them.  This is noted as
+[range].  It consists of one or more line specifiers, separated with &amp;#39;,&amp;#39; or
+&amp;#39;;&amp;#39;.
+
+...
+
+Line numbers may be specified with:     :range {address}
+    {number}        an absolute line number  E1247
+    .               the current line                :.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The space between the &lt;code&gt;w&lt;/code&gt; and the &lt;code&gt;!&lt;/code&gt; is important here. Without it, the current file
+would be saved with filename &lt;code&gt;bash&lt;/code&gt;, which is not what we want to happen.&lt;/p&gt;
+&lt;p&gt;From &lt;code&gt;:help !&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;4.1 Filter commands                 *filter*
+
+A filter is a program that accepts text at standard input, changes it in some
+way, and sends it to standard output.  You can use the commands below to send
+some text through a filter, so that it is replaced by the filter output.
+Examples of filters are &amp;quot;sort&amp;quot;, which sorts lines alphabetically, and
+&amp;quot;indent&amp;quot;, which formats C program files (you need a version of indent that
+works like a filter; not all versions do).  The &amp;#39;shell&amp;#39; option specifies the
+shell Vim uses to execute the filter command (See also the &amp;#39;shelltype&amp;#39;
+option).  You can repeat filter commands with &amp;quot;.&amp;quot;.  Vim does not recognize a
+comment (starting with &amp;#39;&amp;quot;&amp;#39;) after the `:!` command.
+
+                            *!*
+!{motion}{filter}   Filter {motion} text lines through the external
+                    program {filter}.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="the-second"&gt;The second&lt;/h5&gt;
+&lt;p&gt;The second method is also documented a few lines from above:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                            *!!*
+!!{filter}          Filter [count] lines through the external program
+                    {filter}.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Just need to say &lt;code&gt;!!bash&lt;/code&gt; (note: no preceding &lt;code&gt;:&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;But this will overwrite the contents of the current line with the output of the
+command in that line.&lt;/p&gt;
+&lt;h5 id="addendum"&gt;Addendum&lt;/h5&gt;
+&lt;p&gt;This same trick can be used to insert a date in a Markdown file: &lt;code&gt;!!date&lt;/code&gt;&lt;/p&gt;</content><category term="til"></category><category term="vim"></category></entry><entry><title>Build your own shell - Codecrafters style</title><link href="https://gurudas.dev/blog/2024/07/28/codecrafters-build-your-own-shell/" rel="alternate"></link><published>2024-07-28T23:26:59-07:00</published><updated>2024-07-28T23:26:59-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-07-28:/blog/2024/07/28/codecrafters-build-your-own-shell/</id><summary type="html">&lt;p&gt;I created my own shell in Rust using the Codecrafters &lt;a href="https://app.codecrafters.io/courses/shell/overview"&gt;Build your own
+shell&lt;/a&gt; challenge.&lt;/p&gt;
+&lt;p&gt;As part of my ongoing efforts to &lt;a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/"&gt;learn by
+doing&lt;/a&gt;, I came across the course on
+LinkedIn and resolved to try it out using Rust, another goal of mine. Here's my
+experience of completing the challenge, and also my thoughts on the Codecrafters platform
+as ... &lt;a class="read-more" href="/blog/2024/07/28/codecrafters-build-your-own-shell/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;I created my own shell in Rust using the Codecrafters &lt;a href="https://app.codecrafters.io/courses/shell/overview"&gt;Build your own
+shell&lt;/a&gt; challenge.&lt;/p&gt;
+&lt;p&gt;As part of my ongoing efforts to &lt;a href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/"&gt;learn by
+doing&lt;/a&gt;, I came across the course on
+LinkedIn and resolved to try it out using Rust, another goal of mine. Here's my
+experience of completing the challenge, and also my thoughts on the Codecrafters platform
+as a whole.&lt;/p&gt;
+&lt;h5 id="capabilities-of-the-shell"&gt;Capabilities of the shell&lt;/h5&gt;
+&lt;p&gt;But first, what can the shell do?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;REPL: Read-Evaluate-Print-Loop structure&lt;/li&gt;
+&lt;li&gt;Handle the following builtin commands:&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;exit&lt;/code&gt;: exit shell with desired exit code&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;echo&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;type&lt;/code&gt;: identify command as a shell builtin, or print its absolute path&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pwd&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cd&lt;/code&gt;: both absolute and relative paths, and also &lt;code&gt;~&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Run arbitrary programs present in &lt;code&gt;$PATH&lt;/code&gt; and print their output.&lt;/li&gt;
+&lt;li&gt;Gracefully handle unidentified commands or programs not in &lt;code&gt;$PATH&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The code is available on Github:
+&lt;a href="https://github.com/guru-das-s/codecrafters-shell"&gt;https://github.com/guru-das-s/codecrafters-shell&lt;/a&gt;.
+Compiling and running it is quite straightforward, with &lt;code&gt;cargo build&lt;/code&gt; and &lt;code&gt;cargo
+run&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;There are more "extensions" in the pipeline: piping, history, autocompletion of
+commands, et c. Really excited to do those when they're available!&lt;/p&gt;
+&lt;h5 id="the-codecrafters-platform"&gt;The Codecrafters platform&lt;/h5&gt;
+&lt;p&gt;I am thoroughly impressed by the Codecrafters platform.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Sign up was smooth, with Github login&lt;/li&gt;
+&lt;li&gt;They provide skeleton code to begin the challenge with&lt;/li&gt;
+&lt;li&gt;The shell is built up, stage by stage, with clear instructions for each stage&lt;/li&gt;
+&lt;li&gt;A convenient one-stop shell script to compile and run your code is provided too&lt;/li&gt;
+&lt;li&gt;The &lt;a href="https://codecrafters.io/blog/cli"&gt;cli tool&lt;/a&gt; runs all the tests for a stage
+    locally before &lt;code&gt;push&lt;/code&gt;-ing&lt;/li&gt;
+&lt;li&gt;The tool also runs tests for all the previous stages to ensure nothing breaks&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;git push&lt;/code&gt;-ing to their server (&lt;code&gt;origin&lt;/code&gt; already configured in the clone step)
+    advances to the next stage&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id="working-on-the-challenge"&gt;Working on the challenge&lt;/h5&gt;
+&lt;p&gt;Making time to work on the challenge was challenging in itself with a full time job
+and other quotidian demands on my time. It was only during my vacation in India that
+I had the time and mindspace to finally take the plunge and start.&lt;/p&gt;
+&lt;p&gt;Visual Studio Code is a great coding tool for Rust, especially with the Rust
+extensions. Being able to see the return types of functions and of function
+parameters is highly useful, as are the real-time compilation errors and the compiler
+diagnostic messages. The vim mode emulation is adequate for my needs too.&lt;/p&gt;
+&lt;p&gt;I chose to go with the C-style mental model of having a list of function pointers for
+every shell builtin:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;enum&lt;/span&gt; &lt;span class="nc"&gt;CmdHandler&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;i32&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Echo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt;&lt;span class="p"&gt;])),&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;HashMap&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;CmdHandler&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Pwd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="p"&gt;()),&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;Cd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="kt"&gt;str&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And a hashmap to map builtin commands to their handlers:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;builtins&lt;/span&gt;: &lt;span class="nc"&gt;HashMap&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nb"&gt;String&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;CmdHandler&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;HashMap&lt;/span&gt;::&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This allowed me to add new commands easily and keep things neat and organized.&lt;/p&gt;
+&lt;p&gt;It was great to discover the Rust equivalents of a few well-known C library functions:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;stat()&lt;/code&gt; &amp;ndash; &lt;code&gt;fs::metadata()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;exec()&lt;/code&gt; &amp;ndash; &lt;code&gt;std::process:Command::new()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;getenv()&lt;/code&gt; &amp;ndash; &lt;code&gt;std::process:env::var()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A pleasant surprise was that I did not have to write any code to support relative
+filepaths for the &lt;code&gt;cd&lt;/code&gt; builtin - the code for the absolute filepaths was sufficient.
+The difficulty level for that stage is marked as &lt;em&gt;Hard&lt;/em&gt; but I literally had to write
+zero new code to pass that!&lt;/p&gt;
+&lt;h5 id="closing-thoughts"&gt;Closing thoughts&lt;/h5&gt;
+&lt;p&gt;I feel quite proud of the fact that I got to build something tangible in Rust.&lt;/p&gt;
+&lt;p&gt;My earlier attempts at learning Rust were limited to solving Advent of Code 2023
+problems. In my experience, it was quite thrilling to work on them in real time, i.e.
+in December when every day would bring forth a new problem, but once I "fell off the
+wagon" I found it difficult to keep my motivation levels up and feel excited about
+solving them. Being part of an active community seems like a great motivator for me.&lt;/p&gt;
+&lt;p&gt;Now that I'm done with the challenge, I've been checking out other solutions in Rust
+on Github to see what I can learn from them. I realize that my solution is very
+C-like (because I'm primarily a C programmer) and doesn't use many Rust-y features
+like &lt;a href="https://doc.rust-lang.org/stable/rust-by-example/attribute.html"&gt;attributes&lt;/a&gt; or
+&lt;a href="https://doc.rust-lang.org/stable/rust-by-example/trait.html"&gt;traits&lt;/a&gt;. Learning a new
+programming language is like learning a new language in many ways - immersing oneself
+in well-written code accelerates and supplements self-learning.&lt;/p&gt;
+&lt;p&gt;I also appreciated the autogenerated email I received upon completion which had great
+suggestions on what to do next: retrying the challenge in a different language,
+sharing the experience (and code) with others, or trying a new challenge. I'm
+seriously considering taking up the final suggestion!&lt;/p&gt;</content><category term="blog"></category><category term="rust"></category></entry><entry><title>Nand2Tetris - Projects 1 to 3</title><link href="https://gurudas.dev/blog/2024/04/13/nand-to-tetris-2024-project-3/" rel="alternate"></link><published>2024-04-13T11:53:34-07:00</published><updated>2024-04-13T11:53:34-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-04-13:/blog/2024/04/13/nand-to-tetris-2024-project-3/</id><summary type="html">&lt;p&gt;&lt;a href="https://www.nand2tetris.org/"&gt;Nand2Tetris&lt;/a&gt; is a very interesting "learning by doing"
+free and open-source course that enables one to learn how a computer is designed from the
+ground up, and also how it is programmed from the very lowest of levels. It is a
+fantastic course offered in two parts (first building the hardware for the computer,
+and then the software) and is ... &lt;a class="read-more" href="/blog/2024/04/13/nand-to-tetris-2024-project-3/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;a href="https://www.nand2tetris.org/"&gt;Nand2Tetris&lt;/a&gt; is a very interesting "learning by doing"
+free and open-source course that enables one to learn how a computer is designed from the
+ground up, and also how it is programmed from the very lowest of levels. It is a
+fantastic course offered in two parts (first building the hardware for the computer,
+and then the software) and is very rewarding to those who finish it. I started
+working on it this year after having discovered it via &lt;a href="https://news.ycombinator.com/item?id=38735066"&gt;Hacker
+News&lt;/a&gt; and have completed Projects 1 to
+3 of 12 projects in total. You may follow my progress on Github here:
+&lt;a href="https://github.com/guru-das-s/nand2tetris/commits/master/"&gt;guru-das-s/nand2tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://www.nand2tetris.org/course"&gt;projects&lt;/a&gt; in this course start from
+designing various boolean gates using NAND gates as a building block and slowly build
+upon each other to create a full-fledged computer, complete with its own corresponding
+assembler, compiler and operating system, thus allowing for running rich and
+complex full-featured programs such as
+&lt;a href="https://en.wikipedia.org/wiki/Tetris"&gt;Tetris&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;My motivation for starting and committing to this project is to fill in any gaps in
+my understanding of how computing systems work, from the application layer down to
+the individual components. Modern-day computer architectures such as x86 and ARM have
+many layers of optimization and complexity to achieve industrial levels of
+performance. This course pares away all inessential elements during the design
+process, retaining only clean and simple elements for illustrating the basic
+concepts. Most of all, I &lt;em&gt;love&lt;/em&gt; the 100% hands-on approach because I learn better by
+&lt;em&gt;doing&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Here are some thoughts and observations on each of the projects I've completed so
+far:&lt;/p&gt;
+&lt;h5 id="project-1-boolean-logic"&gt;Project 1: Boolean logic&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;This project is about creating gates such as OR, NOT, and MUX along with their
+   16-bit versions using basic Boolean logic. The NAND gate is provided as a
+   fundamental building block (no need to build it).&lt;/li&gt;
+&lt;li&gt;This introduces the Hardware Simulator Java program, the custom Hardware
+   Description Language (HDL) and the whole write-test-debug iteration cycle.&lt;/li&gt;
+&lt;li&gt;Being an software guy myself, writing and thinking in HDL was a pleasant
+   challenge. I didn't get to do much of this during my undergrad which was not all
+   that electronics-focused, so it was quite enjoyable to do it now.&lt;/li&gt;
+&lt;li&gt;I noticed that a couple of test scripts and "ground-truth" comparison files
+   provided in the project's source code were incorrect and had to fetch the right
+   versions from poking around on Github. I also sent the Nand2Tetris admins an email
+   about this; Prof. Shimon responded, acknowledging a recent issue with the software
+   suite.&lt;/li&gt;
+&lt;li&gt;Overall, this project was very satisfying and straightforward.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id="project-2-boolean-arithmetic-and-building-an-alu"&gt;Project 2: Boolean arithmetic and building an ALU&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;The concept of two's complement was explained clearly with motivation for its
+   existence, and illustrated with examples of subtraction and addition with
+   overflow.&lt;/li&gt;
+&lt;li&gt;The most thrilling part of this project was to build an Arithmetic and Logic Unit
+   from scratch, and really understand how various operations could be built using
+   just addition and subtraction.&lt;/li&gt;
+&lt;li&gt;The ALU is to be built in two stages. I thought the first stage was going to be
+   difficult (getting all the operations right) and the second stage (detecting
+   negative numbers and zero in the output), easy. It was the opposite - I struggled
+   with the second stage mostly because I didn't know a quirk of the HDL's syntax. I
+   had to read the HDL Guide and also consult the
+   &lt;a href="http://nand2tetris-questions-and-answers-forum.52.s1.nabble.com/"&gt;forum&lt;/a&gt; for
+   guidance.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id="project-3-building-ram-chips"&gt;Project 3: Building RAM chips&lt;/h5&gt;
+&lt;ol&gt;
+&lt;li&gt;This project introduces sequential logic and building a 16K Random Access Memory
+   (RAM) chip using banks of registers, which are built from individual registers
+   which, in turn, are built from Bits. The D Flip-flop is provided as a fundamental
+   building block (no need to build it).&lt;/li&gt;
+&lt;li&gt;This was a very satisfying project to do because working with sequential logic was
+   a nice change after two projects of combinatorial logic.&lt;/li&gt;
+&lt;li&gt;Once the basic RAM8 was complete (RAM chip containing just 8 registers), it was a
+   breeze to complete the other larger RAM chips, &lt;em&gt;mutatis mutandis&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;Creating the Program Counter (PC) was also very interesting because of the clever
+   ways in which internal pins need to be used.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h5 id="looking-ahead"&gt;Looking ahead&lt;/h5&gt;
+&lt;p&gt;Things start to get even more interesting from Project 4 onward. It is about learning
+the assembly language of the particular computer that is being built and writing
+programs in it using the reference assembler provided. Project 5 is to create a full
+computer using the ALU and RAM that were just built earlier, and Project 6 is to
+write an assembler in any high-level language, to replace the provided assembler.&lt;/p&gt;
+&lt;p&gt;Really excited for the upcoming projects!&lt;/p&gt;</content><category term="blog"></category><category term="nand2tetris"></category><category term="opensource"></category></entry><entry><title>TIL: Easily cycle through all open tmux sessions</title><link href="https://gurudas.dev/til/tmux-cycle-through-all-open-sessions/" rel="alternate"></link><published>2024-03-30T08:32:00-07:00</published><updated>2024-03-30T08:32:00-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-03-30:/til/tmux-cycle-through-all-open-sessions/</id><summary type="html">&lt;p&gt;My &lt;code&gt;tmux&lt;/code&gt; workflow thus far has been strictly windows- and panes-based, meaning I
+usually launch only one tmux session and then create named windows and panes
+(horizontal and vertical splits) as necessary to deal with the set of projects for
+the day. While this works well, things get quickly out of hand when there is some
+firefighting to be done ... &lt;a class="read-more" href="/til/tmux-cycle-through-all-open-sessions/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;My &lt;code&gt;tmux&lt;/code&gt; workflow thus far has been strictly windows- and panes-based, meaning I
+usually launch only one tmux session and then create named windows and panes
+(horizontal and vertical splits) as necessary to deal with the set of projects for
+the day. While this works well, things get quickly out of hand when there is some
+firefighting to be done and context-switching between the projects is frequent,
+involving creating new windows to explore new ideas. &lt;/p&gt;
+&lt;p&gt;I draw the line at nine open windows because that's the maximum number of windows I
+can quickly jump to with one keystroke using the &lt;code&gt;prefix + &amp;lt;number&amp;gt;&lt;/code&gt; keyboard
+shortcut. I have no interest in dealing with double-digit numbers of windows. But
+what if I have, say, three different projects to work on during the day, and I "run
+out" of windows? This week, I realized that there is a better way to effect a clean
+context switch and also organize my tmux windows better: by using the native sessions
+feature.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;man tmux&lt;/code&gt; has this to say about sessions:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;When tmux is started, it creates a new session with a single window and displays it
+on screen.  A status line at the bottom of the screen shows information on the
+current session and is used to enter interactive commands.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;A session is a single collection of pseudo terminals under the management of tmux.
+Each session has one or more windows linked to it. [...] and any
+number of windows may be present in the same session.  Once all sessions are killed,
+tmux exits.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Command&lt;/th&gt;
+&lt;th&gt;Comment&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;tmux&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Launch new unnamed &lt;code&gt;tmux&lt;/code&gt; session&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;prefix&amp;gt; + $&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;From within &lt;code&gt;tmux&lt;/code&gt;, rename current session&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;tmux new -s &amp;lt;session&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Launch new session named &lt;code&gt;&amp;lt;session&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;tmux ls&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;List all open &lt;code&gt;tmux&lt;/code&gt; sessions&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;prefix&amp;gt; + s&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;List all open &lt;code&gt;tmux&lt;/code&gt; sessions from within a session&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;tmux attach -t &amp;lt;session&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Attach to an open session named &lt;code&gt;&amp;lt;session&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;prefix&amp;gt; + d&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;From within &lt;code&gt;tmux&lt;/code&gt;, detach from current session&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;a href="https://github.com/guru-das-s/dotfiles/commit/8fd159707076a5b8a594bf4f6cb1a716042829da"&gt;Adding these
+lines&lt;/a&gt;
+to my &lt;code&gt;.tmux.conf&lt;/code&gt; solved my issue:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Easily cycle between open tmux sessions&lt;/span&gt;
+unbind&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;
+bind-key&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;switch-client&lt;span class="w"&gt; &lt;/span&gt;-p
+unbind&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+bind-key&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;switch-client&lt;span class="w"&gt; &lt;/span&gt;-n
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Turns out that &lt;code&gt;&amp;lt;prefix&amp;gt; + (&lt;/code&gt; or &lt;code&gt;)&lt;/code&gt; enables switching to the previous or next open
+session. I find this cumbersome because of the need to use the &lt;code&gt;Shift&lt;/code&gt; key and so I
+remapped them to single keys. Now I can easily cycle through all my open sessions
+using &lt;code&gt;&amp;lt;prefix&amp;gt; + 0&lt;/code&gt; or &lt;code&gt;&amp;lt;prefix&amp;gt; + =&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;And, since I have this ability, I can happily create as many new sessions as I
+need - one per project - without having to fear using the &lt;code&gt;Shift&lt;/code&gt; key to type in the
+paranthesis characters each time I want to switch to another session I created.&lt;/p&gt;
+&lt;p&gt;You may well wonder how I could access the &lt;code&gt;0&lt;/code&gt;-th pane if &lt;code&gt;&amp;lt;prefix&amp;gt; + 0&lt;/code&gt; has been
+re-bound as above. I don't, because I don't have a &lt;code&gt;0&lt;/code&gt;-th pane at all. I number my
+panes starting from &lt;code&gt;1&lt;/code&gt; and not &lt;code&gt;0&lt;/code&gt; via these lines:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Start windows and panes at 1, not 0&lt;/span&gt;
+&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-g&lt;span class="w"&gt; &lt;/span&gt;base-index&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+setw&lt;span class="w"&gt; &lt;/span&gt;-g&lt;span class="w"&gt; &lt;/span&gt;pane-base-index&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And for good measure and clean pane number management:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Automatically renumber all windows/panes when one is killed&lt;/span&gt;
+&lt;span class="c1"&gt;# e.g. 1 2 [3] 4   .... 3 is killed, results in:&lt;/span&gt;
+&lt;span class="c1"&gt;#      1 2 3       .... and not 1 2 4, which would call for a :movew -r&lt;/span&gt;
+&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-g&lt;span class="w"&gt; &lt;/span&gt;renumber-windows&lt;span class="w"&gt; &lt;/span&gt;on
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And I chose &lt;code&gt;=&lt;/code&gt; to switch to the next session because of its proximity to the
+&lt;code&gt;Backspace&lt;/code&gt; key (easier to reach).&lt;/p&gt;
+&lt;p&gt;Bottom line: my workflow is now the following.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Open terminal, navigate to project directory, launch first &lt;code&gt;tmux&lt;/code&gt; session&lt;/li&gt;
+&lt;li&gt;Create/kill as many windows and panes I need&lt;/li&gt;
+&lt;li&gt;If I need to switch to a new project, detach from current session&lt;/li&gt;
+&lt;li&gt;Navigate to new project directory, launch new session&lt;/li&gt;
+&lt;li&gt;Cycle through open sessions using &lt;code&gt;&amp;lt;prefix&amp;gt; + 0&lt;/code&gt; or &lt;code&gt;&amp;lt;prefix&amp;gt; + =&lt;/code&gt;&lt;ul&gt;
+&lt;li&gt;I mostly end up using only the latter because of its proximity to the Backspace
+    key.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The explicit switching from one session to another not only separates one project's
+windows from another in &lt;code&gt;tmux&lt;/code&gt;, making for clean organization, but also helps me
+context-switch in my mind more effectively.&lt;/p&gt;</content><category term="til"></category><category term="tmux"></category></entry><entry><title>TIL: Show current C function in vim status line sans plugins</title><link href="https://gurudas.dev/til/vim-show-current-c-function/" rel="alternate"></link><published>2024-03-13T00:10:11-07:00</published><updated>2024-03-13T00:10:11-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-03-13:/til/vim-show-current-c-function/</id><summary type="html">&lt;p&gt;I primarily work on the Linux kernel (which is written almost entirely in C) and I
+frequently find myself needing to know which function I'm currently in while browsing
+the codebase. There is, of course, the dictum that functions should be as small as
+possible and not more than a screen's length long; this is mostly just a guiding
+principle ... &lt;a class="read-more" href="/til/vim-show-current-c-function/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;I primarily work on the Linux kernel (which is written almost entirely in C) and I
+frequently find myself needing to know which function I'm currently in while browsing
+the codebase. There is, of course, the dictum that functions should be as small as
+possible and not more than a screen's length long; this is mostly just a guiding
+principle.&lt;/p&gt;
+&lt;p&gt;There are plugins to do this sort of thing, but I do not want to become overly
+dependent on them. I am more partial towards things I can use that are just plain
+vanilla vimscript because I can just stick them in my &lt;code&gt;.vimrc&lt;/code&gt; when setting up a new
+workstation or logging into a remote server somewhere.&lt;/p&gt;
+&lt;h5 id="the-function"&gt;The function&lt;/h5&gt;
+&lt;p&gt;Here's the function in all its inscrutable beauty:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c"&gt;&amp;quot; Show function name on demand, mapped to key &amp;#39;,&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;fun&lt;/span&gt;&lt;span class="p"&gt;!&lt;/span&gt; ShowFuncName&lt;span class="p"&gt;()&lt;/span&gt;
+    echohl ModeMsg
+    echo getline&lt;span class="p"&gt;(&lt;/span&gt;search&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;^[^ \t#/]\\{2}.*[^:]\s*$&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;bWn&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    echohl None
+&lt;span class="k"&gt;endfun&lt;/span&gt;
+
+nmap &lt;span class="p"&gt;,&lt;/span&gt; :&lt;span class="k"&gt;call&lt;/span&gt; ShowFuncName&lt;span class="p"&gt;()&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I couldn't locate the StackOverflow answer I had sourced this from (even though this
+post says TIL, I did not learn this &lt;em&gt;literally&lt;/em&gt; today) so I used &lt;a href="https://gemini.google.com/app"&gt;Gemini
+AI&lt;/a&gt; to break this down for me.&lt;/p&gt;
+&lt;h5 id="the-breakdown"&gt;The breakdown&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;echohl ModeMsg&lt;/code&gt;: Sets the highlighting for the echo output to the mode message
+style. This ensures the function name visually stands out.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;getline(search("^[^ \t#/]\\{2}.*[^:]\s*$", 'bWn'))&lt;/code&gt;: This line is the core
+logic for finding the function name. Let's break down the search pattern:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;^[^ \t#/]&lt;/code&gt; - Matches the beginning of the line (&lt;code&gt;^&lt;/code&gt;) and excludes whitespace (&lt;code&gt;&lt;/code&gt; and &lt;code&gt;\t&lt;/code&gt;), tabs (&lt;code&gt;/&lt;/code&gt;), and comments (&lt;code&gt;#&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;\\{2}&lt;/code&gt; - Matches exactly two characters (the function name can have at least two characters).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;.*&lt;/code&gt; - Matches any characters (captures the function name).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;[^:]&lt;/code&gt; - Excludes the colon (&lt;code&gt;:&lt;/code&gt;) which might follow the function name.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;\s*$&lt;/code&gt; - Matches whitespace at the end of the line.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bWn&lt;/code&gt; - Flags:&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;b&lt;/code&gt; - Starts searching backward from the current line.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;W&lt;/code&gt; - Considers word boundaries.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;n&lt;/code&gt; - Doesn't include the matching pattern in the returned line.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This search essentially finds the line before the current line that starts with
+two non-whitespace, non-tab, non-comment characters, followed by any characters
+(the function name), excluding the colon and ending with whitespace.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;echo&lt;/code&gt;: Prints the captured line containing the function name.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;echohl None&lt;/code&gt;: Resets the highlighting back to the default.&lt;/p&gt;
+&lt;h5 id="the-demo"&gt;The demo&lt;/h5&gt;
+&lt;p&gt;If you were at &lt;a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mfd/qcom-pm8008.c?h=v6.8#n178"&gt;this
+line&lt;/a&gt;
+in &lt;code&gt;drivers/mfd/qcom-pm8008.c&lt;/code&gt; (which is a driver I authored) and pressed &lt;code&gt;,&lt;/code&gt;
+to trigger the above command, you would see this in the vim statusline:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;static&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pm8008_probe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;struct&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;i2c_client&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;which is, in my view, a very clean way of doing things.&lt;/p&gt;</content><category term="til"></category><category term="vim"></category></entry><entry><title>TIL: How to unify all three of Ubuntu's clipboards</title><link href="https://gurudas.dev/til/single-clipboard-ubuntu/" rel="alternate"></link><published>2024-03-02T18:24:00-08:00</published><updated>2024-03-02T18:24:00-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2024-03-02:/til/single-clipboard-ubuntu/</id><summary type="html">&lt;p&gt;Yes, you read that right - Ubuntu (which uses the X server) has a grand total of
+&lt;em&gt;three&lt;/em&gt; clipboards: As the Inter-Client Communication Conventions Manual (ICCCM)
+&lt;a href="https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html#:~:text=large%20data%20transfers.-,Use%20of%20Selection%20Atoms,-Defining%20a%20new"&gt;explains&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Selection Atoms&lt;/p&gt;
+&lt;p&gt;There can be an arbitrary number of selections, each named by an atom. To conform
+with the inter-client conventions, however, clients need deal with only these three
+selections:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;PRIMARY&lt;/li&gt;
+&lt;li&gt;SECONDARY&lt;/li&gt;
+&lt;li&gt;CLIPBOARD&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Of ... &lt;a class="read-more" href="/til/single-clipboard-ubuntu/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;Yes, you read that right - Ubuntu (which uses the X server) has a grand total of
+&lt;em&gt;three&lt;/em&gt; clipboards: As the Inter-Client Communication Conventions Manual (ICCCM)
+&lt;a href="https://x.org/releases/X11R7.6/doc/xorg-docs/specs/ICCCM/icccm.html#:~:text=large%20data%20transfers.-,Use%20of%20Selection%20Atoms,-Defining%20a%20new"&gt;explains&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Selection Atoms&lt;/p&gt;
+&lt;p&gt;There can be an arbitrary number of selections, each named by an atom. To conform
+with the inter-client conventions, however, clients need deal with only these three
+selections:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;PRIMARY&lt;/li&gt;
+&lt;li&gt;SECONDARY&lt;/li&gt;
+&lt;li&gt;CLIPBOARD&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Of these, only &lt;code&gt;PRIMARY&lt;/code&gt; and &lt;code&gt;CLIPBOARD&lt;/code&gt; are commonly used by applications. As
+&lt;code&gt;freedesktop.org&lt;/code&gt;
+&lt;a href="https://specifications.freedesktop.org/clipboards-spec/clipboards-latest.txt"&gt;explains&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There are two historical interpretations of the ICCCM:&lt;/p&gt;
+&lt;p&gt;a) use PRIMARY for mouse selection, middle mouse button paste, and
+   explicit cut/copy/paste menu items (Qt 2, GNU Emacs 20)&lt;/p&gt;
+&lt;p&gt;b) use CLIPBOARD for the Windows-style cut/copy/paste menu items;
+   use PRIMARY for the currently-selected text, even if it isn't
+   explicitly copied, and for middle-mouse-click (Netscape, Mozilla,
+   XEmacs, some GTK+ apps)&lt;/p&gt;
+&lt;p&gt;No one ever does anything interesting with SECONDARY as far as I can
+tell.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h5 id="what-led-me-to-this-discovery"&gt;What led me to this discovery? &lt;a name="copyways"&gt;&lt;/a&gt;&lt;/h5&gt;
+&lt;p&gt;There are two main ways to copy and paste stuff from one application to another on
+Ubuntu:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Select text using mouse, &lt;code&gt;Ctrl-C&lt;/code&gt;, &lt;code&gt;Ctrl-V&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Select text using mouse, paste using middle click of mouse.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It was when I found myself naturally mixing up these two methods and expecting this
+unsupported hybrid scheme to work that I grew frustrated and decided to investigate
+why the scheme that occurred to me naturally did not, in fact, work. Allow me to
+explain using a couple of scenarios.&lt;/p&gt;
+&lt;h5 id="terminal-terminal"&gt;Terminal → Terminal&lt;/h5&gt;
+&lt;p&gt;As a heavy terminal and &lt;code&gt;tmux&lt;/code&gt; user, my workflow involves frequently copying stuff I
+use &lt;code&gt;tmux&lt;/code&gt;, so I need to copy stuff from one tmux pane to another. To achieve this, I
+use the second method above.&lt;/p&gt;
+&lt;p&gt;This is intuitive to me because the two operations occur in the same application and
+what the mouse selects, it copies, too. The first method also works, albeit with a twist:
+need to use &lt;code&gt;Ctrl-Shift-C&lt;/code&gt; and &lt;code&gt;Ctrl-Shift-V&lt;/code&gt;. So this is technically a &lt;em&gt;third&lt;/em&gt; way
+of copying and pasting on Ubuntu.&lt;/p&gt;
+&lt;h5 id="non-terminal-application-non-terminal-application"&gt;Non-terminal application → non-terminal application&lt;/h5&gt;
+&lt;p&gt;Example: copying from one Google Chrome tab to another.&lt;/p&gt;
+&lt;p&gt;Here, the first method is intuitive to me because it is what has been ingrained in me
+from a young age thanks to Windows.&lt;/p&gt;
+&lt;h5 id="non-terminal-application-terminal"&gt;Non-terminal application → Terminal&lt;/h5&gt;
+&lt;p&gt;Example: copying from Google Chrome to the terminal.&lt;/p&gt;
+&lt;p&gt;Here, too, the first method is intuitive to me, albeit with a twist. The twist is
+that you need to paste using &lt;code&gt;Ctrl-Shift-V&lt;/code&gt; in the terminal. So this is technically a
+&lt;em&gt;fourth&lt;/em&gt; way of copying and pasting on Ubuntu.&lt;/p&gt;
+&lt;h5 id="terminal-non-terminal-application"&gt;Terminal → non-terminal application&lt;/h5&gt;
+&lt;p&gt;Example: copying from the terminal to Google Chrome.&lt;/p&gt;
+&lt;p&gt;Here is where my brain crosses out disruptively. What is intuitive to me is copying
+by selecting the text using the mouse, and pasting using &lt;code&gt;Ctrl-V&lt;/code&gt;. This does not
+work. This is what is intuitive to me because I used PuTTy on Windows for a long time
+for work and this is how it works there.&lt;/p&gt;
+&lt;p&gt;Really, this was the main use case that frustrated me because I frequently have to
+look up a compilation error message, or copy some logs to a chat client. I would
+select to copy using the mouse, paste using &lt;code&gt;Ctrl-V&lt;/code&gt;, fail, then middle-click. I did
+this so many times that I found it disruptive to my workflow and had to fix this.&lt;/p&gt;
+&lt;h5 id="the-fix-unify-both-clipboards"&gt;The fix: unify both clipboards&lt;/h5&gt;
+&lt;p&gt;Install &lt;a href="https://www.nongnu.org/autocutsel/"&gt;autocutsel&lt;/a&gt; and add this to your
+&lt;code&gt;.bashrc&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;autocutsel&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;CLIPBOARD&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;
+autocutsel&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;PRIMARY&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, Ubuntu behaves as though there is only a single, common clipboard for all
+applications - terminal or otherwise. To add to the &lt;a href="#copyways"&gt;above list&lt;/a&gt;, you now
+can:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Select text using mouse, &lt;code&gt;Ctrl-C&lt;/code&gt;, paste using middle click of mouse.&lt;/li&gt;
+&lt;li&gt;Select text using mouse, paste using &lt;code&gt;Ctrl-V&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;You can also go one step further and unify the third clipboard too, but I have not
+tried this out personally.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;autocutsel&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;SECONDARY&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;StackOverflow helped me a lot &lt;sup id="sf-single-clipboard-ubuntu-1-back"&gt;&lt;a href="#sf-single-clipboard-ubuntu-1" class="simple-footnote" title="Merge primary and clipboard X selections "&gt;1&lt;/a&gt;&lt;/sup&gt; &lt;sup id="sf-single-clipboard-ubuntu-2-back"&gt;&lt;a href="#sf-single-clipboard-ubuntu-2" class="simple-footnote" title=" How can I merge the gnome clipboard and the X selection? "&gt;2&lt;/a&gt;&lt;/sup&gt; while researching this fix and learning more about the underlying architecture.&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-single-clipboard-ubuntu-1"&gt;&lt;a href="https://unix.stackexchange.com/questions/628492/merge-primary-and-clipboard-x-selections"&gt;Merge primary and clipboard X
+selections&lt;/a&gt;
+ &lt;a href="#sf-single-clipboard-ubuntu-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-single-clipboard-ubuntu-2"&gt; &lt;a href="https://superuser.com/questions/68170/how-can-i-merge-the-gnome-clipboard-and-the-x-selection"&gt;How can I merge the gnome clipboard and the X
+selection?&lt;/a&gt;
+ &lt;a href="#sf-single-clipboard-ubuntu-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="til"></category><category term="terminal"></category></entry><entry><title>Fun with git rebase --interactive</title><link href="https://gurudas.dev/blog/2023/12/02/git-rebase-interactive/" rel="alternate"></link><published>2023-12-02T23:41:29-08:00</published><updated>2023-12-02T23:41:29-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2023-12-02:/blog/2023/12/02/git-rebase-interactive/</id><summary type="html">&lt;p&gt;&lt;em&gt;This is the second in a series of blog posts related to some powerful features of
+&lt;code&gt;git&lt;/code&gt; I've used over the years. Previously, I wrote about &lt;code&gt;git rebase --onto&lt;/code&gt; which
+&lt;a href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/"&gt;you can read here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git&lt;/code&gt; offers many powerful features, and one such feature I have used
+extensively in kernel development is &lt;code&gt;git rebase --interactive&lt;/code&gt;. Here is what the man
+page ... &lt;a class="read-more" href="/blog/2023/12/02/git-rebase-interactive/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;em&gt;This is the second in a series of blog posts related to some powerful features of
+&lt;code&gt;git&lt;/code&gt; I've used over the years. Previously, I wrote about &lt;code&gt;git rebase --onto&lt;/code&gt; which
+&lt;a href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/"&gt;you can read here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git&lt;/code&gt; offers many powerful features, and one such feature I have used
+extensively in kernel development is &lt;code&gt;git rebase --interactive&lt;/code&gt;. Here is what the man
+page has to say about it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;-i, --interactive
+    Make a list of the commits which are about to be rebased. Let the user edit that
+    list before rebasing. This mode can also be used to split commits (see SPLITTING
+    COMMITS below).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That this feature exists is impressive on its own: in the list of commits that
+appears, one can reorder commits, delete them, rework their commit messages, combine
+("squash", "fixup") them, and even merge them in recent versions of &lt;code&gt;git&lt;/code&gt;. But where
+this really shines is how it allows, via an optional flag, for executing any
+arbitrary shell command for one or even all of the commits in the list. I'm talking
+about &lt;code&gt;git rebase --interactive --exec&lt;/code&gt;.&lt;/p&gt;
+&lt;h5 id="usecase-pick-a-bunch-of-linux-next-commits"&gt;Usecase: Pick a bunch of &lt;code&gt;linux-next&lt;/code&gt; commits&lt;/h5&gt;
+&lt;p&gt;Frequently we run into the situation where we need some patches that are accepted by
+maintainers into their own trees but are not merged by Linus into his main
+repository. This occurs when a developer posts a patch to the mailing lists ("pushes
+a patch upstream") that is an urgent fix of some kind, required in a product
+kernel ("downstream"). The downstream kernel, such as the one the Android Open Source
+Project uses (the Android Common Kernel), usually has &lt;a href="https://android.googlesource.com/kernel/common/+/refs/heads/android-mainline#common-kernel-patch-requirements"&gt;strict
+requirements&lt;/a&gt;
+of the commit messages of patches it accepts for merging. One of these requirements
+is:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;If the patch is not merged from an upstream branch, the subject must be tagged
+with the type of patch: &lt;code&gt;UPSTREAM:&lt;/code&gt;, &lt;code&gt;BACKPORT:&lt;/code&gt;, &lt;code&gt;FROMGIT:&lt;/code&gt;, &lt;code&gt;FROMLIST:&lt;/code&gt;, or
+&lt;code&gt;ANDROID:&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Some projects may even require specific
+&lt;code&gt;git-trailers&lt;/code&gt; &lt;sup id="sf-git-rebase-interactive-1-back"&gt;&lt;a href="#sf-git-rebase-interactive-1" class="simple-footnote" title=" Git - git-interpret-trailers Documentation "&gt;1&lt;/a&gt;&lt;/sup&gt;
+in the commit message, e.g.:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Git-commit: 26b4ca3c39012368ab22b06cd35dd6b77f0f3e00
+Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This means every single patch being pushed to the downstream kernel project would
+need to be tagged this way. If we need to get, say, 10 or 20 patches merged from a
+maintainer's tree or linux-next, we need a scalable way of tagging all of them with
+one of the above subject prefixes and adding those git trailers. This is where &lt;code&gt;git
+rebase --interactive --exec&lt;/code&gt; really shines.&lt;/p&gt;
+&lt;p&gt;From within the downstream kernel, add the &lt;code&gt;linux-next&lt;/code&gt; remote:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+git fetch linux-next
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Gather list of commits required. These may be abbreviated SHAs too, for convenience.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;base_sha=$(git rev-parse HEAD)
+pick_commits=(&amp;lt;sha1&amp;gt; &amp;lt;sha2&amp;gt; ... &amp;lt;shaN&amp;gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Cherry pick each commit and add the first trailer:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;for commit in "${pick_commits[@]}"; do
+    git cherry-pick $commit
+    git commit --amend --no-edit --trailer "Git-commit: $(git rev-parse $commit)"
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, add the subject prefix &lt;code&gt;FROMGIT:&lt;/code&gt; to all the commits that were just cherry picked:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git rebase -i --exec 'git commit --amend -m "FROMGIT: $(git show -s --format=%B)"' $base_sha
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, add the second trailer to all the commits that were cherry picked:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git rebase -i --exec 'git commit --amend --no-edit --trailer "Git-repo: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git"' $base_sha
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, add one's own Signed-off-by to all the cherry picked commits:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git rebase -i --exec 'git commit --amend --no-edit -s' $base_sha
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h5 id="git-fixup-and-git-rebase-interactive-autosquash"&gt;git fixup and &lt;code&gt;git rebase --interactive --autosquash&lt;/code&gt;&lt;/h5&gt;
+&lt;p&gt;This blog post: &lt;a href="https://thoughtbot.com/blog/autosquashing-git-commits"&gt;Auto-squashing Git
+Commits&lt;/a&gt; goes into great
+detail on what this feature is, and how it may be made use of.&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-git-rebase-interactive-1"&gt; &lt;a href="https://git-scm.com/docs/git-interpret-trailers#_description"&gt;Git - git-interpret-trailers
+Documentation&lt;/a&gt;  &lt;a href="#sf-git-rebase-interactive-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="blog"></category><category term="git"></category></entry><entry><title>How I used git rebase --onto</title><link href="https://gurudas.dev/blog/2023/11/09/git-rebase-onto/" rel="alternate"></link><published>2023-11-09T23:25:28-08:00</published><updated>2023-11-09T23:25:28-08:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2023-11-09:/blog/2023/11/09/git-rebase-onto/</id><summary type="html">&lt;p&gt;On one of my daily trawlings of Hacker News, I came across Julia Evans' blogpost on
+&lt;a href="https://jvns.ca/blog/2023/11/01/confusing-git-terminology/#rebase-onto"&gt;confusing git
+terminology&lt;/a&gt;
+that lists &lt;code&gt;git rebase --onto&lt;/code&gt; as one such confusing command. I had never used this
+&lt;code&gt;--onto&lt;/code&gt; flag before and her description didn't really help me visualize the problem
+or the solution.&lt;/p&gt;
+&lt;p&gt;I shrugged and let it go, not thinking much of ... &lt;a class="read-more" href="/blog/2023/11/09/git-rebase-onto/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;On one of my daily trawlings of Hacker News, I came across Julia Evans' blogpost on
+&lt;a href="https://jvns.ca/blog/2023/11/01/confusing-git-terminology/#rebase-onto"&gt;confusing git
+terminology&lt;/a&gt;
+that lists &lt;code&gt;git rebase --onto&lt;/code&gt; as one such confusing command. I had never used this
+&lt;code&gt;--onto&lt;/code&gt; flag before and her description didn't really help me visualize the problem
+or the solution.&lt;/p&gt;
+&lt;p&gt;I shrugged and let it go, not thinking much of it at the time.&lt;/p&gt;
+&lt;p&gt;I ended up using it recently, when I had to rebase a feature branch based off a
+couple of weeks old, stale, &lt;code&gt;master&lt;/code&gt; branch &lt;strong&gt;&lt;em&gt;onto&lt;/em&gt;&lt;/strong&gt; the up-to-date tip of the
+same &lt;code&gt;master&lt;/code&gt; branch.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Since I was using Gerrit, my feature branch had a &lt;code&gt;topic:XYZ&lt;/code&gt; set. This &lt;code&gt;XYZ&lt;/code&gt; topic
+series of mine had about ~20 commits, and the master branch had advanced quite a bit
+with almost ~15K commits &lt;sup id="sf-git-rebase-onto-1-back"&gt;&lt;a href="#sf-git-rebase-onto-1" class="simple-footnote" title=" This large number of changes is because the project was the Linux kernel actively being developed by a global team of developers. "&gt;1&lt;/a&gt;&lt;/sup&gt;,
+some of which were also large merge commits.&lt;/p&gt;
+&lt;p&gt;My erstwhile strategy for cherrypicking the whole series onto the moving tip of the
+&lt;code&gt;master&lt;/code&gt; branch was as follows:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git&lt;span class="w"&gt; &lt;/span&gt;config&lt;span class="w"&gt; &lt;/span&gt;pull.rebase&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;
+git&lt;span class="w"&gt; &lt;/span&gt;pull&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;server/project&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;refs/changes/12345/4&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;(where &lt;code&gt;12345&lt;/code&gt; was the last change in the series)&lt;/p&gt;
+&lt;p&gt;This worked at the time I had published this strategy to our internal documentation
+at work so that other developers could make use of my &lt;code&gt;XYZ&lt;/code&gt; series on top of the
+latest, up-to-date &lt;code&gt;master&lt;/code&gt; branch. Over time, though, the series ran into a merge
+conflict once the master branch had advanced sufficiently enough. And that is when I
+was asked to rebase the series to fix this merge conflict and update the
+documentation.&lt;/p&gt;
+&lt;p&gt;When I tried the above instructions on top of the up-to-date master branch, it did
+not work because git tried to interactively rebase &lt;em&gt;all&lt;/em&gt; the ~15K changes one by one
+and then somehow ran into merge conflicts on changes unrelated to mine. Resolving
+merge conflicts unrelated to my changes was a clear sign that I was doing something
+wrong — there &lt;em&gt;had&lt;/em&gt; to be a better way.&lt;/p&gt;
+&lt;p&gt;After a bit of Googling, I found this answer &lt;sup id="sf-git-rebase-onto-2-back"&gt;&lt;a href="#sf-git-rebase-onto-2" class="simple-footnote" title=" Git: Interactively rebase a range of commits - Stack Overflow "&gt;2&lt;/a&gt;&lt;/sup&gt;
+on Stack Overflow that succintly expressed what I had to do:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git rebase --onto &amp;lt;final_base_commit&amp;gt; &amp;lt;initial_base_commit&amp;gt; &amp;lt;head&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This was interesting. The fact that I had come across this recently was fresh in my
+mind, and hence I quickly consulted the &lt;code&gt;man&lt;/code&gt; page for &lt;code&gt;git-rebase&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;First let’s assume your topic is based on branch next. For example, a feature
+developed in topic depends on some functionality which is found in next.
+
+        o---o---o---o---o  master
+             \
+              o---o---o---o---o  next
+                               \
+                                o---o---o  topic
+
+We want to make topic forked from branch master; for example, because the
+functionality on which topic depends was merged into the more stable master branch.
+We want our tree to look like this:
+
+        o---o---o---o---o  master
+            |            \
+            |             o'--o'--o'  topic
+             \
+              o---o---o---o---o  next
+
+We can get this using the following command:
+
+    git rebase --onto master next topic
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Aha! When read alongside the man page, the Stack Overflow answer's recommendation
+started to make sense.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;final_base_commit&lt;/code&gt; would be my current &lt;code&gt;HEAD&lt;/code&gt;, i.e. the current (up-to-date)
+tip of the &lt;code&gt;master&lt;/code&gt; branch.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;initial_base_commit&lt;/code&gt; would be the &lt;strong&gt;parent of&lt;/strong&gt; the first patch in my series.
+In my case, this was &lt;code&gt;&amp;lt;SHA&amp;gt;^&lt;/code&gt; where &lt;code&gt;&amp;lt;SHA&amp;gt;&lt;/code&gt; was that of the first patch - easily
+available by inspection on Gerrit. Let's say this was &lt;code&gt;43487e7b567cfb^&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;head&lt;/code&gt; would be the &lt;code&gt;FETCH_HEAD&lt;/code&gt; after running &lt;code&gt;git fetch&lt;/code&gt; on the &lt;strong&gt;last change&lt;/strong&gt; in
+my series, i.e.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git fetch &amp;lt;server/project&amp;gt; &amp;lt;refs/changes/12345/4&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Thus, the final command became:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;git rebase --onto HEAD 43487e7b567cfb^ FETCH_HEAD
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The merge conflict I had to fix was fairly trivial, and I was done in no time.&lt;/p&gt;
+&lt;p&gt;I was really impressed by the power of this feature as I was dreading having to
+manually cherry-pick all of the ~20 changes in my series.&lt;/p&gt;
+&lt;hr&gt;&lt;ol class="simple-footnotes"&gt;&lt;li id="sf-git-rebase-onto-1"&gt; This large number of changes is because the project
+was the Linux kernel actively being developed by a global team of developers.  &lt;a href="#sf-git-rebase-onto-1-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;li id="sf-git-rebase-onto-2"&gt;
+&lt;a href="https://stackoverflow.com/questions/45336573/git-interactively-rebase-a-range-of-commits"&gt;Git: Interactively rebase a range of commits - Stack
+Overflow&lt;/a&gt;
+ &lt;a href="#sf-git-rebase-onto-2-back" class="simple-footnote-back"&gt;↩&lt;/a&gt;&lt;/li&gt;&lt;/ol&gt;</content><category term="blog"></category><category term="git"></category></entry><entry><title>Learning Go</title><link href="https://gurudas.dev/blog/2023/09/19/learning-go/" rel="alternate"></link><published>2023-09-19T00:23:04-07:00</published><updated>2023-09-19T00:23:04-07:00</updated><author><name>Guru Das Srinagesh</name></author><id>tag:gurudas.dev,2023-09-19:/blog/2023/09/19/learning-go/</id><summary type="html">&lt;p&gt;I recently had to learn Go. I was on a tight timeline of just about 4 or 5
+days. I am familiar with learning Rust, and &lt;a href="https://doc.rust-lang.org/stable/rust-by-example/"&gt;Rust by
+Example&lt;/a&gt;, so I found &lt;a href="https://gobyexample.com/"&gt;Go by
+Example&lt;/a&gt;. I found the format wanting for the absolute
+beginner level I was at, so I found the absolutely beautiful &lt;a href="https://go.dev/tour/welcome/1"&gt;A Tour of
+Go&lt;/a&gt; instead. It ... &lt;a class="read-more" href="/blog/2023/09/19/learning-go/"&gt;Continue reading &amp;gt;&amp;gt;&lt;/a&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;I recently had to learn Go. I was on a tight timeline of just about 4 or 5
+days. I am familiar with learning Rust, and &lt;a href="https://doc.rust-lang.org/stable/rust-by-example/"&gt;Rust by
+Example&lt;/a&gt;, so I found &lt;a href="https://gobyexample.com/"&gt;Go by
+Example&lt;/a&gt;. I found the format wanting for the absolute
+beginner level I was at, so I found the absolutely beautiful &lt;a href="https://go.dev/tour/welcome/1"&gt;A Tour of
+Go&lt;/a&gt; instead. It has links to the official Go
+blog for some language features, plus a live playground, which is really great.&lt;/p&gt;
+&lt;p&gt;I learnt enough to pass a Hackerrank test, which is immensely gratifying :)
+It's such a lovely language - very non-threatening syntax and approachable. I
+hope to transition out of the embedded space and into pure application/web
+development one day, and I hope to use Go that day.&lt;/p&gt;</content><category term="blog"></category><category term="go"></category></entry></feed>
