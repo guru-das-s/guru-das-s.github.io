@@ -4,16 +4,14 @@
 
 <div class="page-section">
 <h4><tt class="tag">{{ tag }}</tt></h4>
-    <dl>
+    <ul class="row-list">
         {% for article in articles %}
-        <div>
-            <div class="row">
-                <div class="three columns">{{ article.locale_date }}</div>
-                <div class="nine columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
-            </div>
-        </div>
+        <li class="row">
+            <div class="three columns">{{ article.locale_date }}</div>
+            <div class="nine columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
+        </li>
         {% endfor %}
-    </dl>
+    </ul>
 </div>
 
 {% endblock %}

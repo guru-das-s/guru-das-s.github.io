@@ -4,18 +4,16 @@
 
 <div class="page-section">
     <h4>Today I Learned</h4>
-    <dl>
+    <ul class="row-list">
         {% for article in dates %}
         {% if article.category == "til" %}
-        <div>
-            <div class="row">
-                <div class="three columns">{{ article.locale_date }}</div>
-                <div class="nine columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
-            </div>
-        </div>
+        <li class="row">
+            <div class="three columns">{{ article.locale_date }}</div>
+            <div class="nine columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
+        </li>
         {% endif %}
         {% endfor %}
-    </dl>
+    </ul>
 </div>
 
 {% endblock %}

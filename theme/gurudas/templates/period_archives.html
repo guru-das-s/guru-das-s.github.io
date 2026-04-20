@@ -3,15 +3,13 @@
 {% block content %}
 <div class="page-section">
     <h4>Archives for {{ period | reverse | join(' ') }}</h4>
-    <dl>
+    <ul class="row-list">
     {% for article in dates %}
-        <div>
-          <div class="row">
+        <li class="row">
             <div class="two columns">{{ article.locale_date }}</div>
             <div class="ten columns"><a href="{{ SITEURL }}/{{ article.url }}">{{ article.title }}</a></div>
-	  </div>
-	</div>
+        </li>
     {% endfor %}
-    </dl>
+    </ul>
 </div>
 {% endblock %}
